@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: white;
+    color: rgb(17, 24, 39);
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgb(243, 244, 246);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: #6b8e23;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #556b2f;
+  }
+
+  /* Custom Olive Colors */
+  :root {
+    --olive-50: #f9f8f3;
+    --olive-100: #f1ede3;
+    --olive-200: #dcd5b8;
+    --olive-300: #c7be8c;
+    --olive-400: #a39e60;
+    --olive-500: #8a8450;
+    --olive-600: #6b8e23;
+    --olive-700: #556b2f;
+    --olive-800: #3d4f1f;
+    --olive-900: #2a3714;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    padding: 0.75rem 1.5rem;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background-color: #6b8e23;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background-color: #556b2f;
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #6b8e23;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    color: #6b8e23;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover {
+    background-color: #f9f8f3;
+  }
+
+  .card {
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgb(229, 231, 235);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+}
+
+@layer utilities {
+  /* Olive text colors */
+  .text-olive-50 { color: #f9f8f3; }
+  .text-olive-100 { color: #f1ede3; }
+  .text-olive-200 { color: #dcd5b8; }
+  .text-olive-300 { color: #c7be8c; }
+  .text-olive-400 { color: #a39e60; }
+  .text-olive-500 { color: #8a8450; }
+  .text-olive-600 { color: #6b8e23; }
+  .text-olive-700 { color: #556b2f; }
+  .text-olive-800 { color: #3d4f1f; }
+  .text-olive-900 { color: #2a3714; }
+
+  /* Olive background colors */
+  .bg-olive-50 { background-color: #f9f8f3; }
+  .bg-olive-100 { background-color: #f1ede3; }
+  .bg-olive-200 { background-color: #dcd5b8; }
+  .bg-olive-300 { background-color: #c7be8c; }
+  .bg-olive-400 { background-color: #a39e60; }
+  .bg-olive-500 { background-color: #8a8450; }
+  .bg-olive-600 { background-color: #6b8e23; }
+  .bg-olive-700 { background-color: #556b2f; }
+  .bg-olive-800 { background-color: #3d4f1f; }
+  .bg-olive-900 { background-color: #2a3714; }
+
+  /* Olive border colors */
+  .border-olive-50 { border-color: #f9f8f3; }
+  .border-olive-100 { border-color: #f1ede3; }
+  .border-olive-200 { border-color: #dcd5b8; }
+  .border-olive-300 { border-color: #c7be8c; }
+  .border-olive-400 { border-color: #a39e60; }
+  .border-olive-500 { border-color: #8a8450; }
+  .border-olive-600 { border-color: #6b8e23; }
+  .border-olive-700 { border-color: #556b2f; }
+  .border-olive-800 { border-color: #3d4f1f; }
+  .border-olive-900 { border-color: #2a3714; }
+
+  /* Olive with opacity */
+  .bg-olive-600\/10 { background-color: rgba(107, 142, 35, 0.1); }
+  .bg-olive-700\/10 { background-color: rgba(85, 107, 47, 0.1); }
+
+  /* Ring colors for focus states */
+  .focus\:ring-olive-300:focus { --tw-ring-color: #c7be8c; }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.6s ease-out;
+  }
+
+  .smooth-transition {
+    transition: all 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
