@@ -16,10 +16,10 @@
 
 <svelte:head>
   {#if restaurant}
-    <title>{restaurant.name} - TvojQR</title>
+    <title>{restaurant.name} - HostQR</title>
     <meta name="description" content={restaurant.description} />
   {:else}
-    <title>Not Found - TvojQR</title>
+    <title>Not Found - HostQR</title>
   {/if}
 </svelte:head>
 
@@ -31,7 +31,7 @@
         <h1 class="text-6xl font-bold text-olive-900 mb-4">404</h1>
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Menu Not Found</h2>
         <p class="text-gray-600 mb-8">
-          The menu you're looking for doesn't exist. Please check the URL or
+          The file you're looking for doesn't exist. Please check the URL or
           return to the homepage.
         </p>
         <a

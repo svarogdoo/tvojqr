@@ -6,7 +6,7 @@ export const translations = {
       contact: "Contact",
     },
     hero: {
-      title: "Your Brand, Beautifully Designed",
+      title: "Host your QR codes fast and easy",
       description:
         "Professional graphic designs, translations, printing, and QR codes for restaurants, cafés, salons, and more. All hosted online and ready to share.",
       cta: "Get Started",
@@ -110,6 +110,11 @@ export const translations = {
       copyright: "© 2025 TvojQR. All rights reserved.",
       tagline: "Crafted with care for your brand",
     },
+    notFound: {
+      subtitle: "Page Not Found",
+      description:
+        "The page you're looking for doesn't exist. Please check the URL or return to the homepage.",
+    },
   },
   sr: {
     nav: {
@@ -118,7 +123,7 @@ export const translations = {
       contact: "Kontakt",
     },
     hero: {
-      title: "Vaša marka, lepo dizajnirana",
+      title: "Hostujte QR kodove brzo i lako",
       description:
         "Profesionalni grafički dizajn, prevodi, štampa i QR kodovi za restorane, kafeće,alone i još mnogo toga. Sve je hostirano onlajn i spremno za deljenje.",
       cta: "Počnite",
@@ -224,6 +229,11 @@ export const translations = {
       copyright: "© 2025 TvojQR. Sva prava su zadržana.",
       tagline: "Kreirano sa pažnjom za vašu marku",
     },
+    notFound: {
+      subtitle: "Stranica nije pronađena",
+      description:
+        "Stranica koju tražite ne postoji. Proverite URL ili se vratite na početnu stranicu.",
+    },
   },
   ru: {
     nav: {
@@ -232,7 +242,7 @@ export const translations = {
       contact: "Контакт",
     },
     hero: {
-      title: "Ваш бренд, красиво оформленный",
+      title: "Хостинг ваших QR-кодов быстро и легко",
       description:
         "Профессиональный графический дизайн, переводы, печать и QR-коды для ресторанов, кафе, салонов и многого другого. Все размещено в Интернете и готово к совместному использованию.",
       cta: "Начните",
@@ -339,6 +349,11 @@ export const translations = {
       copyright: "© 2025 TvojQR. Все права защищены.",
       tagline: "Создано с заботой о вашем бренде",
     },
+    notFound: {
+      subtitle: "Страница не найдена",
+      description:
+        "Страница, которую вы ищете, не существует. Пожалуйста, проверьте URL или вернитесь на главную страницу.",
+    },
   },
   el: {
     nav: {
@@ -347,7 +362,7 @@ export const translations = {
       contact: "Επικοινωνία",
     },
     hero: {
-      title: "Το ήμα σας, όμορφα σχεδιασμένο",
+      title: "Φιλοξενήστε τους κωδικούς QR σας γρήγορα και εύκολα",
       description:
         "Επαγγελματικό γραφικό σχεδιασμό, μεταφράσεις, εκτύπωση και κωδικούς QR για εστιατόρια, καφετέριες, σαλόνια και πολλά άλλα. Όλα φιλοξενούνται στο διαδίκτυο και είναι έτοιμα να μοιραστούν.",
       cta: "Ξεκινήστε",
@@ -453,6 +468,11 @@ export const translations = {
     footer: {
       copyright: "© 2025 TvojQR. Όλα τα δικαιώματα είναι κατοχυρωμένα.",
       tagline: "Δημιουργήθηκε με περίσκεψη για το ήμα σας",
+    },
+    notFound: {
+      subtitle: "Η σελίδα δεν βρέθηκε",
+      description:
+        "Η σελίδα που αναζητάτε δεν υπάρχει. Ελέγξτε το URL ή επιστρέψτε στην αρχική σελίδα.",
     },
   },
 };
