@@ -20,22 +20,28 @@
   <div
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
   >
-    <div class="text-2xl font-bold text-olive-700">TvojQR</div>
+    <div class="text-2xl font-bold text-olive-700">HostingQR</div>
     <div class="hidden md:flex space-x-8 items-center">
       <a
-        href="#services"
+        href="/create-new"
+        class="text-white font-semibold bg-olive-700 px-4 py-2 rounded-md hover:text-olive-700 transition-colors"
+      >
+        {t.hero.cta}
+      </a>
+      <a
+        href="/#services"
         class="text-gray-700 hover:text-olive-700 transition-colors"
       >
         {t.nav.services}
       </a>
       <a
-        href="#examples"
+        href="/restoran"
         class="text-gray-700 hover:text-olive-700 transition-colors"
       >
         {t.nav.examples}
       </a>
       <a
-        href="#contact"
+        href="/#contact"
         class="text-gray-700 hover:text-olive-700 transition-colors"
       >
         {t.nav.contact}

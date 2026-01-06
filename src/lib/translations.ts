@@ -9,7 +9,7 @@ export const translations = {
       title: "Host your QR codes fast and easy",
       description:
         "Professional graphic designs, translations, printing, and QR codes for restaurants, cafés, salons, and more. All hosted online and ready to share.",
-      cta: "Get Started",
+      cta: "Try it now",
       secondary: "See Examples",
     },
     services: {
@@ -101,13 +101,13 @@ export const translations = {
         send: "Send Message",
       },
       info: {
-        email: "info@tvojqr.com",
+        email: "info@HostingQR.com",
         phone: "+1 (555) 123-4567",
-        website: "www.tvojqr.com",
+        website: "www.HostingQR.com",
       },
     },
     footer: {
-      copyright: "© 2025 TvojQR. All rights reserved.",
+      copyright: "© 2025 HostingQR. All rights reserved.",
       tagline: "Crafted with care for your brand",
     },
     notFound: {
@@ -126,7 +126,7 @@ export const translations = {
       title: "Hostujte QR kodove brzo i lako",
       description:
         "Profesionalni grafički dizajn, prevodi, štampa i QR kodovi za restorane, kafeće,alone i još mnogo toga. Sve je hostirano onlajn i spremno za deljenje.",
-      cta: "Počnite",
+      cta: "Probaj sada",
       secondary: "Pogledajte primere",
     },
     services: {
@@ -220,13 +220,13 @@ export const translations = {
         send: "Pošalji poruku",
       },
       info: {
-        email: "info@tvojqr.com",
+        email: "info@HostingQR.com",
         phone: "+1 (555) 123-4567",
-        website: "www.tvojqr.com",
+        website: "www.HostingQR.com",
       },
     },
     footer: {
-      copyright: "© 2025 TvojQR. Sva prava su zadržana.",
+      copyright: "© 2025 HostingQR. Sva prava su zadržana.",
       tagline: "Kreirano sa pažnjom za vašu marku",
     },
     notFound: {
@@ -245,7 +245,7 @@ export const translations = {
       title: "Хостинг ваших QR-кодов быстро и легко",
       description:
         "Профессиональный графический дизайн, переводы, печать и QR-коды для ресторанов, кафе, салонов и многого другого. Все размещено в Интернете и готово к совместному использованию.",
-      cta: "Начните",
+      cta: "Попробуйте сейчас",
       secondary: "Посмотреть примеры",
     },
     services: {
@@ -340,13 +340,13 @@ export const translations = {
         send: "Отправить сообщение",
       },
       info: {
-        email: "info@tvojqr.com",
+        email: "info@HostingQR.com",
         phone: "+1 (555) 123-4567",
-        website: "www.tvojqr.com",
+        website: "www.HostingQR.com",
       },
     },
     footer: {
-      copyright: "© 2025 TvojQR. Все права защищены.",
+      copyright: "© 2025 HostingQR. Все права защищены.",
       tagline: "Создано с заботой о вашем бренде",
     },
     notFound: {
@@ -365,7 +365,7 @@ export const translations = {
       title: "Φιλοξενήστε τους κωδικούς QR σας γρήγορα και εύκολα",
       description:
         "Επαγγελματικό γραφικό σχεδιασμό, μεταφράσεις, εκτύπωση και κωδικούς QR για εστιατόρια, καφετέριες, σαλόνια και πολλά άλλα. Όλα φιλοξενούνται στο διαδίκτυο και είναι έτοιμα να μοιραστούν.",
-      cta: "Ξεκινήστε",
+      cta: "Δοκιμάστε το τώρα",
       secondary: "Δείτε παραδείγματα",
     },
     services: {
@@ -460,13 +460,13 @@ export const translations = {
         send: "Αποστολή μηνύματος",
       },
       info: {
-        email: "info@tvojqr.com",
+        email: "info@HostingQR.com",
         phone: "+1 (555) 123-4567",
-        website: "www.tvojqr.com",
+        website: "www.HostingQR.com",
       },
     },
     footer: {
-      copyright: "© 2025 TvojQR. Όλα τα δικαιώματα είναι κατοχυρωμένα.",
+      copyright: "© 2025 HostingQR. Όλα τα δικαιώματα είναι κατοχυρωμένα.",
       tagline: "Δημιουργήθηκε με περίσκεψη για το ήμα σας",
     },
     notFound: {

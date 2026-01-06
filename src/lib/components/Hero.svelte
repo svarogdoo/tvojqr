@@ -1,4 +1,5 @@
 <script lang="ts">
+  import heroImage from "$lib/assets/hero-image.jpg";
   import { language } from "$lib/stores/language";
   import { translations } from "$lib/translations";
 
@@ -28,7 +29,7 @@
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a
-          href="#contact"
+          href="/create-new"
           class="px-8 py-4 bg-olive-700 text-white rounded-lg font-semibold hover:bg-olive-800 hover:scale-105 transition-all duration-300 shadow-lg text-center"
         >
           {t.hero.cta}
@@ -61,7 +62,7 @@
 
         <!-- Image -->
         <img
-          src="/menu.jpg"
+          src={heroImage}
           alt="Menu Design"
           class="relative w-full h-full object-cover object-center rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
         />
