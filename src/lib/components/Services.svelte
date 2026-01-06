@@ -12,7 +12,7 @@
 </script>
 
 <!-- Services Section -->
-<section id="services" class="py-20 px-4 sm:px-6 lg:px-8 bg-olive-50">
+<section id="services" class="py-20 px-4 sm:px-6 lg:px-8 bg-olive-200">
   <div class="max-w-6xl mx-auto">
     <!-- Title Section -->
     <div class="text-center mb-16">

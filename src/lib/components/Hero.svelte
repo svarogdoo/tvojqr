@@ -45,8 +45,9 @@
 
     <!-- Image Below with Top Half Visible, Bottom Half Cut Off -->
     <div
-      class="relative mx-auto flex items-start justify-center -mb-64"
-      style="width: 70%; height: 768px; max-width: none;"
+      class="relative mx-auto flex items-start justify-center -mb-64
+         w-full h-auto
+         lg:w-[70%] md:h-192 lg:max-w-none"
     >
       <!-- Shadow Background -->
       <div

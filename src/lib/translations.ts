@@ -115,6 +115,31 @@ export const translations = {
       description:
         "The page you're looking for doesn't exist. Please check the URL or return to the homepage.",
     },
+    createNew: {
+      title: "Upload your file",
+      firstName: "First Name",
+      lastName: "Last Name",
+      domainEnding: "project-name",
+      domainEndingTitle: "Chosen Domain Ending",
+      email: "Email Address",
+      fileUpload: "Choose File",
+      submit: "Submit",
+      sending: "Sending...",
+    },
+    modals: {
+      uploadSuccess: {
+        title: "Upload Successful!",
+        description:
+          "Your information has been successfully submitted. We will contact you via email soon.",
+        close: "Close",
+      },
+      uploadError: {
+        title: "Upload Failed",
+        description:
+          "Something unfortunately went wrong. You can write to us directly at:",
+        close: "Close",
+      },
+    },
   },
   sr: {
     nav: {
@@ -233,6 +258,31 @@ export const translations = {
       subtitle: "Stranica nije pronađena",
       description:
         "Stranica koju tražite ne postoji. Proverite URL ili se vratite na početnu stranicu.",
+    },
+    createNew: {
+      title: "Okačite Vaš fajl",
+      firstName: "Ime",
+      lastName: "Prezime",
+      email: "Email adresa",
+      domainEnding: "ime-projekta",
+      domainEndingTitle: "Izabrano ime domena",
+      fileUpload: "Izaberite fajl",
+      submit: "Pošalji",
+      sending: "Slanje...",
+    },
+    modals: {
+      uploadSuccess: {
+        title: "Uspešno poslato!",
+        description:
+          "Vaš informacije su uspešno poslate. Kontaktiraćemo Vas putem email-a uskoro.",
+        close: "Zatvori",
+      },
+      uploadError: {
+        title: "Slanje nije uspelo",
+        description:
+          "Nažalost, nešto je pošlo po zlu. Možete nam pisati direktno na:",
+        close: "Zatvori",
+      },
     },
   },
   ru: {
@@ -354,6 +404,31 @@ export const translations = {
       description:
         "Страница, которую вы ищете, не существует. Пожалуйста, проверьте URL или вернитесь на главную страницу.",
     },
+    createNew: {
+      title: "Загрузите Ваш файл",
+      firstName: "Имя",
+      lastName: "Фамилия",
+      email: "Адрес электронной почты",
+      domainEnding: "имя-проекта",
+      domainEndingTitle: "Выбранное окончание домена",
+      fileUpload: "Выберите файл",
+      submit: "Отправить",
+      sending: "Отправка...",
+    },
+    modals: {
+      uploadSuccess: {
+        title: "Загрузка успешна!",
+        description:
+          "Ваша информация была успешно отправлена. Мы свяжемся с вами по электронной почте в ближайшее время.",
+        close: "Закрыть",
+      },
+      uploadError: {
+        title: "Ошибка загрузки",
+        description:
+          "К сожалению, что-то пошло не так. Вы можете написать нам напрямую по адресу:",
+        close: "Закрыть",
+      },
+    },
   },
   el: {
     nav: {
@@ -473,6 +548,31 @@ export const translations = {
       subtitle: "Η σελίδα δεν βρέθηκε",
       description:
         "Η σελίδα που αναζητάτε δεν υπάρχει. Ελέγξτε το URL ή επιστρέψτε στην αρχική σελίδα.",
+    },
+    createNew: {
+      title: "Ανεβάστε το αρχείο σας",
+      firstName: "Όνομα",
+      lastName: "Επώνυμο",
+      email: "Διεύθυνση ηλεκτρονικού ταχυδρομείου",
+      domainEnding: "όνομα-έργου",
+      domainEndingTitle: "Επιλεγμένο Τέλος Τομέα",
+      fileUpload: "Επιλέξτε αρχείο",
+      submit: "Υποβολή",
+      sending: "Αποστολή...",
+    },
+    modals: {
+      uploadSuccess: {
+        title: "Η μεταφόρτωση ήταν επιτυχής!",
+        description:
+          "Οι πληροφορίες σας έχουν υποβληθεί με επιτυχία. Θα επικοινωνήσουμε μαζί σας μέσω email σύντομα.",
+        close: "Κλείσιμο",
+      },
+      uploadError: {
+        title: "Η μεταφόρτωση απέτυχε",
+        description:
+          "Δυστυχώς, κάτι πήγε στραβά. Μπορείτε να μας γράψετε απευθείας στο:",
+        close: "Κλείσιμο",
+      },
     },
   },
 };

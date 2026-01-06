@@ -3,9 +3,19 @@
   import ErrorModal from "$lib/components/ErrorModal.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
   import SuccessModal from "$lib/components/SuccessModal.svelte";
+  import { language } from "$lib/stores/language";
+  import { translations } from "$lib/translations.js";
 
   // 2. Added the form prop to receive server data
   export let form;
+
+  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+
+  language.subscribe((value) => {
+    currentLang = value;
+  });
+
+  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
 
   let loading = false;
   let domainChoice = "";
@@ -84,7 +94,7 @@
     class="max-w-md mx-auto bg-white rounded-xl flex flex-col gap-y-6 shadow-md overflow-hidden md:max-w-2xl p-8"
   >
     <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">
-      Upload your file
+      {t.createNew.title}
     </h1>
 
     <form
@@ -116,7 +126,7 @@
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label for="firstName" class="block text-lg font-medium text-gray-700"
-            >First Name</label
+            >{t.createNew.firstName}</label
           >
           <input
             type="text"
@@ -128,7 +138,7 @@
         </div>
         <div>
           <label for="lastName" class="block text-lg font-medium text-gray-700"
-            >Last Name</label
+            >{t.createNew.lastName}</label
           >
           <input
             type="text"
@@ -142,7 +152,7 @@
 
       <div>
         <label for="email" class="block text-lg font-medium text-gray-700"
-          >Email Address</label
+          >{t.createNew.email}</label
         >
         <input
           type="email"
@@ -155,7 +165,7 @@
 
       <div>
         <label for="domain" class="block text-lg font-medium text-gray-700"
-          >Chosen Domain Ending</label
+          >{t.createNew.domainEndingTitle}</label
         >
         <div class="mt-1 flex rounded-md shadow-sm">
           <span
@@ -169,12 +179,12 @@
             id="domain"
             bind:value={domainChoice}
             required
-            placeholder="your-name"
+            placeholder={t.createNew.domainEnding}
             class="flex-1 block w-full border border-gray-300 rounded-none rounded-r-md p-2 focus:ring-olive-500 focus:border-olive-500"
           />
         </div>
         <p class="mt-2 text-sm text-gray-500 italic">
-          Preview: hostingqr.com/{domainChoice || "..."}
+          hostingqr.com/{domainChoice || "..."}
         </p>
       </div>
 
@@ -183,7 +193,7 @@
           for="attachments"
           class="block text-lg font-medium text-gray-700"
         >
-          Upload Images or PDFs
+          {t.createNew.fileUpload}
         </label>
 
         <input
@@ -258,7 +268,7 @@
         disabled={loading}
         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-olive-600 hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-500 disabled:bg-gray-400"
       >
-        {loading ? "Sending..." : "Submit Application"}
+        {loading ? t.createNew.sending : t.createNew.submit}
       </button>
     </form>
   </div>

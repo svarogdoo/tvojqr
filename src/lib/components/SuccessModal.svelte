@@ -1,8 +1,16 @@
 <script lang="ts">
+  import { language } from "$lib/stores/language";
+  import { translations } from "$lib/translations";
   import { fade, scale } from "svelte/transition";
 
   export let show = false;
   export let onClose: () => void;
+
+  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  language.subscribe((value) => {
+    currentLang = value;
+  });
+  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
 
   function handleBackdropClick() {
     onClose();
@@ -41,17 +49,18 @@
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Success!</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        {t.modals.uploadSuccess.title}
+      </h2>
       <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-        Your information has been successfully sent. We are now processing it
-        and will be contacting you via email shortly.
+        {t.modals.uploadSuccess.description}
       </p>
 
       <button
         on:click={onClose}
         class="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
       >
-        Got it, thanks!
+        {t.modals.uploadSuccess.close}
       </button>
     </div>
   </div>

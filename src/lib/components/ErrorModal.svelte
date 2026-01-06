@@ -1,9 +1,17 @@
 <script lang="ts">
+  import { language } from "$lib/stores/language";
+  import { translations } from "$lib/translations";
   import { fade, scale } from "svelte/transition";
 
   export let show = false;
   export let onClose: () => void;
   export let emailAddress = "myemail@gmail.com";
+
+  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  language.subscribe((value) => {
+    currentLang = value;
+  });
+  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
 
   let copied = false;
 
@@ -49,9 +57,11 @@
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Oops!</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        {t.modals.uploadError.title}
+      </h2>
       <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-        Something unfortunately went wrong. You can write to us directly at:
+        {t.modals.uploadError.description}
       </p>
 
       <div
@@ -72,7 +82,7 @@
         on:click={onClose}
         class="w-full py-3 px-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-black transition-colors"
       >
-        Close
+        {t.modals.uploadError.close}
       </button>
     </div>
   </div>
