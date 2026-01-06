@@ -1,4 +1,4 @@
-import { EMAIL_PASS, EMAIL_USER } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import nodemailer from "nodemailer";
 import type { Actions } from "./$types";
 
@@ -17,8 +17,8 @@ export const actions: Actions = {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASS,
       },
     });
 
