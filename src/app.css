@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../tailwind.config.ts";
 
 @layer base {
   html {
@@ -6,8 +7,8 @@
   }
 
   body {
-    background-color: white;
-    color: rgb(17, 24, 39);
+    background-color: theme(colors.brand.canvas);
+    color: theme(colors.brand.ink);
     overflow-x: hidden;
   }
 
@@ -16,30 +17,59 @@
   }
 
   ::-webkit-scrollbar-track {
-    background-color: rgb(243, 244, 246);
+    background-color: #f1ebf0;
   }
 
   ::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background-color: #6b8e23;
+    background-color: theme(colors.brand.dusty);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #556b2f;
+    background-color: theme(colors.brand.ink);
   }
 
-  /* Custom Olive Colors */
+  /* Brand palette + usage notes (2.1.c)
+     Custom brand palette
+     - `Ivory Canvas`  : #fffdf6 (main page background)
+     - `Blush Mist`    : #e2d4e0 (soft section tint / borders)
+     - `Cloud Slate`   : #949ab1 (muted accents / dividers)
+     - `Dusty Indigo`  : #7c7e9d (primary buttons / active states)
+     - `Ink Slate`     : #4c5372 (headings / strong contrast)
+     - Use olive-* utilities as the shared project palette aliases
+     - Use white + olive-50/100 for surfaces, olive-700/800 for CTAs
+     - Prefer subtle borders and minimal contrast transitions
+     - Reserve red/green for status only (error/success)
+  */
   :root {
-    --olive-50: #f9f8f3;
-    --olive-100: #f1ede3;
-    --olive-200: #dcd5b8;
-    --olive-300: #c7be8c;
-    --olive-400: #a39e60;
-    --olive-500: #8a8450;
-    --olive-600: #6b8e23;
-    --olive-700: #556b2f;
-    --olive-800: #3d4f1f;
-    --olive-900: #2a3714;
+    --ivory-canvas: theme(colors.brand.canvas);
+    --blush-mist: theme(colors.brand.blush);
+    --cloud-slate: theme(colors.brand.cloud);
+    --dusty-indigo: theme(colors.brand.dusty);
+    --ink-slate: theme(colors.brand.ink);
+
+    /* Project palette aliases used by existing components */
+    --olive-50: theme(colors.olive.50);
+    --olive-100: theme(colors.olive.100);
+    --olive-200: theme(colors.olive.200);
+    --olive-300: theme(colors.olive.300);
+    --olive-400: theme(colors.olive.400);
+    --olive-500: theme(colors.olive.500);
+    --olive-600: theme(colors.olive.600);
+    --olive-700: theme(colors.olive.700);
+    --olive-800: theme(colors.olive.800);
+    --olive-900: theme(colors.olive.900);
+
+    --surface-0: theme(colors.brand.canvas);
+    --surface-1: #ffffff;
+    --surface-2: theme(colors.olive.100);
+    --surface-3: #eee6ef;
+    --accent-soft: theme(colors.olive.100);
+    --accent-ink: theme(colors.brand.ink);
+    --success-soft: #e9f7ef;
+    --success-strong: #2f7a54;
+    --error-soft: #fcedea;
+    --error-strong: #b24f3c;
   }
 }
 
@@ -49,91 +79,53 @@
     color: white;
     border-radius: 0.5rem;
     font-weight: 600;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 24px rgba(17, 18, 13, 0.12);
     transition: all 0.3s ease;
-    background-color: #6b8e23;
+    background-color: theme(colors.olive.700);
     cursor: pointer;
   }
 
   .btn-primary:hover {
-    background-color: #556b2f;
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
+    background-color: theme(colors.olive.800);
+    box-shadow: 0 14px 28px rgba(17, 18, 13, 0.16);
+    transform: translateY(-1px);
   }
 
   .btn-secondary {
     padding: 0.75rem 1.5rem;
-    border: 2px solid #6b8e23;
-    border-radius: 0.5rem;
+    border: 1px solid #e7dce6;
+    border-radius: 0.75rem;
     font-weight: 600;
-    color: #6b8e23;
+    color: theme(colors.brand.ink);
     transition: all 0.3s ease;
     cursor: pointer;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 6px 16px rgba(17, 18, 13, 0.06);
   }
 
   .btn-secondary:hover {
-    background-color: #f9f8f3;
+    border-color: #d9cddd;
+    background: #ffffff;
+    box-shadow: 0 10px 22px rgba(17, 18, 13, 0.08);
+    transform: translateY(-1px);
   }
 
   .card {
     padding: 2rem;
     background-color: white;
     border-radius: 0.75rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgb(229, 231, 235);
+    box-shadow: 0 10px 24px rgba(17, 18, 13, 0.06);
+    border: 1px solid #eadfeb;
     transition: all 0.3s ease;
   }
 
   .card:hover {
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
+    box-shadow: 0 16px 36px rgba(17, 18, 13, 0.1);
+    transform: translateY(-2px);
   }
 }
 
 @layer utilities {
-  /* Olive text colors */
-  .text-olive-50 { color: #f9f8f3; }
-  .text-olive-100 { color: #f1ede3; }
-  .text-olive-200 { color: #dcd5b8; }
-  .text-olive-300 { color: #c7be8c; }
-  .text-olive-400 { color: #a39e60; }
-  .text-olive-500 { color: #8a8450; }
-  .text-olive-600 { color: #6b8e23; }
-  .text-olive-700 { color: #556b2f; }
-  .text-olive-800 { color: #3d4f1f; }
-  .text-olive-900 { color: #2a3714; }
-
-  /* Olive background colors */
-  .bg-olive-50 { background-color: #f9f8f3; }
-  .bg-olive-100 { background-color: #f1ede3; }
-  .bg-olive-200 { background-color: #dcd5b8; }
-  .bg-olive-300 { background-color: #c7be8c; }
-  .bg-olive-400 { background-color: #a39e60; }
-  .bg-olive-500 { background-color: #8a8450; }
-  .bg-olive-600 { background-color: #6b8e23; }
-  .bg-olive-700 { background-color: #556b2f; }
-  .bg-olive-800 { background-color: #3d4f1f; }
-  .bg-olive-900 { background-color: #2a3714; }
-
-  /* Olive border colors */
-  .border-olive-50 { border-color: #f9f8f3; }
-  .border-olive-100 { border-color: #f1ede3; }
-  .border-olive-200 { border-color: #dcd5b8; }
-  .border-olive-300 { border-color: #c7be8c; }
-  .border-olive-400 { border-color: #a39e60; }
-  .border-olive-500 { border-color: #8a8450; }
-  .border-olive-600 { border-color: #6b8e23; }
-  .border-olive-700 { border-color: #556b2f; }
-  .border-olive-800 { border-color: #3d4f1f; }
-  .border-olive-900 { border-color: #2a3714; }
-
-  /* Olive with opacity */
-  .bg-olive-600\/10 { background-color: rgba(107, 142, 35, 0.1); }
-  .bg-olive-700\/10 { background-color: rgba(85, 107, 47, 0.1); }
-
-  /* Ring colors for focus states */
-  .focus\:ring-olive-300:focus { --tw-ring-color: #c7be8c; }
-
   .animate-fade-in {
     animation: fadeIn 0.8s ease-out;
   }

@@ -15,10 +15,10 @@
 <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
   <div class="max-w-6xl mx-auto">
     <div class="text-center mb-16">
-      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+      <h2 class="text-3xl sm:text-4xl font-bold text-olive-900 mb-4">
         {t.howItWorks.title}
       </h2>
-      <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+      <p class="text-olive-700 text-lg max-w-2xl mx-auto">
         A simple, transparent process to bring your vision to life
       </p>
     </div>
@@ -27,7 +27,7 @@
     <div class="relative">
       <!-- Connecting line (hidden on mobile) -->
       <div
-        class="hidden lg:block absolute top-24 left-0 right-0 h-1 bg-gradient-to-r from-olive-200 via-olive-400 to-olive-200"
+        class="hidden lg:block absolute top-24 left-0 right-0 h-px bg-olive-300"
       ></div>
 
       <!-- Steps Grid -->
@@ -39,10 +39,10 @@
             <!-- Icon Circle with number -->
             <div class="flex justify-center mb-6">
               <div
-                class="relative w-24 h-24 bg-olive-700 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300"
+                class="relative w-24 h-24 bg-olive-700 rounded-full flex items-center justify-center shadow-md transform hover:scale-105 transition-transform duration-300"
               >
                 <div
-                  class="absolute inset-0 bg-olive-600 rounded-full animate-pulse opacity-20"
+                  class="absolute inset-0 border border-white/10 rounded-full"
                 ></div>
                 <span class="relative text-white text-3xl font-bold"
                   >{idx + 1}</span
@@ -52,12 +52,12 @@
 
             <!-- Card -->
             <div
-              class="bg-gray-50 p-6 rounded-xl border-2 border-transparent hover:border-olive-300 transition-all duration-300"
+              class="bg-white p-6 rounded-xl border border-olive-200 hover:border-olive-300 hover:shadow-md transition-all duration-300"
             >
-              <h3 class="text-xl font-bold text-gray-900 mb-3">
+              <h3 class="text-xl font-bold text-olive-900 mb-3">
                 {step.title}
               </h3>
-              <p class="text-gray-600 text-sm leading-relaxed">
+              <p class="text-olive-700 text-sm leading-relaxed">
                 {step.description}
               </p>
             </div>
@@ -75,10 +75,10 @@
 
     <!-- Bottom CTA -->
     <div class="text-center mt-16">
-      <p class="text-gray-600 mb-6">Ready to get started?</p>
+      <p class="text-olive-700 mb-6">Ready to get started?</p>
       <a
         href="#contact"
-        class="inline-block px-8 py-4 bg-olive-700 text-white rounded-lg font-semibold hover:bg-olive-800 hover:scale-105 transition-all duration-300 shadow-lg"
+        class="inline-block px-8 py-4 bg-olive-700 text-white rounded-xl font-semibold hover:bg-olive-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md"
       >
         Start Your Project
       </a>

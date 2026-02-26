@@ -32,10 +32,10 @@
       class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center"
     >
       <div
-        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6"
+        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-olive-100 mb-6"
       >
         <svg
-          class="h-10 w-10 text-green-600"
+          class="h-10 w-10 text-olive-700"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -58,7 +58,7 @@
 
       <button
         on:click={onClose}
-        class="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+        class="w-full py-3 px-4 bg-olive-700 text-white font-semibold rounded-xl hover:bg-olive-800 transition-colors shadow-lg shadow-olive-200/60"
       >
         {t.modals.uploadSuccess.close}
       </button>

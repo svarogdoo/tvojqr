@@ -125,6 +125,12 @@ When implementing new features, prioritize in this order:
 
 This TODO reflects the current codebase state and the target HostingQr product described above.
 
+Status markers for tasks:
+
+- `[DONE]` completed
+- `[PARTIAL]` started but needs another pass
+- No marker = not started yet
+
 ### 1. Front Page (Marketing / Landing)
 
 1.1 Rework landing page copy from manual service/agency messaging to self-service SaaS messaging.
@@ -145,16 +151,16 @@ This TODO reflects the current codebase state and the target HostingQr product d
 
 ### 2. UI Redesign / Visual System
 
-2.1 Redesign the visual direction so the product feels smoother and more polished.
-2.1.a Define a softer/smoother color palette (brand colors, neutrals, success/error states).
-2.1.b Replace harsh/high-contrast combinations where they feel rough.
-2.1.c Document palette usage rules (primary action, secondary action, surfaces, borders).
+[PARTIAL] 2.1 Redesign the visual direction so the product feels smoother and more polished.
+[DONE] 2.1.a Define a softer/smoother color palette (brand colors, neutrals, success/error states).
+[DONE] 2.1.b Replace harsh/high-contrast combinations where they feel rough.
+[DONE] 2.1.c Document palette usage rules (primary action, secondary action, surfaces, borders).
 2.2 Improve typography and spacing consistency across the app.
 2.2.a Define heading/body/button text styles.
 2.2.b Standardize spacing scale for sections/cards/forms.
 2.2.c Normalize border radius and shadow styles.
 2.3 Create consistent component styling patterns.
-2.3.a Buttons (primary/secondary/ghost/destructive).
+[PARTIAL] 2.3.a Buttons (primary/secondary/ghost/destructive).
 2.3.b Form fields (inputs, labels, hints, errors).
 2.3.c Modals (`SuccessModal`, `ErrorModal`) visual consistency and motion polish.
 2.4 Mobile-first visual polish pass.

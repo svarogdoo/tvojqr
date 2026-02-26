@@ -29,7 +29,7 @@
 {#if show}
   <div
     transition:fade={{ duration: 200 }}
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm"
     role="button"
     tabindex="0"
     on:click|self={onClose}
@@ -37,13 +37,13 @@
   >
     <div
       transition:scale={{ duration: 300, start: 0.95 }}
-      class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center"
+      class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-xl ring-1 ring-black/5 text-center"
     >
       <div
-        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6"
+        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-rose-50 mb-6"
       >
         <svg
-          class="h-10 w-10 text-red-600"
+          class="h-10 w-10 text-rose-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -65,14 +65,14 @@
       </p>
 
       <div
-        class="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg mb-6"
+        class="flex items-center gap-2 p-2 bg-olive-50 border border-olive-100 rounded-lg mb-6"
       >
         <code class="flex-1 text-sm font-semibold text-gray-800 break-all"
           >{emailAddress}</code
         >
         <button
           on:click={copyEmail}
-          class="px-3 py-1 bg-white border border-gray-300 rounded md text-xs font-medium hover:bg-gray-50 transition-colors"
+          class="px-3 py-1 bg-white border border-olive-200 rounded-md text-xs font-medium hover:bg-olive-50 transition-colors"
         >
           {copied ? "Copied!" : "Copy"}
         </button>
@@ -80,7 +80,7 @@
 
       <button
         on:click={onClose}
-        class="w-full py-3 px-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-black transition-colors"
+        class="w-full py-3 px-4 bg-olive-800 text-white font-semibold rounded-xl hover:bg-olive-900 transition-colors"
       >
         {t.modals.uploadError.close}
       </button>

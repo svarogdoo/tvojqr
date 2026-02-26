@@ -12,7 +12,7 @@
 </script>
 
 <!-- Services Section -->
-<section id="services" class="py-20 px-4 sm:px-6 lg:px-8 bg-olive-200">
+<section id="services" class="py-20 px-4 sm:px-6 lg:px-8 bg-olive-100">
   <div class="max-w-6xl mx-auto">
     <!-- Title Section -->
     <div class="text-center mb-16">
@@ -29,18 +29,17 @@
       {#each t.services.list as service, idx (service.title)}
         <!-- Featured cards: indices 0, 2, 4 (Graphic Design, QR Codes, Online Hosting) -->
         {#if idx === 0 || idx === 2 || idx === 4}
-          <!-- Dark featured cards with olive accents -->
+          <!-- Featured cards (minimal accent version) -->
           <div
-            class="group relative bg-linear-to-br from-lime-900 to-lime-800 p-8 rounded-3xl hover:scale-105 hover:shadow-2xl transition-all duration-300 border border-olive-800 hover:border-olive-600 overflow-hidden"
+            class="group relative bg-olive-800 p-8 rounded-3xl hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-olive-700 overflow-hidden"
           >
-            <!-- Animated background -->
             <div
-              class="absolute top-0 right-0 w-40 h-40 bg-olive-700/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"
+              class="absolute top-0 right-0 w-32 h-32 bg-olive-300 rounded-full blur-3xl opacity-15 group-hover:opacity-25 transition-opacity duration-300"
             ></div>
 
             <div class="relative z-10">
               <div
-                class="w-12 h-12 bg-olive-300 rounded-xl flex items-center justify-center mb-4 text-olive-900 text-2xl group-hover:scale-110 transition-transform duration-300"
+                class="w-12 h-12 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center mb-4 text-white text-2xl group-hover:scale-105 transition-transform duration-300"
               >
                 {service.icon}
               </div>
@@ -52,25 +51,24 @@
               </p>
               <a
                 href="#contact"
-                class="text-olive-300 font-semibold text-sm hover:text-olive-200 transition-colors duration-300"
+                class="text-olive-300 font-semibold text-sm hover:text-olive-100 transition-colors duration-300"
               >
                 Read more →
               </a>
             </div>
           </div>
         {:else}
-          <!-- Light cards with olive accents -->
+          <!-- Standard cards -->
           <div
-            class="group relative bg-white p-8 rounded-3xl hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-olive-200 hover:border-olive-400 overflow-hidden"
+            class="group relative bg-white p-8 rounded-3xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-olive-200 hover:border-olive-300 overflow-hidden"
           >
-            <!-- Subtle background gradient -->
             <div
-              class="absolute top-0 right-0 w-32 h-32 bg-olive-100 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              class="absolute top-0 right-0 w-28 h-28 bg-olive-100 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             ></div>
 
             <div class="relative z-10">
               <div
-                class="w-12 h-12 bg-linear-to-br from-olive-700 to-olive-600 rounded-xl flex items-center justify-center mb-4 text-white text-2xl group-hover:scale-110 transition-transform duration-300"
+                class="w-12 h-12 bg-olive-100 rounded-xl flex items-center justify-center mb-4 text-olive-800 text-2xl group-hover:scale-105 transition-transform duration-300"
               >
                 {service.icon}
               </div>
@@ -82,7 +80,7 @@
               </p>
               <a
                 href="#contact"
-                class="text-olive-700 font-semibold text-sm hover:text-olive-800 transition-colors duration-300"
+                class="text-olive-800 font-semibold text-sm hover:text-olive-900 transition-colors duration-300"
               >
                 Read more →
               </a>
@@ -96,7 +94,7 @@
     <div class="text-center">
       <a
         href="#contact"
-        class="inline-block px-8 py-4 bg-olive-700 text-white rounded-full font-bold hover:bg-olive-800 hover:scale-105 transition-all duration-300 shadow-lg"
+        class="inline-block px-8 py-4 bg-olive-700 text-white rounded-xl font-bold hover:bg-olive-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md"
       >
         Let's Talk
       </a>

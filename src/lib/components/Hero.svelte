@@ -14,29 +14,29 @@
 
 <!-- Hero Section -->
 <section
-  class="relative pt-20 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-gray-50 to-white overflow-hidden"
+  class="relative pt-20 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-white to-olive-50 overflow-hidden"
 >
   <div class="max-w-7xl mx-auto">
     <!-- Content -->
     <div class="text-center mb-12 max-w-3xl mx-auto">
       <h1
-        class="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight animate-fade-in"
+        class="text-5xl sm:text-6xl lg:text-7xl font-bold text-olive-900 mb-6 leading-tight animate-fade-in"
       >
         {t.hero.title}
       </h1>
-      <p class="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
+      <p class="text-lg sm:text-xl text-olive-700 mb-8 leading-relaxed">
         {t.hero.description}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a
           href="/create-new"
-          class="px-8 py-4 bg-olive-700 text-white rounded-lg font-semibold hover:bg-olive-800 hover:scale-105 transition-all duration-300 shadow-lg text-center"
+          class="px-8 py-4 bg-olive-700 text-white rounded-xl font-semibold hover:bg-olive-800 hover:-translate-y-0.5 transition-all duration-300 shadow-lg text-center"
         >
           {t.hero.cta}
         </a>
         <a
           href="/restoran"
-          class="px-8 py-4 border-2 border-olive-700 text-olive-700 rounded-lg font-semibold hover:bg-olive-50 transition-all duration-300 text-center"
+          class="px-8 py-4 rounded-xl font-semibold text-olive-800 text-center transition-all duration-300 border border-olive-200 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:border-olive-300"
         >
           {t.hero.secondary}
         </a>
@@ -51,21 +51,21 @@
     >
       <!-- Shadow Background -->
       <div
-        class="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-96 bg-olive-600/10 rounded-full blur-3xl"
+        class="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-96 bg-olive-200 rounded-full blur-3xl opacity-40"
       ></div>
 
       <!-- Image Container -->
       <div class="relative w-full h-full">
         <!-- Shadow Layer -->
         <div
-          class="absolute bottom-0 left-4 right-4 w-5/6 h-20 bg-gray-900/20 rounded-full blur-2xl mx-auto"
+          class="absolute bottom-0 left-4 right-4 w-5/6 h-20 bg-olive-900 opacity-10 rounded-full blur-2xl mx-auto"
         ></div>
 
         <!-- Image -->
         <img
           src={heroImage}
           alt="Menu Design"
-          class="relative w-full h-full object-cover object-center rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
+          class="relative w-full h-full object-cover object-center rounded-3xl shadow-2xl transform hover:scale-[1.01] transition-transform duration-500"
         />
       </div>
     </div>
