@@ -19,9 +19,6 @@
   <div class="max-w-7xl mx-auto">
     <div class="grid items-center gap-14 pb-12 lg:grid-cols-[1.05fr_0.95fr] lg:pb-20">
       <div class="max-w-2xl">
-        <div class="mb-5 inline-flex items-center rounded-full border border-stone-200 bg-white/80 px-4 py-1.5 text-sm font-medium text-stone-600 shadow-sm backdrop-blur-sm">
-          Simple hosting for QR pages
-        </div>
         <h1
           class="max-w-3xl text-5xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-6xl lg:text-7xl animate-fade-in"
         >
@@ -43,20 +40,6 @@
           >
             {t.hero.secondary}
           </a>
-        </div>
-        <div class="mt-12 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="rounded-2xl border border-stone-200/80 bg-white/75 px-4 py-4 shadow-sm backdrop-blur-sm">
-            <div class="text-sm text-stone-500">Step 1</div>
-            <div class="mt-1 font-medium text-stone-900">Upload files</div>
-          </div>
-          <div class="rounded-2xl border border-stone-200/80 bg-white/75 px-4 py-4 shadow-sm backdrop-blur-sm">
-            <div class="text-sm text-stone-500">Step 2</div>
-            <div class="mt-1 font-medium text-stone-900">Choose slug</div>
-          </div>
-          <div class="rounded-2xl border border-stone-200/80 bg-white/75 px-4 py-4 shadow-sm backdrop-blur-sm">
-            <div class="text-sm text-stone-500">Step 3</div>
-            <div class="mt-1 font-medium text-stone-900">Share QR</div>
-          </div>
         </div>
       </div>
 
