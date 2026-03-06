@@ -29,7 +29,7 @@
 {#if show}
   <div
     transition:fade={{ duration: 200 }}
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,39,34,0.28)] p-4 backdrop-blur-md"
     role="button"
     tabindex="0"
     on:click|self={onClose}
@@ -37,13 +37,13 @@
   >
     <div
       transition:scale={{ duration: 300, start: 0.95 }}
-      class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-xl ring-1 ring-black/5 text-center"
+      class="w-full max-w-sm rounded-[1.75rem] border border-black/6 bg-white/95 p-8 text-center shadow-[0_24px_60px_rgba(45,53,46,0.16)]"
     >
       <div
-        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-rose-50 mb-6"
+        class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color:var(--error-soft)]"
       >
         <svg
-          class="h-10 w-10 text-rose-500"
+          class="h-10 w-10 text-[color:var(--error-strong)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -57,22 +57,22 @@
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+      <h2 class="mb-2 text-2xl font-semibold text-stone-900">
         {t.modals.uploadError.title}
       </h2>
-      <p class="text-gray-600 mb-6 leading-relaxed text-lg">
+      <p class="mb-6 text-lg leading-relaxed text-stone-600">
         {t.modals.uploadError.description}
       </p>
 
       <div
-        class="flex items-center gap-2 p-2 bg-olive-50 border border-olive-100 rounded-lg mb-6"
+        class="mb-6 flex items-center gap-2 rounded-2xl border border-stone-200 bg-stone-50 p-2"
       >
-        <code class="flex-1 text-sm font-semibold text-gray-800 break-all"
+        <code class="flex-1 break-all text-sm font-medium text-stone-700"
           >{emailAddress}</code
         >
         <button
           on:click={copyEmail}
-          class="px-3 py-1 bg-white border border-olive-200 rounded-md text-xs font-medium hover:bg-olive-50 transition-colors"
+          class="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition-colors hover:border-stone-300 hover:text-stone-900"
         >
           {copied ? "Copied!" : "Copy"}
         </button>
@@ -80,7 +80,7 @@
 
       <button
         on:click={onClose}
-        class="w-full py-3 px-4 bg-olive-800 text-white font-semibold rounded-xl hover:bg-olive-900 transition-colors"
+        class="inline-flex w-full items-center justify-center rounded-full bg-stone-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-800"
       >
         {t.modals.uploadError.close}
       </button>

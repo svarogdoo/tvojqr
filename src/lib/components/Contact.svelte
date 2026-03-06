@@ -26,7 +26,7 @@
 <!-- Contact Section -->
 <section id="contact" class="px-4 py-20 sm:px-6 lg:px-8">
   <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-    <div class="rounded-[2rem] border border-black/6 bg-[rgba(230,235,226,0.72)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.06)] backdrop-blur-sm sm:p-10">
+    <div class="rounded-[2rem] border border-black/6 bg-[rgba(218,226,212,0.9)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.06)] backdrop-blur-sm sm:p-10">
       <div class="max-w-md">
         <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
           Contact

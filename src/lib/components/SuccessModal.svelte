@@ -20,7 +20,7 @@
 {#if show}
   <div
     transition:fade={{ duration: 200 }}
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,39,34,0.28)] p-4 backdrop-blur-md"
     role="button"
     tabindex="0"
     aria-label="Close modal"
@@ -29,13 +29,13 @@
   >
     <div
       transition:scale={{ duration: 300, start: 0.95 }}
-      class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center"
+      class="w-full max-w-sm rounded-[1.75rem] border border-black/6 bg-white/95 p-8 text-center shadow-[0_24px_60px_rgba(45,53,46,0.16)]"
     >
       <div
-        class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-olive-100 mb-6"
+        class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(236,245,238,0.95)]"
       >
         <svg
-          class="h-10 w-10 text-olive-700"
+          class="h-10 w-10 text-[color:var(--success-strong)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -49,16 +49,16 @@
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">
+      <h2 class="mb-2 text-2xl font-semibold text-stone-900">
         {t.modals.uploadSuccess.title}
       </h2>
-      <p class="text-gray-600 mb-6 leading-relaxed text-lg">
+      <p class="mb-6 text-lg leading-relaxed text-stone-600">
         {t.modals.uploadSuccess.description}
       </p>
 
       <button
         on:click={onClose}
-        class="w-full py-3 px-4 bg-olive-700 text-white font-semibold rounded-xl hover:bg-olive-800 transition-colors shadow-lg shadow-olive-200/60"
+        class="inline-flex w-full items-center justify-center rounded-full bg-stone-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-800"
       >
         {t.modals.uploadSuccess.close}
       </button>

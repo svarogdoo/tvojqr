@@ -161,11 +161,11 @@ Status markers for tasks:
 [PARTIAL] 2.2.c Normalize border radius and shadow styles.
 2.3 Create consistent component styling patterns.
 [PARTIAL] 2.3.a Buttons (primary/secondary/ghost/destructive).
-[PARTIAL] 2.3.b Form fields (inputs, labels, hints, errors).
+[DONE] 2.3.b Form fields (inputs, labels, hints, errors).
 2.3.c Modals (`SuccessModal`, `ErrorModal`) visual consistency and motion polish.
 [PARTIAL] 2.4 Mobile-first visual polish pass.
 [PARTIAL] 2.4.a Check landing page sections for spacing and overflow.
-2.4.b Check create/upload flow form readability on smaller screens.
+[DONE] 2.4.b Check create/upload flow form readability on smaller screens.
 2.4.c Check public slug page readability on mobile.
 
 ### 3. Manual Intake Flow (`/create-new`) -> Product Onboarding
