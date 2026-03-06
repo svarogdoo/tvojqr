@@ -12,15 +12,13 @@
 </script>
 
 <!-- How It Works -->
-<section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+<section id="how-it-works" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
   <div class="max-w-6xl mx-auto">
     <div class="text-center mb-16">
       <h2 class="text-3xl sm:text-4xl font-bold text-olive-900 mb-4">
         {t.howItWorks.title}
       </h2>
-      <p class="text-olive-700 text-lg max-w-2xl mx-auto">
-        A simple, transparent process to bring your vision to life
-      </p>
+      <p class="text-olive-700 text-lg max-w-2xl mx-auto">{t.howItWorks.subtitle}</p>
     </div>
 
     <!-- Timeline with cards -->
@@ -75,12 +73,12 @@
 
     <!-- Bottom CTA -->
     <div class="text-center mt-16">
-      <p class="text-olive-700 mb-6">Ready to get started?</p>
+      <p class="text-olive-700 mb-6">{t.howItWorks.ctaDescription}</p>
       <a
-        href="#contact"
+        href="/create-new"
         class="inline-block px-8 py-4 bg-olive-700 text-white rounded-xl font-semibold hover:bg-olive-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md"
       >
-        Start Your Project
+        {t.howItWorks.cta}
       </a>
     </div>
   </div>

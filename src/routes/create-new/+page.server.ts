@@ -6,6 +6,14 @@ export const actions: Actions = {
   default: async ({ request }) => {
     const formData = await request.formData();
 
+    if (!env.EMAIL_USER || !env.EMAIL_PASS) {
+      return {
+        success: false,
+        message:
+          "Email sending is not configured yet. Please try again later or contact us directly.",
+      };
+    }
+
     // Extract form fields
     const firstName = formData.get("firstName");
     const lastName = formData.get("lastName");
@@ -29,18 +37,18 @@ export const actions: Actions = {
         .map(async (file) => ({
           filename: file.name,
           content: Buffer.from(await file.arrayBuffer()),
-        }))
+        })),
     );
 
     // 3. Send the email
     try {
       await transporter.sendMail({
-        from: `"${firstName} ${lastName}" <${EMAIL_USER}>`,
+        from: `"${firstName} ${lastName}" <${env.EMAIL_USER}>`,
         to: "hostingqr@gmail.com", // Where YOU want to receive the notification
         replyTo: email as string, // So you can click 'Reply' to email the customer
         subject: `New Hosting Request: ${domain}`,
         text: `
-                    New submission for HostingQR:
+                    New submission for HostingQr:
                     
                     User: ${firstName} ${lastName}
                     Email: ${email}

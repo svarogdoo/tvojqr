@@ -19,9 +19,7 @@
       <h2 class="text-4xl sm:text-5xl font-bold text-olive-900 mb-4">
         {t.services.title}
       </h2>
-      <p class="text-olive-700 text-lg max-w-2xl mx-auto">
-        Comprehensive solutions to elevate your brand and reach
-      </p>
+      <p class="text-olive-700 text-lg max-w-2xl mx-auto">{t.services.subtitle}</p>
     </div>
 
     <!-- Services Grid: 3 columns, 2 rows -->
@@ -50,10 +48,10 @@
                 {service.description}
               </p>
               <a
-                href="#contact"
+                href="/create-new"
                 class="text-olive-300 font-semibold text-sm hover:text-olive-100 transition-colors duration-300"
               >
-                Read more →
+                {t.services.readMore} ->
               </a>
             </div>
           </div>
@@ -79,10 +77,10 @@
                 {service.description}
               </p>
               <a
-                href="#contact"
+                href="/create-new"
                 class="text-olive-800 font-semibold text-sm hover:text-olive-900 transition-colors duration-300"
               >
-                Read more →
+                {t.services.readMore} ->
               </a>
             </div>
           </div>
@@ -93,10 +91,10 @@
     <!-- Call to action -->
     <div class="text-center">
       <a
-        href="#contact"
+        href="/create-new"
         class="inline-block px-8 py-4 bg-olive-700 text-white rounded-xl font-bold hover:bg-olive-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md"
       >
-        Let's Talk
+        {t.services.cta}
       </a>
     </div>
   </div>

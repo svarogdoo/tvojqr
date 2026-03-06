@@ -20,7 +20,7 @@
   <div
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
   >
-    <a href="/" class="text-2xl font-bold text-olive-900">HostingQR</a>
+    <a href="/" class="text-2xl font-bold text-olive-900">HostingQr</a>
     <div class="hidden md:flex space-x-8 items-center">
       <a
         href="/create-new"

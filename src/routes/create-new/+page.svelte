@@ -37,8 +37,6 @@
   function closeModals() {
     showSuccess = false;
     showError = false;
-    // Optional: Reset form success so the modal doesn't pop up again on page refresh
-    if (form) form.success = null;
   }
 
   let allFiles: File[] = []; // This stores the actual File objects

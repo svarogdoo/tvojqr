@@ -15,15 +15,15 @@
 <Footer />
 
 <svelte:head>
-  <title>HostingQR</title>
+  <title>HostingQr</title>
   <meta
     name="description"
-    content="HostingQR - your ultimate solution for seamless QR code generation and management. Create, customize, and track QR codes effortlessly with our user-friendly platform."
+    content="HostingQr lets you upload menus or files, choose a public slug, and share them instantly with a QR code."
   />
   <meta
     name="keywords"
-    content="QR code, QR code generator, QR code management, QR code tracking, custom QR codes, digital solutions, HostingQR"
+    content="HostingQr, QR menu hosting, file hosting, menu QR code, public slug, multilingual menus"
   />
-  <meta name="author" content="HostingQR" />
+  <meta name="author" content="HostingQr" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>

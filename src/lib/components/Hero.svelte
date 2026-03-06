@@ -35,7 +35,7 @@
           {t.hero.cta}
         </a>
         <a
-          href="/restoran"
+          href="/#how-it-works"
           class="px-8 py-4 rounded-xl font-semibold text-olive-800 text-center transition-all duration-300 border border-olive-200 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:border-olive-300"
         >
           {t.hero.secondary}

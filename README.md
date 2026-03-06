@@ -133,10 +133,10 @@ Status markers for tasks:
 
 ### 1. Front Page (Marketing / Landing)
 
-1.1 Rework landing page copy from manual service/agency messaging to self-service SaaS messaging.
-1.1.a Update hero text to explain upload -> slug -> QR flow.
-1.1.b Update CTA labels to match account/signup flow instead of manual submission.
-1.1.c Align examples/services sections with actual MVP features.
+[DONE] 1.1 Rework landing page copy from manual service/agency messaging to self-service SaaS messaging.
+[DONE] 1.1.a Update hero text to explain upload -> slug -> QR flow.
+[DONE] 1.1.b Update CTA labels to match account/signup flow instead of manual submission.
+[DONE] 1.1.c Align examples/services sections with actual MVP features.
 1.2 Replace placeholder contact form behavior with real backend handling or remove it until supported.
 1.2.a `src/lib/components/Contact.svelte` currently simulates success locally only.
 1.3 Add pricing section on front page (even if prices are "coming soon" initially).
@@ -187,13 +187,13 @@ Status markers for tasks:
 
 ### 4. Current Server Action / Email Submission (Short-Term Fixes)
 
-4.1 Fix server action bug in `src/routes/create-new/+page.server.ts`.
-4.1.a `from:` currently uses `${EMAIL_USER}` but only `env.EMAIL_USER` is defined.
+[DONE] 4.1 Fix server action bug in `src/routes/create-new/+page.server.ts`.
+[DONE] 4.1.a `from:` currently uses `${EMAIL_USER}` but only `env.EMAIL_USER` is defined.
 4.2 Decide whether to keep email submission temporarily.
 4.2.a If kept: harden it (validation, rate limiting, spam protection).
 4.2.b If removed: replace with authenticated upload/storage flow.
 4.3 Add robust error handling for file/email submission path.
-4.3.a Handle missing env vars (`EMAIL_USER`, `EMAIL_PASS`) gracefully.
+[DONE] 4.3.a Handle missing env vars (`EMAIL_USER`, `EMAIL_PASS`) gracefully.
 4.3.b Return user-friendly error states for upload/send failures.
 
 ### 5. Public Hosted Page (`/[slug]`)
@@ -292,7 +292,7 @@ Status markers for tasks:
 11.1.a Current `src/lib/translations.ts` is app-UI focused and very large.
 11.2 Ensure consistency and proofreading across all languages.
 11.2.a Fix wording/typos in current translations.
-11.2.b Standardize "HostingQr" casing (`HostingQr` vs `HostingQR`).
+[DONE] 11.2.b Standardize "HostingQr" casing (`HostingQr` vs `HostingQR`).
 11.3 Persist user language preference (app UI), not only in-memory store.
 
 ### 12. Quality, Security & Operations

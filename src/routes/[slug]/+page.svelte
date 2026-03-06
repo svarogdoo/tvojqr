@@ -16,10 +16,10 @@
 
 <svelte:head>
   {#if restaurant}
-    <title>{restaurant.name} - HostingQR</title>
+    <title>{restaurant.name} - HostingQr</title>
     <meta name="description" content={restaurant.description} />
   {:else}
-    <title>Not Found - HostingQR</title>
+    <title>Not Found - HostingQr</title>
   {/if}
 </svelte:head>
 
