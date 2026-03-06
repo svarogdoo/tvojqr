@@ -151,20 +151,20 @@ Status markers for tasks:
 
 ### 2. UI Redesign / Visual System
 
-[PARTIAL] 2.1 Redesign the visual direction so the product feels smoother and more polished.
+[DONE] 2.1 Redesign the visual direction so the product feels smoother and more polished.
 [DONE] 2.1.a Define a softer/smoother color palette (brand colors, neutrals, success/error states).
 [DONE] 2.1.b Replace harsh/high-contrast combinations where they feel rough.
 [DONE] 2.1.c Document palette usage rules (primary action, secondary action, surfaces, borders).
-2.2 Improve typography and spacing consistency across the app.
-2.2.a Define heading/body/button text styles.
-2.2.b Standardize spacing scale for sections/cards/forms.
-2.2.c Normalize border radius and shadow styles.
+[PARTIAL] 2.2 Improve typography and spacing consistency across the app.
+[PARTIAL] 2.2.a Define heading/body/button text styles.
+[PARTIAL] 2.2.b Standardize spacing scale for sections/cards/forms.
+[PARTIAL] 2.2.c Normalize border radius and shadow styles.
 2.3 Create consistent component styling patterns.
 [PARTIAL] 2.3.a Buttons (primary/secondary/ghost/destructive).
-2.3.b Form fields (inputs, labels, hints, errors).
+[PARTIAL] 2.3.b Form fields (inputs, labels, hints, errors).
 2.3.c Modals (`SuccessModal`, `ErrorModal`) visual consistency and motion polish.
-2.4 Mobile-first visual polish pass.
-2.4.a Check landing page sections for spacing and overflow.
+[PARTIAL] 2.4 Mobile-first visual polish pass.
+[PARTIAL] 2.4.a Check landing page sections for spacing and overflow.
 2.4.b Check create/upload flow form readability on smaller screens.
 2.4.c Check public slug page readability on mobile.
 

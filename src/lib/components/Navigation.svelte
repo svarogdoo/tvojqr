@@ -16,33 +16,33 @@
 </script>
 
 <!-- Navigation -->
-<nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-sm border-b border-olive-200">
+<nav class="fixed top-0 w-full z-50 border-b border-black/5 bg-white/75 backdrop-blur-xl">
   <div
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
   >
-    <a href="/" class="text-2xl font-bold text-olive-900">HostingQr</a>
+    <a href="/" class="text-2xl font-semibold tracking-tight text-stone-900">HostingQr</a>
     <div class="hidden md:flex space-x-8 items-center">
       <a
         href="/create-new"
-        class="text-white font-semibold bg-olive-700 px-4 py-2 rounded-xl hover:bg-olive-800 transition-all shadow-sm hover:-translate-y-0.5"
+        class="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
       >
         {t.hero.cta}
       </a>
       <a
         href="/#services"
-        class="text-olive-700 hover:text-olive-900 transition-colors"
+        class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >
         {t.nav.services}
       </a>
       <a
         href="/restoran"
-        class="text-olive-700 hover:text-olive-900 transition-colors"
+        class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >
         {t.nav.examples}
       </a>
       <a
         href="/#contact"
-        class="text-olive-700 hover:text-olive-900 transition-colors"
+        class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >
         {t.nav.contact}
       </a>
@@ -52,9 +52,9 @@
         <button
           on:click={() =>
             changeLanguage(lang.code as "en" | "sr" | "ru" | "el")}
-          class="px-3 py-1 rounded-lg transition-all {currentLang === lang.code
-            ? 'bg-olive-700 text-white'
-            : 'border border-olive-200 bg-white text-olive-800 shadow-sm hover:-translate-y-0.5 hover:border-olive-300'}"
+          class="rounded-full px-3 py-1 text-sm transition-all {currentLang === lang.code
+            ? 'bg-stone-900 text-white shadow-sm'
+            : 'border border-stone-200 bg-white/90 text-stone-600 hover:border-stone-300 hover:text-stone-900'}"
         >
           {lang.flag}
         </button>

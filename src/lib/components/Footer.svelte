@@ -12,9 +12,9 @@
 </script>
 
 <!-- Footer -->
-<footer class="bg-gray-900 text-gray-400 py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-6xl mx-auto text-center">
-    <p>{t.footer.copyright}</p>
-    <p class="text-sm mt-2">{t.footer.tagline}</p>
+<footer class="px-4 py-10 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-6xl border-t border-black/6 pt-8 text-center text-stone-500">
+    <p class="font-medium text-stone-700">{t.footer.copyright}</p>
+    <p class="mt-2 text-sm">{t.footer.tagline}</p>
   </div>
 </footer>

@@ -24,86 +24,100 @@
 </script>
 
 <!-- Contact Section -->
-<section id="contact" class="py-20 px-4 sm:px-6 lg:px-8 bg-olive-700">
-  <div class="max-w-2xl mx-auto">
-    <h2 class="text-3xl sm:text-4xl font-bold text-center text-white mb-2">
-      {t.contact.title}
-    </h2>
-    <p class="text-center text-olive-100 mb-10">
-      {t.contact.description}
-    </p>
+<section id="contact" class="px-4 py-20 sm:px-6 lg:px-8">
+  <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+    <div class="rounded-[2rem] border border-black/6 bg-[rgba(230,235,226,0.72)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.06)] backdrop-blur-sm sm:p-10">
+      <div class="max-w-md">
+        <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
+          Contact
+        </p>
+        <h2 class="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+          {t.contact.title}
+        </h2>
+        <p class="mt-4 text-base leading-7 text-stone-600">
+          {t.contact.description}
+        </p>
+      </div>
 
-    {#if formSubmitted}
-      <div
-        class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-bounce"
-      >
-        {t.contact.success}
+      <div class="mt-10 grid gap-4 text-stone-700">
+        <div class="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Email</p>
+          <p class="mt-2 font-medium text-stone-900">{t.contact.info.email}</p>
+        </div>
+        <div class="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Phone</p>
+          <p class="mt-2 font-medium text-stone-900">{t.contact.info.phone}</p>
+        </div>
+        <div class="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Website</p>
+          <p class="mt-2 font-medium text-stone-900">{t.contact.info.website}</p>
+        </div>
       </div>
-    {/if}
+    </div>
 
-    <form on:submit={handleSubmit} class="space-y-6">
-      <div>
-        <label for="name" class="block text-white font-medium mb-2"
-          >{t.contact.form.name}</label
-        >
-        <input
-          id="name"
-          type="text"
-          bind:value={contactForm.name}
-          required
-          class="w-full px-4 py-3 rounded-lg bg-white/95 text-gray-900 focus:outline-none focus:ring-2 focus:ring-olive-300 transition-all"
-          placeholder={t.contact.form.name}
-        />
-      </div>
-      <div>
-        <label for="email" class="block text-white font-medium mb-2"
-          >{t.contact.form.email}</label
-        >
-        <input
-          id="email"
-          type="email"
-          bind:value={contactForm.email}
-          required
-          class="w-full px-4 py-3 rounded-lg bg-white/95 text-gray-900 focus:outline-none focus:ring-2 focus:ring-olive-300 transition-all"
-          placeholder={t.contact.form.email}
-        />
-      </div>
-      <div>
-        <label for="message" class="block text-white font-medium mb-2"
-          >{t.contact.form.message}</label
-        >
-        <textarea
-          id="message"
-          bind:value={contactForm.message}
-          required
-          rows="5"
-          class="w-full px-4 py-3 rounded-lg bg-white/95 text-gray-900 focus:outline-none focus:ring-2 focus:ring-olive-300 transition-all resize-none"
-          placeholder={t.contact.form.message}
-        ></textarea>
-      </div>
-      <button
-        type="submit"
-        class="w-full px-6 py-3 bg-white text-olive-700 font-semibold rounded-lg hover:bg-gray-50 hover:scale-105 transition-all duration-300 shadow-lg"
-      >
-        {t.contact.form.send}
-      </button>
-    </form>
+    <div class="rounded-[2rem] border border-black/6 bg-white/82 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.07)] backdrop-blur-sm sm:p-10">
+      <h3 class="text-2xl font-semibold tracking-tight text-stone-900">
+        Send a message
+      </h3>
+      <p class="mt-3 text-sm leading-7 text-stone-600">
+        For now this is a simple contact placeholder while the product onboarding is being rebuilt.
+      </p>
 
-    <div
-      class="mt-12 pt-8 border-t border-olive-600 grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white"
-    >
-      <div>
-        <div class="text-3xl mb-2">📧</div>
-        <p class="text-olive-100">{t.contact.info.email}</p>
-      </div>
-      <div>
-        <div class="text-3xl mb-2">📱</div>
-        <p class="text-olive-100">{t.contact.info.phone}</p>
-      </div>
-      <div>
-        <div class="text-3xl mb-2">🌐</div>
-        <p class="text-olive-100">{t.contact.info.website}</p>
-      </div>
+      {#if formSubmitted}
+        <div
+          class="mt-6 rounded-2xl border border-[rgba(94,117,97,0.18)] bg-[rgba(236,245,238,0.9)] px-4 py-3 text-sm font-medium text-[color:var(--success-strong)]"
+        >
+          {t.contact.success}
+        </div>
+      {/if}
+
+      <form on:submit={handleSubmit} class="mt-8 space-y-5">
+        <div>
+          <label for="name" class="mb-2 block text-sm font-medium text-stone-700"
+            >{t.contact.form.name}</label
+          >
+          <input
+            id="name"
+            type="text"
+            bind:value={contactForm.name}
+            required
+            class="w-full rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3 text-stone-900 outline-none transition-all focus:border-stone-400 focus:bg-white"
+            placeholder={t.contact.form.name}
+          />
+        </div>
+        <div>
+          <label for="email" class="mb-2 block text-sm font-medium text-stone-700"
+            >{t.contact.form.email}</label
+          >
+          <input
+            id="email"
+            type="email"
+            bind:value={contactForm.email}
+            required
+            class="w-full rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3 text-stone-900 outline-none transition-all focus:border-stone-400 focus:bg-white"
+            placeholder={t.contact.form.email}
+          />
+        </div>
+        <div>
+          <label for="message" class="mb-2 block text-sm font-medium text-stone-700"
+            >{t.contact.form.message}</label
+          >
+          <textarea
+            id="message"
+            bind:value={contactForm.message}
+            required
+            rows="5"
+            class="w-full resize-none rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3 text-stone-900 outline-none transition-all focus:border-stone-400 focus:bg-white"
+            placeholder={t.contact.form.message}
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          class="inline-flex w-full items-center justify-center rounded-full bg-stone-900 px-6 py-3.5 text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
+        >
+          {t.contact.form.send}
+        </button>
+      </form>
     </div>
   </div>
 </section>

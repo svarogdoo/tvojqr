@@ -8,91 +8,51 @@
     currentLang = value;
   });
 
-  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
+  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"] as any;
 </script>
 
 <!-- Services Section -->
-<section id="services" class="py-20 px-4 sm:px-6 lg:px-8 bg-olive-100">
+<section id="services" class="px-4 py-20 sm:px-6 lg:px-8">
   <div class="max-w-6xl mx-auto">
-    <!-- Title Section -->
-    <div class="text-center mb-16">
-      <h2 class="text-4xl sm:text-5xl font-bold text-olive-900 mb-4">
+    <div class="mx-auto mb-16 max-w-3xl text-center">
+      <h2 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
         {t.services.title}
       </h2>
-      <p class="text-olive-700 text-lg max-w-2xl mx-auto">{t.services.subtitle}</p>
+      <p class="mt-4 text-lg leading-8 text-stone-600">{t.services.subtitle}</p>
     </div>
 
-    <!-- Services Grid: 3 columns, 2 rows -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {#each t.services.list as service, idx (service.title)}
-        <!-- Featured cards: indices 0, 2, 4 (Graphic Design, QR Codes, Online Hosting) -->
-        {#if idx === 0 || idx === 2 || idx === 4}
-          <!-- Featured cards (minimal accent version) -->
-          <div
-            class="group relative bg-olive-800 p-8 rounded-3xl hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-olive-700 overflow-hidden"
-          >
-            <div
-              class="absolute top-0 right-0 w-32 h-32 bg-olive-300 rounded-full blur-3xl opacity-15 group-hover:opacity-25 transition-opacity duration-300"
-            ></div>
+        <div
+          class="group relative overflow-hidden rounded-[1.75rem] border border-black/6 bg-white/78 p-8 shadow-[0_16px_40px_rgba(45,53,46,0.06)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(45,53,46,0.09)]"
+        >
+          <div class="absolute right-0 top-0 h-28 w-28 rounded-full bg-[rgba(210,218,206,0.45)] blur-3xl transition-opacity duration-300 group-hover:opacity-100"></div>
 
-            <div class="relative z-10">
-              <div
-                class="w-12 h-12 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center mb-4 text-white text-2xl group-hover:scale-105 transition-transform duration-300"
-              >
-                {service.icon}
-              </div>
-              <h3 class="text-xl font-bold text-white mb-3">
-                {service.title}
-              </h3>
-              <p class="text-olive-100 text-sm mb-6 leading-relaxed">
-                {service.description}
-              </p>
-              <a
-                href="/create-new"
-                class="text-olive-300 font-semibold text-sm hover:text-olive-100 transition-colors duration-300"
-              >
-                {t.services.readMore} ->
-              </a>
+          <div class="relative z-10">
+            <div class="mb-6 inline-flex h-12 min-w-12 items-center justify-center rounded-2xl bg-stone-100 px-4 text-sm font-medium text-stone-700">
+              {idx + 1}
             </div>
+            <h3 class="mb-3 text-xl font-semibold text-stone-900">
+              {service.title}
+            </h3>
+            <p class="mb-6 text-sm leading-7 text-stone-600">
+              {service.description}
+            </p>
+            <a
+              href="/create-new"
+              class="text-sm font-medium text-stone-900 transition-colors duration-300 hover:text-stone-600"
+            >
+              {t.services.readMore} ->
+            </a>
           </div>
-        {:else}
-          <!-- Standard cards -->
-          <div
-            class="group relative bg-white p-8 rounded-3xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-olive-200 hover:border-olive-300 overflow-hidden"
-          >
-            <div
-              class="absolute top-0 right-0 w-28 h-28 bg-olive-100 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            ></div>
-
-            <div class="relative z-10">
-              <div
-                class="w-12 h-12 bg-olive-100 rounded-xl flex items-center justify-center mb-4 text-olive-800 text-2xl group-hover:scale-105 transition-transform duration-300"
-              >
-                {service.icon}
-              </div>
-              <h3 class="text-xl font-bold text-olive-900 mb-3">
-                {service.title}
-              </h3>
-              <p class="text-olive-700 text-sm mb-6 leading-relaxed">
-                {service.description}
-              </p>
-              <a
-                href="/create-new"
-                class="text-olive-800 font-semibold text-sm hover:text-olive-900 transition-colors duration-300"
-              >
-                {t.services.readMore} ->
-              </a>
-            </div>
-          </div>
-        {/if}
+        </div>
       {/each}
     </div>
 
-    <!-- Call to action -->
-    <div class="text-center">
+    <div class="mt-12 text-center">
       <a
         href="/create-new"
-        class="inline-block px-8 py-4 bg-olive-700 text-white rounded-xl font-bold hover:bg-olive-800 hover:-translate-y-0.5 transition-all duration-300 shadow-md"
+        class="inline-flex items-center rounded-full bg-stone-900 px-6 py-3.5 text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
       >
         {t.services.cta}
       </a>
