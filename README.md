@@ -166,7 +166,7 @@ Status markers for tasks:
 [PARTIAL] 2.4 Mobile-first visual polish pass.
 [PARTIAL] 2.4.a Check landing page sections for spacing and overflow.
 [DONE] 2.4.b Check create/upload flow form readability on smaller screens.
-2.4.c Check public slug page readability on mobile.
+[DONE] 2.4.c Check public slug page readability on mobile.
 
 ### 3. Manual Intake Flow (`/create-new`) -> Product Onboarding
 
@@ -206,10 +206,10 @@ Status markers for tasks:
 5.3 Support more than one asset/file per hosted page.
 5.3.a Image gallery / multi-page menu display.
 5.3.b PDF display/download behavior (if included in MVP).
-5.4 Improve public page UX.
-5.4.a Better empty/not-found states (brand-consistent and localized).
-5.4.b Mobile-first reading experience for menus/documents.
-5.4.c Optional file title/description display.
+[DONE] 5.4 Improve public page UX.
+[DONE] 5.4.a Better empty/not-found states (brand-consistent and localized).
+[DONE] 5.4.b Mobile-first reading experience for menus/documents.
+[DONE] 5.4.c Optional file title/description display.
 
 ### 6. Authentication & User Dashboard (Core Missing Product Layer)
 

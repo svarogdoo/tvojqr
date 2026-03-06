@@ -1,5 +1,6 @@
 <script lang="ts">
   import Contact from "$lib/components/Contact.svelte";
+  import Examples from "$lib/components/Examples.svelte";
   import Footer from "$lib/components/Footer.svelte";
   import Hero from "$lib/components/Hero.svelte";
   import HowItWorks from "$lib/components/HowItWorks.svelte";
@@ -10,6 +11,7 @@
 <Navigation />
 <Hero />
 <Services />
+<Examples />
 <HowItWorks />
 <Contact />
 <Footer />

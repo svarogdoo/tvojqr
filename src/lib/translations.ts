@@ -13,7 +13,7 @@ export const translations = {
       secondary: "See how it works",
     },
     services: {
-      title: "Built for the MVP flow",
+      title: "Here's what you can do",
       subtitle:
         "Everything on the front page now points toward the core product: upload content, organize languages, publish a slug, and share a QR code.",
       readMore: "Start setup",
