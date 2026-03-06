@@ -24,9 +24,9 @@
 </script>
 
 <!-- Contact Section -->
-<section id="contact" class="px-4 py-20 sm:px-6 lg:px-8">
+<section id="contact" class="border-y border-black/8 bg-[rgba(220,228,216,0.92)] px-4 py-20 sm:px-6 lg:px-8">
   <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-    <div class="rounded-[2rem] border border-black/6 bg-[rgba(218,226,212,0.9)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.06)] backdrop-blur-sm sm:p-10">
+    <div class="rounded-[2rem] border border-black/8 bg-[rgba(247,246,242,0.96)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.08)] backdrop-blur-sm sm:p-10">
       <div class="max-w-md">
         <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
           Contact
@@ -40,22 +40,22 @@
       </div>
 
       <div class="mt-10 grid gap-4 text-stone-700">
-        <div class="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 shadow-sm">
+        <div class="rounded-2xl border border-stone-200 bg-[rgba(239,236,230,0.88)] px-5 py-4 shadow-sm">
           <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Email</p>
           <p class="mt-2 font-medium text-stone-900">{t.contact.info.email}</p>
         </div>
-        <div class="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 shadow-sm">
+        <div class="rounded-2xl border border-stone-200 bg-[rgba(239,236,230,0.88)] px-5 py-4 shadow-sm">
           <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Phone</p>
           <p class="mt-2 font-medium text-stone-900">{t.contact.info.phone}</p>
         </div>
-        <div class="rounded-2xl border border-white/70 bg-white/80 px-5 py-4 shadow-sm">
+        <div class="rounded-2xl border border-stone-200 bg-[rgba(239,236,230,0.88)] px-5 py-4 shadow-sm">
           <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Website</p>
           <p class="mt-2 font-medium text-stone-900">{t.contact.info.website}</p>
         </div>
       </div>
     </div>
 
-    <div class="rounded-[2rem] border border-black/6 bg-white/82 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.07)] backdrop-blur-sm sm:p-10">
+    <div class="rounded-[2rem] border border-black/8 bg-white/96 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.09)] backdrop-blur-sm sm:p-10">
       <h3 class="text-2xl font-semibold tracking-tight text-stone-900">
         Send a message
       </h3>

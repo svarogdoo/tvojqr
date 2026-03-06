@@ -164,7 +164,7 @@ Status markers for tasks:
 [DONE] 2.3.b Form fields (inputs, labels, hints, errors).
 2.3.c Modals (`SuccessModal`, `ErrorModal`) visual consistency and motion polish.
 [PARTIAL] 2.4 Mobile-first visual polish pass.
-[PARTIAL] 2.4.a Check landing page sections for spacing and overflow.
+[DONE] 2.4.a Check landing page sections for spacing and overflow.
 [DONE] 2.4.b Check create/upload flow form readability on smaller screens.
 [DONE] 2.4.c Check public slug page readability on mobile.
 

@@ -14,7 +14,7 @@
 
 <!-- Hero Section -->
 <section
-  class="relative overflow-hidden px-4 pt-24 sm:px-6 lg:px-8"
+  class="relative overflow-hidden border-b border-black/5 px-4 pt-24 sm:px-6 lg:px-8"
 >
   <div class="max-w-7xl mx-auto">
     <div class="grid items-center gap-14 pb-12 lg:grid-cols-[1.05fr_0.95fr] lg:pb-20">

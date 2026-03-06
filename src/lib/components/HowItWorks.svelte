@@ -12,7 +12,10 @@
 </script>
 
 <!-- How It Works -->
-<section id="how-it-works" class="px-4 py-20 sm:px-6 lg:px-8">
+<section
+  id="how-it-works"
+  class="border-y border-black/8 bg-[rgba(236,240,234,0.88)] px-4 py-20 sm:px-6 lg:px-8"
+>
   <div class="max-w-6xl mx-auto">
     <div class="mx-auto mb-16 max-w-3xl text-center">
       <h2 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
@@ -33,14 +36,14 @@
           <div class="text-center lg:text-left">
             <div class="mb-6 flex justify-center lg:justify-start">
               <div
-                class="flex h-12 w-12 items-center justify-center rounded-2xl border border-stone-200 bg-white text-sm font-semibold text-stone-900 shadow-sm"
+                class="flex h-12 w-12 items-center justify-center rounded-2xl border border-stone-300 bg-white text-sm font-semibold text-stone-900 shadow-sm"
               >
                 {idx + 1}
               </div>
             </div>
 
             <div
-              class="rounded-[1.5rem] border border-black/6 bg-white/78 p-6 shadow-[0_16px_40px_rgba(45,53,46,0.06)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(45,53,46,0.08)]"
+              class="rounded-[1.5rem] border border-black/8 bg-white/92 p-6 shadow-[0_16px_40px_rgba(45,53,46,0.07)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(45,53,46,0.1)]"
             >
               <h3 class="mb-3 text-xl font-semibold text-stone-900">
                 {step.title}
@@ -64,7 +67,7 @@
       <p class="mb-6 text-stone-600">{t.howItWorks.ctaDescription}</p>
       <a
         href="/create-new"
-        class="inline-flex items-center rounded-full border border-stone-200 bg-white/90 px-6 py-3.5 text-base font-medium text-stone-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300"
+        class="inline-flex items-center rounded-full border border-stone-300 bg-white px-6 py-3.5 text-base font-medium text-stone-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-400"
       >
         {t.howItWorks.cta}
       </a>
