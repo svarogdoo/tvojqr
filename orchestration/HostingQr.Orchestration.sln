@@ -3,17 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "orchestration", "orchestration", "{6769D8A8-7DDF-9F1A-6194-7060CBC2FEA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.AgentContracts", "HostingQr.AgentContracts\HostingQr.AgentContracts.csproj", "{3ED83612-F475-42E4-9821-46644BBD62B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.AgentContracts", "orchestration\HostingQr.AgentContracts\HostingQr.AgentContracts.csproj", "{3ED83612-F475-42E4-9821-46644BBD62B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.Tools", "HostingQr.Tools\HostingQr.Tools.csproj", "{2C510256-2810-4686-BD20-22DE2D87D790}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.Tools", "orchestration\HostingQr.Tools\HostingQr.Tools.csproj", "{2C510256-2810-4686-BD20-22DE2D87D790}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.AgentRuntime", "HostingQr.AgentRuntime\HostingQr.AgentRuntime.csproj", "{0CB9DAA6-E4B6-4C0A-9204-839AB388DE2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.AgentRuntime", "orchestration\HostingQr.AgentRuntime\HostingQr.AgentRuntime.csproj", "{0CB9DAA6-E4B6-4C0A-9204-839AB388DE2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.Orchestrator", "HostingQr.Orchestrator\HostingQr.Orchestrator.csproj", "{6BF65B16-B1E3-40B6-985A-FEA9689C49B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.Orchestrator", "orchestration\HostingQr.Orchestrator\HostingQr.Orchestrator.csproj", "{6BF65B16-B1E3-40B6-985A-FEA9689C49B7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.Tests", "orchestration\HostingQr.Tests\HostingQr.Tests.csproj", "{AF254B00-D292-44CF-A78B-D6AFFCD2638D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingQr.Tests", "HostingQr.Tests\HostingQr.Tests.csproj", "{AF254B00-D292-44CF-A78B-D6AFFCD2638D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,12 +86,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{3ED83612-F475-42E4-9821-46644BBD62B3} = {6769D8A8-7DDF-9F1A-6194-7060CBC2FEA6}
-		{2C510256-2810-4686-BD20-22DE2D87D790} = {6769D8A8-7DDF-9F1A-6194-7060CBC2FEA6}
-		{0CB9DAA6-E4B6-4C0A-9204-839AB388DE2B} = {6769D8A8-7DDF-9F1A-6194-7060CBC2FEA6}
-		{6BF65B16-B1E3-40B6-985A-FEA9689C49B7} = {6769D8A8-7DDF-9F1A-6194-7060CBC2FEA6}
-		{AF254B00-D292-44CF-A78B-D6AFFCD2638D} = {6769D8A8-7DDF-9F1A-6194-7060CBC2FEA6}
 	EndGlobalSection
 EndGlobal
