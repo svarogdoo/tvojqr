@@ -118,9 +118,9 @@ export const translations = {
         send: "Send Message",
       },
       info: {
-        email: "info@HostingQr.com",
+        email: "info@hostingqr.com",
         phone: "+1 (555) 123-4567",
-        website: "www.HostingQr.com",
+        website: "www.hostingqr.com",
       },
     },
     footer: {
@@ -279,9 +279,9 @@ export const translations = {
         send: "Pošalji poruku",
       },
       info: {
-        email: "info@HostingQr.com",
+        email: "info@hostingqr.com",
         phone: "+1 (555) 123-4567",
-        website: "www.HostingQr.com",
+        website: "www.hostingqr.com",
       },
     },
     footer: {
@@ -439,9 +439,9 @@ export const translations = {
         send: "Отправить сообщение",
       },
       info: {
-        email: "info@HostingQr.com",
+        email: "info@hostingqr.com",
         phone: "+1 (555) 123-4567",
-        website: "www.HostingQr.com",
+        website: "www.hostingqr.com",
       },
     },
     footer: {
@@ -600,9 +600,9 @@ export const translations = {
         send: "Αποστολή μηνύματος",
       },
       info: {
-        email: "info@HostingQr.com",
+        email: "info@hostingqr.com",
         phone: "+1 (555) 123-4567",
-        website: "www.HostingQr.com",
+        website: "www.hostingqr.com",
       },
     },
     footer: {
