@@ -1,13 +1,32 @@
 # Backend
 
-This folder is reserved for the future `.NET` product backend.
+This folder contains the `.NET` product backend foundation.
 
-Planned contents:
+Current stack:
 
-- `HostingQr.Api`
-- `HostingQr.Application`
-- `HostingQr.Domain`
-- `HostingQr.Infrastructure`
-- backend test projects
+- `ASP.NET Core` Web API
+- `Dapper`
+- `Npgsql`
+- `Swagger`
 
-The current repo state keeps backend work out of the main frontend app while local developer orchestration lives under `orchestration/`.
+Current structure:
+
+- `src/HostingQr.Api`
+- `src/HostingQr.Application`
+- `src/HostingQr.Domain`
+- `src/HostingQr.Infrastructure`
+- `tests/HostingQr.Api.Tests`
+
+Current endpoint:
+
+- `GET /api/ping`
+
+Run locally:
+
+```bash
+dotnet run --project src/HostingQr.Api
+```
+
+Open Swagger:
+
+- `http://localhost:5030/swagger` or the port shown by the app

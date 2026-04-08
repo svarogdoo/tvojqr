@@ -274,6 +274,10 @@ Status markers for tasks:
 
 ### 10. Data Model & Backend Foundation
 
+[PARTIAL] 10.0 Scaffold the `.NET` backend foundation.
+[DONE] 10.0.a Create backend solution and layered project structure.
+[DONE] 10.0.b Add Swagger/OpenAPI and a simple backend smoke-test endpoint.
+[DONE] 10.0.c Add Dapper/Npgsql foundation without EF.
 10.1 Introduce a database for users/projects/assets/subscriptions.
 10.1.a Users
 10.1.b Projects/hosted pages
