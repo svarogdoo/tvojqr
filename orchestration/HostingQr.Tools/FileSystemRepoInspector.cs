@@ -36,11 +36,12 @@ public sealed class FileSystemRepoInspector : IRepoInspector
 
     private static IReadOnlyList<string> GetRelevantFiles(string repositoryRoot, string prompt)
     {
-        string srcRoot = Path.Combine(repositoryRoot, "src");
-        if (!Directory.Exists(srcRoot))
-        {
-            return [];
-        }
+        string[] candidateRoots =
+        [
+            Path.Combine(repositoryRoot, "frontend", "src"),
+            Path.Combine(repositoryRoot, "backend", "src"),
+            Path.Combine(repositoryRoot, "orchestration"),
+        ];
 
         HashSet<string> tokens = prompt
             .Split([' ', ',', '.', ':', ';', '-', '_', '/', '\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -48,8 +49,9 @@ public sealed class FileSystemRepoInspector : IRepoInspector
             .Select(token => token.ToLowerInvariant())
             .ToHashSet();
 
-        return Directory
-            .EnumerateFiles(srcRoot, "*", SearchOption.AllDirectories)
+        return candidateRoots
+            .Where(Directory.Exists)
+            .SelectMany(root => Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
             .Where(path => SourceExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
             .Select(path => new
             {

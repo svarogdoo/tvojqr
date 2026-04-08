@@ -325,6 +325,11 @@ Status markers for tasks:
 13.1.e Add controlled edit execution behind explicit approval.
 13.1.f Add richer repo tools (diff analysis, targeted file search, scoped command execution).
 
+[DONE] 13.2 Restructure the workspace for clearer frontend/backend/tooling separation.
+[DONE] 13.2.a Move the Svelte app into `frontend/`.
+[DONE] 13.2.b Keep local developer orchestration under `orchestration/`.
+[DONE] 13.2.c Reserve `backend/` for the future `.NET` product backend.
+
 ## Open Questions (To Decide Later)
 
 - Which storage provider will host uploaded files?
