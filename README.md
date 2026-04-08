@@ -314,6 +314,17 @@ Status markers for tasks:
 12.4.d Email env vars (if temporary flow remains)
 12.5 Add monitoring/error tracking for production.
 
+### 13. Local Developer Orchestration
+
+[PARTIAL] 13.1 Add a local orchestration foundation for planning and implementation support.
+[DONE] 13.1.a Create a local `.NET` orchestration workspace under `orchestration/`.
+[DONE] 13.1.b Add typed agent contracts and a read-only orchestration pipeline.
+[DONE] 13.1.c Persist local run artifacts outside git under `.orchestration/runs/`.
+[DONE] 13.1.d Add automated tests for orchestration flow and persistence.
+[DONE] 13.1.g Add reusable prompt templates and run resume/history UX.
+13.1.e Add controlled edit execution behind explicit approval.
+13.1.f Add richer repo tools (diff analysis, targeted file search, scoped command execution).
+
 ## Open Questions (To Decide Later)
 
 - Which storage provider will host uploaded files?
