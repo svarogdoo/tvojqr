@@ -40,11 +40,24 @@ The app should become mostly autonomous:
 
 The dashboard should let users manage:
 
+- Multiple projects from one account
 - Posted image(s) / file(s)
 - Language variants
 - URL ending / slug (public page address)
 - QR code generation and download/display
-- Subscription plan / billing status
+- Preview before publish/save
+
+The intended control-panel flow is:
+
+1. User signs in and lands on a dashboard listing all their projects.
+2. User can open an existing project or create a new one.
+3. Inside a project they can manage:
+   - project name
+   - one active slug
+   - image uploads
+   - language variants
+   - preview before final save/publish
+4. User saves changes and later retrieves the live project again from the dashboard.
 
 ### Pricing & Payments
 
@@ -56,6 +69,8 @@ To be fully autonomous, HostingQr should include built-in billing:
 - Billing status visible in the user dashboard
 
 Pricing amounts are not decided yet. We will define pricing later, but the product and implementation should be designed to support tiers from the beginning.
+
+For now, billing and payment work is intentionally deferred until the core control-panel, upload, slug, preview, and public-page flows are working well.
 
 ### Public Hosted Page
 
@@ -69,12 +84,23 @@ When someone visits the user’s public URL:
 This is the minimum useful version to build first:
 
 1. Google login
-2. Single user dashboard page
-3. Upload one or more images (menus/documents)
-4. Save a unique URL slug
-5. Generate QR code for that URL
-6. Public page renders uploaded images
-7. Basic language switching (at least 2 language versions)
+2. Dashboard listing multiple user projects
+3. Project settings page for one selected project
+4. Upload one or more images (menus/documents)
+5. Save one unique URL slug per project
+6. Random slug generation option
+7. Preview changes before final save
+8. Public page renders uploaded images
+9. Basic language switching (at least 2 language versions)
+
+Project settings MVP should include:
+
+- project name
+- slug field with availability checking
+- random slug generator button
+- image upload section
+- language-specific upload support
+- preview before final save
 
 ## Post-MVP / Future Enhancements
 
@@ -220,12 +246,15 @@ Status markers for tasks:
 6.2 Build initial dashboard.
 6.2.a List user hosted pages/projects
 6.2.b Create new hosted page/project
-6.2.c Edit slug
-6.2.d Manage uploads
-6.2.e Manage languages
-6.2.f View/download QR code
+6.2.c Open a specific project from the project list
+6.2.d Edit project name
+6.2.e Edit one active slug per project
+6.2.f Manage uploads
+6.2.g Manage languages
+6.2.h Preview project changes before final save
+6.2.i View/download QR code
 6.3 Define first account model decisions.
-6.3.a One project per user vs multiple projects
+6.3.a [DECIDED] One user can manage multiple projects
 6.3.b Owner profile display name
 
 ### 7. File Storage & Hosting Infrastructure
@@ -234,10 +263,12 @@ Status markers for tasks:
 7.1.a Choose storage backend (e.g. S3-compatible, Supabase Storage, Cloudflare R2, etc.)
 7.1.b Implement upload pipeline from authenticated users.
 7.1.c Save metadata (file type, size, language, order).
+7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
 7.2 Add file lifecycle management.
 7.2.a Delete/replace uploads
 7.2.b Versioning strategy (optional later)
 7.2.c Storage cleanup when content is removed
+7.2.d Support multiple images per project and per language variant.
 7.3 Enforce limits (especially once billing exists).
 7.3.a Max file size
 7.3.b Max total storage
@@ -253,7 +284,7 @@ Status markers for tasks:
 8.2.a Generate on demand vs persist generated assets
 8.3 Add QR regeneration rules if slug changes.
 
-### 9. Billing, Pricing & Payments (Autonomy Requirement)
+### 9. Billing, Pricing & Payments (Deferred Until Core Product Flow Is Stable)
 
 9.1 Define plan structure before pricing amounts.
 9.1.a Tier names
@@ -278,16 +309,24 @@ Status markers for tasks:
 [DONE] 10.0.a Create backend solution and layered project structure.
 [DONE] 10.0.b Add Swagger/OpenAPI and a simple backend smoke-test endpoint.
 [DONE] 10.0.c Add Dapper/Npgsql foundation without EF.
-10.1 Introduce a database for users/projects/assets/subscriptions.
-10.1.a Users
-10.1.b Projects/hosted pages
-10.1.c Slugs
+[PARTIAL] 10.1 Introduce a database for users/projects/assets/subscriptions.
+[DONE] 10.1.a Users
+[DONE] 10.1.b Projects/hosted pages (one user -> many projects)
+[DONE] 10.1.c Slugs (one active slug per project)
 10.1.d Language variants
 10.1.e Assets/files
 10.1.f Subscriptions/plans
 10.1.g Billing events
-10.2 Build server-side CRUD endpoints/actions for dashboard operations.
-10.3 Add slug uniqueness checks and conflict handling.
+[PARTIAL] 10.2 Build server-side CRUD endpoints/actions for dashboard operations.
+[DONE] 10.2.a List projects for the current user dashboard
+[DONE] 10.2.b Create a new project
+[DONE] 10.2.c Fetch one project for editing/settings
+10.2.d Save project settings and uploads
+10.2.e Preview project before final save/publish
+[PARTIAL] 10.3 Add slug uniqueness checks and conflict handling.
+[DONE] 10.3.a Check custom slug availability
+[DONE] 10.3.b Generate a random unique slug
+[DONE] 10.3.c Enforce one active slug per project
 10.4 Add audit/logging for important state changes (publish/unpublish, billing changes).
 
 ### 11. Localization / Translation System
@@ -302,6 +341,10 @@ Status markers for tasks:
 ### 12. Quality, Security & Operations
 
 12.1 Add form/file validation on both client and server for all upload flows.
+[DONE] 12.1.a Slug format validation
+[DONE] 12.1.b Random slug generation validation/path coverage
+12.1.c Image-only upload validation for MVP
+12.1.d Per-language upload validation
 12.2 Add abuse protection.
 12.2.a Rate limiting
 12.2.b Spam protection
@@ -338,9 +381,10 @@ Status markers for tasks:
 - Which storage provider will host uploaded files?
 - Will public pages support only images first, or PDFs too in MVP?
 - What slug rules should apply (length, allowed characters, uniqueness)?
-- Can a user create multiple hosted pages/projects, or only one at first?
 - Should QR codes be stored permanently or generated on-demand?
 - What is the max upload size for MVP?
+- How aggressive should image compression be before quality becomes unacceptable?
+- Should preview changes be a temporary draft view or a fully generated unpublished public page?
 - Which payment provider should be used (for example Stripe)?
 - What limits define each tier (storage, number of pages, traffic, languages)?
 - Will there be a free tier and/or free trial?

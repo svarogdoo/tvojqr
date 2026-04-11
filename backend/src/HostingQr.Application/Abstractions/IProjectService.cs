@@ -1,0 +1,14 @@
+using HostingQr.Application.Projects;
+
+namespace HostingQr.Application.Abstractions;
+
+public interface IProjectService
+{
+    Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default);
+
+    Task<ProjectDetailResponse?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
+
+    Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default);
+
+    Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default);
+}

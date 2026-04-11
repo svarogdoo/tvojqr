@@ -1,6 +1,7 @@
 using HostingQr.Api.Endpoints;
 using HostingQr.Application;
 using HostingQr.Infrastructure;
+using HostingQr.Infrastructure.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +20,15 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+await app.Services.RunDatabaseMigrationsAsync();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapSystemEndpoints();
+app.MapProjectEndpoints();
+app.MapSlugEndpoints();
+app.MapPublicEndpoints();
 
 app.Run();
 
