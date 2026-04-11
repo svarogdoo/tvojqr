@@ -24,7 +24,7 @@ public static class AuthEndpoints
 
             var properties = new AuthenticationProperties
             {
-                RedirectUri = "/api/auth/me"
+                RedirectUri = $"{authOptions.Value.FrontendBaseUrl.TrimEnd('/')}/dashboard"
             };
 
             return Results.Challenge(properties, [AuthConstants.GoogleScheme]);

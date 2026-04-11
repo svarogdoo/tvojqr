@@ -42,6 +42,18 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(GoogleAuthOptions.SectionName));
 
         services.AddHttpContextAccessor();
+        services.AddCors(options =>
+        {
+            AuthOptions authOptions = configuration.GetSection(AuthOptions.SectionName).Get<AuthOptions>() ?? new AuthOptions();
+            options.AddPolicy("FrontendClient", policy =>
+            {
+                policy
+                    .WithOrigins(authOptions.FrontendBaseUrl)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
 
         services
             .AddAuthentication(options =>

@@ -41,6 +41,15 @@ Current notes:
 - SQL migration support is included through embedded `.sql` scripts
 - migrations are disabled by default in `appsettings.json` until a local PostgreSQL database is ready
 
+Required local auth/frontend config:
+
+- backend `appsettings.json` or env/config override for:
+  - `GoogleAuth:ClientId`
+  - `GoogleAuth:ClientSecret`
+  - `Auth:FrontendBaseUrl`
+- frontend public env:
+  - `PUBLIC_API_BASE_URL` (defaults to `http://localhost:5115` if unset)
+
 Run locally:
 
 ```bash

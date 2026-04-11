@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { auth, signOut, startGoogleSignIn } from "$lib/stores/auth";
   import { language, languages } from "$lib/stores/language";
   import { translations } from "$lib/translations";
 
@@ -21,12 +22,12 @@
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
   >
     <a href="/" class="text-2xl font-semibold tracking-tight text-stone-900">HostingQr</a>
-    <div class="hidden md:flex space-x-8 items-center">
+    <div class="hidden md:flex space-x-6 items-center">
       <a
-        href="/create-new"
-        class="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
+        href="/dashboard"
+        class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >
-        {t.hero.cta}
+        Dashboard
       </a>
       <a
         href="/#services"
@@ -46,6 +47,21 @@
       >
         {t.nav.contact}
       </a>
+      {#if $auth.status === "authenticated"}
+        <button
+          on:click={signOut}
+          class="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
+        >
+          Sign out
+        </button>
+      {:else}
+        <button
+          on:click={startGoogleSignIn}
+          class="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
+        >
+          Sign in
+        </button>
+      {/if}
     </div>
     <div class="flex gap-2">
       {#each languages as lang (lang.code)}

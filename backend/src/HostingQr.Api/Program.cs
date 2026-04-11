@@ -24,6 +24,7 @@ await app.Services.RunDatabaseMigrationsAsync();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors("FrontendClient");
 app.UseAuthentication();
 app.UseAuthorization();
 

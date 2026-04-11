@@ -241,12 +241,12 @@ Status markers for tasks:
 
 6.1 Add authentication (Google login first).
 [DONE] 6.1.a Session handling
-6.1.b Route protection for dashboard/pages
+[PARTIAL] 6.1.b Route protection for dashboard/pages
 [DONE] 6.1.c Sign out flow
-6.2 Build initial dashboard.
-6.2.a List user hosted pages/projects
+[PARTIAL] 6.2 Build initial dashboard.
+[DONE] 6.2.a List user hosted pages/projects
 6.2.b Create new hosted page/project
-6.2.c Open a specific project from the project list
+[DONE] 6.2.c Open a specific project from the project list
 6.2.d Edit project name
 6.2.e Edit one active slug per project
 6.2.f Manage uploads
