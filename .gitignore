@@ -141,7 +141,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
-.orchestration/
 
 # .NET build and IDE artifacts
 **/bin/

@@ -320,18 +320,17 @@ Status markers for tasks:
 
 ### 13. Local Developer Orchestration
 
-[PARTIAL] 13.1 Add a local orchestration foundation for planning and implementation support.
-[DONE] 13.1.a Create a local `.NET` orchestration workspace under `orchestration/`.
-[DONE] 13.1.b Add typed agent contracts and a read-only orchestration pipeline.
-[DONE] 13.1.c Persist local run artifacts outside git under `.orchestration/runs/`.
-[DONE] 13.1.d Add automated tests for orchestration flow and persistence.
-[DONE] 13.1.g Add reusable prompt templates and run resume/history UX.
-13.1.e Add controlled edit execution behind explicit approval.
-13.1.f Add richer repo tools (diff analysis, targeted file search, scoped command execution).
+[DONE] 13.1 Replace the local orchestration runtime with a markdown-only repo workflow.
+[DONE] 13.1.a Use `.github/orchestration/main.instructions.md` as the orchestration entry point.
+[DONE] 13.1.b Define role behavior in `.github/orchestration/roles/*.instructions.md`.
+[DONE] 13.1.c Define workflow document shapes in `.github/orchestration/templates/*.template.md`.
+[DONE] 13.1.d Keep active and completed workflow folders under `.github/orchestration/workflows/`.
+13.1.e Decide whether active workflow files should be committed or kept ephemeral per task.
+13.1.f Add example completed workflow records once the process has been used end to end.
 
 [DONE] 13.2 Restructure the workspace for clearer frontend/backend/tooling separation.
 [DONE] 13.2.a Move the Svelte app into `frontend/`.
-[DONE] 13.2.b Keep local developer orchestration under `orchestration/`.
+[DONE] 13.2.b Keep local developer orchestration under `.github/orchestration/`.
 [DONE] 13.2.c Reserve `backend/` for the future `.NET` product backend.
 
 ## Open Questions (To Decide Later)
