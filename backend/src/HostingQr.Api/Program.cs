@@ -24,7 +24,10 @@ await app.Services.RunDatabaseMigrationsAsync();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseAuthentication();
+app.UseAuthorization();
 
+app.MapAuthEndpoints();
 app.MapSystemEndpoints();
 app.MapProjectEndpoints();
 app.MapSlugEndpoints();

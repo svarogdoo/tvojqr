@@ -1,22 +1,43 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using HostingQr.Application.Abstractions;
+using HostingQr.Application.Auth;
 using HostingQr.Application.Projects;
 using HostingQr.Application.Slugs;
+using HostingQr.Infrastructure.Auth;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HostingQr.Api.Tests;
 
 public sealed class ProjectEndpointTests
 {
     [Fact]
+    public async Task GetProjects_ReturnsUnauthorizedWithoutAuthentication()
+    {
+        await using WebApplicationFactory<Program> factory = new WebApplicationFactory<Program>();
+        HttpClient client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+        });
+
+        HttpResponseMessage response = await client.GetAsync("/api/projects");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetProjects_ReturnsProjectList()
     {
-        await using TestApplicationFactory factory = new();
+        await using TestApplicationFactory factory = new(authenticated: true);
         HttpClient client = factory.CreateClient();
 
         HttpResponseMessage response = await client.GetAsync("/api/projects");
@@ -32,7 +53,7 @@ public sealed class ProjectEndpointTests
     [Fact]
     public async Task PostGenerateSlug_ReturnsGeneratedSlug()
     {
-        await using TestApplicationFactory factory = new();
+        await using TestApplicationFactory factory = new(authenticated: true);
         HttpClient client = factory.CreateClient();
 
         HttpResponseMessage response = await client.PostAsync("/api/slugs/generate", null);
@@ -44,16 +65,49 @@ public sealed class ProjectEndpointTests
         Assert.Equal("randm123", payload.Slug);
     }
 
+    [Fact]
+    public async Task GetCurrentUser_ReturnsAuthenticatedUser()
+    {
+        await using TestApplicationFactory factory = new(authenticated: true);
+        HttpClient client = factory.CreateClient();
+
+        HttpResponseMessage response = await client.GetAsync("/api/auth/me");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        AuthUserResponse? payload = await response.Content.ReadFromJsonAsync<AuthUserResponse>();
+        Assert.NotNull(payload);
+        Assert.Equal("demo@hostingqr.local", payload.Email);
+    }
+
     private sealed class TestApplicationFactory : WebApplicationFactory<Program>
     {
+        private readonly bool _authenticated;
+
+        public TestApplicationFactory(bool authenticated)
+        {
+            _authenticated = authenticated;
+        }
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
             {
                 services.RemoveAll<IProjectService>();
                 services.RemoveAll<ISlugService>();
+                services.RemoveAll<IUserRepository>();
                 services.AddScoped<IProjectService, FakeProjectService>();
                 services.AddScoped<ISlugService, FakeSlugService>();
+                services.AddScoped<IUserRepository, FakeUserRepository>();
+
+                if (_authenticated)
+                {
+                    services.AddAuthentication(options =>
+                    {
+                        options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+                        options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+                    }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+                }
             });
 
             builder.ConfigureAppConfiguration((_, config) =>
@@ -63,6 +117,47 @@ public sealed class ProjectEndpointTests
                     ["Migrations:RunOnStartup"] = "false",
                 });
             });
+        }
+    }
+
+    private sealed class FakeUserRepository : IUserRepository
+    {
+        public Task<AuthUserResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<AuthUserResponse?>(new AuthUserResponse(id, "demo@hostingqr.local", "Demo User"));
+        }
+
+        public Task<AuthUserResponse> UpsertAsync(Guid id, string email, string displayName, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new AuthUserResponse(id, email, displayName));
+        }
+    }
+
+    private sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    {
+        public const string SchemeName = "TestAuth";
+
+        public TestAuthHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder)
+            : base(options, logger, encoder)
+        {
+        }
+
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            var claims = new[]
+            {
+                new Claim(AuthConstants.UserIdClaimType, "11111111-1111-1111-1111-111111111111"),
+                new Claim(ClaimTypes.Email, "demo@hostingqr.local"),
+                new Claim(ClaimTypes.Name, "Demo User"),
+            };
+
+            var identity = new ClaimsIdentity(claims, SchemeName);
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, SchemeName);
+            return Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
 

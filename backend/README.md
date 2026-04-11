@@ -19,6 +19,9 @@ Current structure:
 
 Current endpoint:
 
+- `GET /api/auth/google`
+- `GET /api/auth/me`
+- `POST /api/auth/sign-out`
 - `GET /api/ping`
 - `GET /api/projects`
 - `POST /api/projects`
@@ -32,6 +35,9 @@ Current notes:
 - one user can own multiple projects
 - each project currently has one active slug
 - random slug generation is server-side and uniqueness-checked
+- cookie auth is wired for backend sessions
+- session cookies currently use a 14-day idle timeout with sliding expiration
+- Google auth is scaffolded and needs real credentials in config/env
 - SQL migration support is included through embedded `.sql` scripts
 - migrations are disabled by default in `appsettings.json` until a local PostgreSQL database is ready
 

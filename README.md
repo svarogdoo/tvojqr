@@ -240,9 +240,9 @@ Status markers for tasks:
 ### 6. Authentication & User Dashboard (Core Missing Product Layer)
 
 6.1 Add authentication (Google login first).
-6.1.a Session handling
+[DONE] 6.1.a Session handling
 6.1.b Route protection for dashboard/pages
-6.1.c Sign out flow
+[DONE] 6.1.c Sign out flow
 6.2 Build initial dashboard.
 6.2.a List user hosted pages/projects
 6.2.b Create new hosted page/project
@@ -355,7 +355,7 @@ Status markers for tasks:
 12.3.c Public page rendering by slug
 12.3.d Billing webhook handling
 12.4 Add environment setup documentation.
-12.4.a Auth env vars
+[PARTIAL] 12.4.a Auth env vars
 12.4.b Storage env vars
 12.4.c Billing env vars
 12.4.d Email env vars (if temporary flow remains)

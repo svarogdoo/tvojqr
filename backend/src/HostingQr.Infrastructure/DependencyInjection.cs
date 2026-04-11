@@ -1,4 +1,5 @@
 using HostingQr.Application.Abstractions;
+using HostingQr.Infrastructure.Auth;
 using HostingQr.Infrastructure.Configuration;
 using HostingQr.Infrastructure.Data;
 using HostingQr.Infrastructure.Migrations;
@@ -6,8 +7,13 @@ using HostingQr.Infrastructure.Projects;
 using HostingQr.Infrastructure.Services;
 using HostingQr.Infrastructure.Slugs;
 using HostingQr.Infrastructure.Users;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace HostingQr.Infrastructure;
 
@@ -27,9 +33,67 @@ public static class DependencyInjection
             .AddOptions<MigrationOptions>()
             .Bind(configuration.GetSection(MigrationOptions.SectionName));
 
+        services
+            .AddOptions<AuthOptions>()
+            .Bind(configuration.GetSection(AuthOptions.SectionName));
+
+        services
+            .AddOptions<GoogleAuthOptions>()
+            .Bind(configuration.GetSection(GoogleAuthOptions.SectionName));
+
+        services.AddHttpContextAccessor();
+
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultScheme = AuthConstants.CookieScheme;
+                options.DefaultAuthenticateScheme = AuthConstants.CookieScheme;
+                options.DefaultChallengeScheme = AuthConstants.CookieScheme;
+            })
+            .AddCookie(AuthConstants.CookieScheme, options =>
+            {
+                AuthOptions authOptions = configuration.GetSection(AuthOptions.SectionName).Get<AuthOptions>() ?? new AuthOptions();
+                options.LoginPath = "/api/auth/google";
+                options.LogoutPath = "/api/auth/sign-out";
+                options.Cookie.Name = "hostingqr.auth";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                options.ExpireTimeSpan = TimeSpan.FromDays(authOptions.SessionIdleDays);
+                options.SlidingExpiration = true;
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
+            })
+            .AddGoogle(AuthConstants.GoogleScheme, _ => { });
+
+        services.AddAuthorization();
+        services.AddSingleton<IConfigureOptions<GoogleOptions>, GoogleAuthenticationConfigurator>();
+
         services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
         services.AddSingleton<IBackendInfoService, BackendInfoService>();
-        services.AddScoped<ICurrentUserContext, DevelopmentUserContext>();
+        services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<ISlugRepository, SlugRepository>();
         services.AddSingleton<MigrationRunner>();

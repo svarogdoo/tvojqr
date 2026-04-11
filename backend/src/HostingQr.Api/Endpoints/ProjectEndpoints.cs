@@ -1,5 +1,6 @@
 using HostingQr.Application.Abstractions;
 using HostingQr.Application.Projects;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HostingQr.Api.Endpoints;
 
@@ -7,7 +8,9 @@ public static class ProjectEndpoints
 {
     public static IEndpointRouteBuilder MapProjectEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        RouteGroupBuilder group = endpoints.MapGroup("/api/projects").WithTags("Projects");
+        RouteGroupBuilder group = endpoints.MapGroup("/api/projects")
+            .WithTags("Projects")
+            .RequireAuthorization();
 
         group.MapGet("/", async (IProjectService projectService, CancellationToken cancellationToken) =>
             Results.Ok(await projectService.ListProjectsAsync(cancellationToken)))
