@@ -7,11 +7,12 @@
 3. After approval, implement only the agreed scope. If scope changes, return to planning mode and get approval again.
 4. Share a short summary of intended edits before applying them.
 5. Before starting implementation, check `README.md` for relevant TODO/task items and task IDs.
-6. After completing approved work, update the related task status in `README.md` in the same turn (for any tasks that were actually worked on).
-7. Prefer current standards and best practices for the technologies used in this project (Svelte/SvelteKit/TypeScript/Tailwind), while staying consistent with the existing codebase unless a change is approved.
-8. Keep code clean by extracting/reusing components where it clearly improves readability, maintainability, or reuse.
-9. Keep components focused and reasonably small when practical (single clear responsibility, minimal duplication).
-10. Do not over-engineer abstractions; only extract components/helpers when they provide real value.
+6. Before planning or implementation, consult `.github/orchestration/main.instructions.md` and follow the orchestration flow and role guidance defined under `.github/orchestration/`.
+7. After completing approved work, update the related task status in `README.md` in the same turn (for any tasks that were actually worked on).
+8. Prefer current standards and best practices for the technologies used in this project (Svelte/SvelteKit/TypeScript/Tailwind), while staying consistent with the existing codebase unless a change is approved.
+9. Keep code clean by extracting/reusing components where it clearly improves readability, maintainability, or reuse.
+10. Keep components focused and reasonably small when practical (single clear responsibility, minimal duplication).
+11. Do not over-engineer abstractions; only extract components/helpers when they provide real value.
 
 ## Notes
 
