@@ -93,6 +93,11 @@ Railway deployment recommendation:
 - if `Database__ConnectionString` is not set, the app can also build a connection string from Railway `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and `PGPASSWORD` variables
 - Railway internal DB hosts such as `*.railway.internal` now default to `SSL Mode=Disable`; external/public hosts still default to `SSL Mode=Require`
 
+Config note:
+
+- localhost Postgres defaults now live only in `appsettings.Development.json`
+- production no longer falls back to `127.0.0.1:5433`
+
 Open Swagger:
 
 - `http://localhost:5030/swagger` or the port shown by the app
