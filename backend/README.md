@@ -90,6 +90,7 @@ Railway deployment recommendation:
 - the Docker container listens on port `8080`
 - the app also honors Railway's `PORT` environment variable explicitly at runtime
 - `Database__ConnectionString` may be either a standard Npgsql connection string or a Railway-style `postgres://` / `postgresql://` URL
+- if `Database__ConnectionString` is not set, the app can also build a connection string from Railway `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and `PGPASSWORD` variables
 - Railway internal DB hosts such as `*.railway.internal` now default to `SSL Mode=Disable`; external/public hosts still default to `SSL Mode=Require`
 
 Config note:

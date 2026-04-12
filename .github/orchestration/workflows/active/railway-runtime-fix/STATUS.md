@@ -20,3 +20,4 @@ Approved by user to fix Railway runtime failure.
 
 - Workflow created before implementation as required by repo rules.
 - Added Railway `PORT` binding support; next debugging step is runtime log inspection if deploy still fails.
+- Current subtask: restore the earlier PG fallback support while keeping the other Railway fixes.
