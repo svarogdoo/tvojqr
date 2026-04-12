@@ -15,5 +15,5 @@
 
 ## Notes
 
-- Reverted to the simple env-only API base configuration.
-- Added a one-time browser console log on the first backend call so the resolved API URL can be inspected easily.
+- Switched API base resolution to runtime public env access via `$env/dynamic/public`.
+- Kept the one-time browser console log on the first backend call so the resolved API URL can be inspected easily.
