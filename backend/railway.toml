@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "dotnet publish src/HostingQr.Api -c Release -o out"
+
+[deploy]
+startCommand = "dotnet out/HostingQr.Api.dll"
+healthcheckPath = "/api/ping"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
