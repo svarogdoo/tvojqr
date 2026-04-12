@@ -437,6 +437,18 @@ npm run dev:backend
 npm run dev:down
 ```
 
+Frontend local env:
+
+```sh
+cp frontend/.env.example frontend/.env
+```
+
+Production frontend env should set:
+
+```text
+PUBLIC_API_BASE_URL=https://api.hostingqr.com
+```
+
 ## Build
 
 ```sh

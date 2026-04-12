@@ -51,6 +51,12 @@ Required local auth/frontend config:
 - frontend public env:
   - `PUBLIC_API_BASE_URL` (defaults to `http://localhost:5115` if unset)
 
+Production auth/frontend alignment:
+
+- backend `Auth__FrontendBaseUrl` must be your real frontend origin, for example `https://hostingqr.com`
+- frontend `PUBLIC_API_BASE_URL` must be your real backend API origin, for example `https://api.hostingqr.com`
+- if backend `Auth__FrontendBaseUrl` still points to localhost, Google sign-in will redirect back to localhost even if the frontend API URL is correct
+
 Recommended local setup:
 
 ```bash
