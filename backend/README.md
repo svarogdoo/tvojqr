@@ -77,6 +77,12 @@ If you want to run the backend by itself:
 dotnet run --project src/HostingQr.Api
 ```
 
+Railway deployment recommendation:
+
+- set the service root directory to `backend`
+- if Railway build-plan detection keeps failing, use the included `backend/Dockerfile`
+- the Docker container listens on port `8080`
+
 Open Swagger:
 
 - `http://localhost:5030/swagger` or the port shown by the app

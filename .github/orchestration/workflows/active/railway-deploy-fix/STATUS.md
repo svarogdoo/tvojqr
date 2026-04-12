@@ -19,4 +19,4 @@ Approved by user to fix Railway deployment.
 ## Notes
 
 - Workflow created before implementation as required by repo rules.
-- Scope delivered: explicit Railway backend build/start configuration.
+- Scope delivered: explicit Railway/Nixpacks config plus a Docker fallback for backend deployment.

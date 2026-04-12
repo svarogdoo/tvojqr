@@ -8,6 +8,9 @@
 ## Files Touched
 
 - `backend/railway.toml`
+- `backend/nixpacks.toml`
+- `backend/Dockerfile`
+- `backend/.dockerignore`
 
 ## Verification
 
@@ -15,4 +18,5 @@
 
 ## Notes
 
-- Added an explicit Railway build/start plan for the backend using `dotnet publish` and a direct `dotnet out/HostingQr.Api.dll` start command.
+- Added explicit Railway and Nixpacks build/start config.
+- Added a backend Dockerfile as the most reliable Railway fallback when automatic build-plan detection fails.

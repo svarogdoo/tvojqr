@@ -7,6 +7,7 @@
 ## Residual Risks
 
 - Railway still needs the backend service root directory and environment variables configured correctly.
+- If Railway is still pointed at the repo root instead of `backend/`, it may still ignore these backend-specific files.
 
 ## Verification Notes
 
