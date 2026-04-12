@@ -8,6 +8,7 @@
   import { auth, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
   import { showSnackbar } from "$lib/stores/snackbar";
   import type {
+    Asset,
     GeneratedSlugResponse,
     ProjectDetail,
     SlugAvailabilityResponse,
@@ -47,6 +48,7 @@
   let showDeleteConfirmation = false;
   let isDraft = false;
   let deletingAssetId = "";
+  let removedSavedAssetIds = new Set<string>();
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -94,6 +96,7 @@
         };
         initializedProjectId = project.id;
       }
+      removedSavedAssetIds = new Set<string>();
       slugMessage = "";
       slugError = "";
       uploadError = "";
@@ -199,25 +202,6 @@
 
         savedProject = (await response.json()) as ProjectDetail;
 
-        if (draftAssets.length > 0) {
-          const formData = new FormData();
-          draftAssets.forEach((asset) => {
-            formData.append("files", asset.file);
-          });
-
-          const uploadResponse = await apiFetch(`/api/projects/${savedProject.id}/assets`, {
-            method: "POST",
-            body: formData,
-            headers: {},
-          });
-
-          if (!uploadResponse.ok) {
-            const body = (await uploadResponse.json()) as { message?: string };
-            showSnackbar(body.message ?? "Project saved, but images could not be uploaded.", "error");
-            await goto(`/dashboard/projects/${savedProject.id}`);
-            return;
-          }
-        }
       } else {
         response = await apiFetch(`/api/projects/${project!.id}`, {
           method: "PUT",
@@ -237,6 +221,40 @@
         savedProject = (await response.json()) as ProjectDetail;
       }
 
+      if (!isDraft && removedSavedAssetIds.size > 0) {
+        for (const assetId of removedSavedAssetIds) {
+          const deleteResponse = await apiFetch(`/api/projects/${savedProject.id}/assets/${assetId}`, {
+            method: "DELETE",
+          });
+
+          if (!deleteResponse.ok) {
+            showSnackbar("Project settings saved, but some image deletions failed.", "error");
+            await goto(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
+        }
+      }
+
+      if (draftAssets.length > 0) {
+        const formData = new FormData();
+        draftAssets.forEach((asset) => {
+          formData.append("files", asset.file);
+        });
+
+        const uploadResponse = await apiFetch(`/api/projects/${savedProject.id}/assets`, {
+          method: "POST",
+          body: formData,
+          headers: {},
+        });
+
+        if (!uploadResponse.ok) {
+          const body = (await uploadResponse.json()) as { message?: string };
+          showSnackbar(body.message ?? "Project saved, but images could not be uploaded.", "error");
+          await goto(`/dashboard/projects/${savedProject.id}`);
+          return;
+        }
+      }
+
       project = savedProject;
       originalSlug = savedProject.slug;
       form = {
@@ -245,6 +263,7 @@
       };
       draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
       draftAssets = [];
+      removedSavedAssetIds = new Set<string>();
       isDraft = false;
       slugMessage = "";
       showSnackbar("Project settings saved.", "success");
@@ -340,46 +359,15 @@
     uploadError = "";
 
     try {
-      if (isDraft) {
-        const nextAssets = Array.from(files).map((file) => ({
-          id: crypto.randomUUID(),
-          file,
-          previewUrl: URL.createObjectURL(file),
-          originalFileName: file.name,
-        }));
+      const nextAssets = Array.from(files).map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+        originalFileName: file.name,
+      }));
 
-        draftAssets = [...draftAssets, ...nextAssets];
-        showSnackbar("Images added to draft.", "success");
-        return;
-      }
-
-      if (!project) {
-        return;
-      }
-
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const response = await apiFetch(`/api/projects/${project.id}/assets`, {
-        method: "POST",
-        body: formData,
-        headers: {},
-      });
-
-      if (!response.ok) {
-        const body = (await response.json()) as { message?: string };
-        uploadError = body.message ?? "Unable to upload images right now.";
-        showSnackbar(uploadError, "error");
-        return;
-      }
-
-      await loadProject(true);
-      showSnackbar("Images uploaded.", "success");
-    } catch {
-      uploadError = "Unable to upload images right now.";
-      showSnackbar(uploadError, "error");
+      draftAssets = [...draftAssets, ...nextAssets];
+      showSnackbar("Images added. Save to apply changes.", "success");
     } finally {
       uploading = false;
       input.value = "";
@@ -393,33 +381,30 @@
     }
 
     draftAssets = draftAssets.filter((item) => item.id !== assetId);
-    showSnackbar("Draft image removed.", "success");
+    showSnackbar("Image removed from draft. Save to apply changes.", "success");
   }
 
-  async function deleteSavedAsset(assetId: string) {
+  function deleteSavedAsset(assetId: string) {
     if (!project) {
       return;
     }
 
-    deletingAssetId = assetId;
-    try {
-      const response = await apiFetch(`/api/projects/${project.id}/assets/${assetId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        showSnackbar("Unable to delete image.", "error");
-        return;
-      }
-
-      await loadProject(true);
-      showSnackbar("Image deleted.", "success");
-    } catch {
-      showSnackbar("Unable to delete image.", "error");
-    } finally {
-      deletingAssetId = "";
-    }
+    removedSavedAssetIds = new Set([...removedSavedAssetIds, assetId]);
+    showSnackbar("Image marked for deletion. Save to apply changes.", "success");
   }
+
+  function restoreSavedAsset(assetId: string) {
+    if (!removedSavedAssetIds.has(assetId)) {
+      return;
+    }
+
+    const next = new Set(removedSavedAssetIds);
+    next.delete(assetId);
+    removedSavedAssetIds = next;
+    showSnackbar("Image restored.", "info");
+  }
+
+  $: visibleSavedAssets = (project?.assets ?? []).filter((asset: Asset) => !removedSavedAssetIds.has(asset.id));
 
   onMount(async () => {
     projectId = window.location.pathname.split("/").at(-1) ?? "";
@@ -548,62 +533,56 @@
                 </label>
               </div>
 
-              {#if isDraft ? draftAssets.length === 0 : (project?.assets.length ?? 0) === 0}
+              {#if isDraft ? draftAssets.length === 0 : visibleSavedAssets.length === 0 && draftAssets.length === 0}
                 <div class="mt-5 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
                   No images uploaded yet.
                 </div>
               {:else}
                 <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  {#if isDraft}
-                    {#each draftAssets as asset}
-                      <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
-                        <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
-                        <button
-                          type="button"
-                          on:click={() => removeDraftAsset(asset.id)}
-                          class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
-                          aria-label={`Delete ${asset.originalFileName}`}
-                        >
-                          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
-                          </svg>
-                        </button>
-                        <div class="border-t border-stone-100 px-3 py-3">
-                          <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
-                        </div>
+                  {#each visibleSavedAssets as asset}
+                    <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                      <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                      <button
+                        type="button"
+                        on:click={() => deleteSavedAsset(asset.id)}
+                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
+                        aria-label={`Delete ${asset.originalFileName}`}
+                      >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
+                        </svg>
+                      </button>
+                      <div class="border-t border-stone-100 px-3 py-3">
+                        <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
                       </div>
-                    {/each}
-                  {:else}
-                    {#each project?.assets ?? [] as asset}
-                      <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
-                        <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
-                        <button
-                          type="button"
-                          on:click={() => deleteSavedAsset(asset.id)}
-                          class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
-                          aria-label={`Delete ${asset.originalFileName}`}
-                          disabled={deletingAssetId === asset.id}
-                        >
-                          {#if deletingAssetId === asset.id}
-                            <span class="text-xs font-semibold">...</span>
-                          {:else}
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
-                            </svg>
-                          {/if}
-                        </button>
-                        <div class="border-t border-stone-100 px-3 py-3">
-                          <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
-                        </div>
+                    </div>
+                  {/each}
+
+                  {#each draftAssets as asset}
+                    <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                      <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                      <button
+                        type="button"
+                        on:click={() => removeDraftAsset(asset.id)}
+                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
+                        aria-label={`Delete ${asset.originalFileName}`}
+                      >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
+                        </svg>
+                      </button>
+                      <div class="border-t border-stone-100 px-3 py-3">
+                        <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
+                        <p class="mt-1 text-xs text-stone-500">Pending upload</p>
                       </div>
-                    {/each}
-                  {/if}
+                    </div>
+                  {/each}
                 </div>
               {/if}
             </div>

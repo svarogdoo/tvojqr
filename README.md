@@ -260,6 +260,7 @@ Status markers for tasks:
 [PARTIAL] 6.2.f Manage uploads
 [DONE] 6.2.f.1 Add quick public-view access from dashboard project rows.
 [DONE] 6.2.f.2 Show project status in the dashboard list.
+[DONE] 6.2.f.3 Stage asset add/remove changes in the editor until explicit save.
 6.2.g Manage languages
 6.2.h Preview project changes before final save
 [PARTIAL] 6.2.i View/download QR code
