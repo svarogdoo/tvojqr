@@ -39,18 +39,39 @@ Current notes:
 - session cookies currently use a 14-day idle timeout with sliding expiration
 - Google auth is scaffolded and needs real credentials in config/env
 - SQL migration support is included through embedded `.sql` scripts
-- migrations are disabled by default in `appsettings.json` until a local PostgreSQL database is ready
+- migrations run automatically in the Development environment once local PostgreSQL is available
+- local Docker PostgreSQL is expected on `localhost:5433`
 
 Required local auth/frontend config:
 
-- backend `appsettings.json` or env/config override for:
+- backend user-secrets or env/config override for:
   - `GoogleAuth:ClientId`
   - `GoogleAuth:ClientSecret`
   - `Auth:FrontendBaseUrl`
 - frontend public env:
   - `PUBLIC_API_BASE_URL` (defaults to `http://localhost:5115` if unset)
 
+Recommended local setup:
+
+```bash
+dotnet user-secrets --project src/HostingQr.Api set "GoogleAuth:ClientId" "your-google-client-id"
+dotnet user-secrets --project src/HostingQr.Api set "GoogleAuth:ClientSecret" "your-google-client-secret"
+dotnet user-secrets --project src/HostingQr.Api set "Auth:FrontendBaseUrl" "http://localhost:5173"
+```
+
+Google OAuth redirect URI for local development:
+
+- `http://localhost:5115/api/auth/google/callback`
+
+If Google credentials are still placeholders, `GET /api/auth/google` will now return `503` instead of attempting a broken sign-in.
+
 Run locally:
+
+```bash
+npm run dev
+```
+
+If you want to run the backend by itself:
 
 ```bash
 dotnet run --project src/HostingQr.Api

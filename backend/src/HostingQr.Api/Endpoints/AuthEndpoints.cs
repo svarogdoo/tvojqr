@@ -17,9 +17,12 @@ public static class AuthEndpoints
 
         group.MapGet("/google", (HttpContext httpContext, IOptions<AuthOptions> authOptions) =>
         {
-            if (httpContext.RequestServices.GetRequiredService<IOptions<GoogleAuthOptions>>().Value.ClientId is null or "")
+            GoogleAuthOptions googleAuthOptions = httpContext.RequestServices.GetRequiredService<IOptions<GoogleAuthOptions>>().Value;
+            if (!googleAuthOptions.IsConfigured())
             {
-                return Results.Problem("Google auth is not configured.", statusCode: StatusCodes.Status503ServiceUnavailable);
+                return Results.Problem(
+                    "Google auth is not configured. Set real Google credentials through user-secrets or environment variables.",
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
             }
 
             var properties = new AuthenticationProperties

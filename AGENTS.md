@@ -13,6 +13,10 @@
 9. Keep code clean by extracting/reusing components where it clearly improves readability, maintainability, or reuse.
 10. Keep components focused and reasonably small when practical (single clear responsibility, minimal duplication).
 11. Do not over-engineer abstractions; only extract components/helpers when they provide real value.
+12. For every non-trivial implementation task, create or update a workflow folder under `.github/orchestration/workflows/active/<task-id>/` and keep the required workflow documents current while working.
+13. The required workflow documents for non-trivial implementation tasks are `INTENT.md`, `BRIEF.md`, `SPEC.md`, `IMPLEMENTATION.md`, `REVIEW.md`, and `STATUS.md`, using the templates under `.github/orchestration/templates/`.
+14. Do not treat a non-trivial task as complete until the workflow documents and `STATUS.md` reflect the final state of the work.
+15. The workflow-document requirement may be skipped only for trivial copy edits, tiny one-file fixes, or purely informational/conversational requests.
 
 ## Notes
 

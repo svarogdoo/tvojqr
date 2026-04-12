@@ -1,0 +1,17 @@
+{
+  "name": "hostingqr-workspace",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "docker compose up -d postgres && concurrently -n frontend,backend -c green,blue \"npm run dev --prefix frontend\" \"bash -lc 'until docker compose exec -T postgres pg_isready -U postgres -d hostingqr >/dev/null 2>&1; do sleep 1; done; Migrations__RunOnStartup=true dotnet run --project backend/src/HostingQr.Api'\"",
+    "dev:db": "docker compose up -d postgres",
+    "dev:down": "docker compose down",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "Migrations__RunOnStartup=true dotnet run --project backend/src/HostingQr.Api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

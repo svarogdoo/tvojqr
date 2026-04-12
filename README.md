@@ -102,6 +102,8 @@ Project settings MVP should include:
 - language-specific upload support
 - preview before final save
 
+Because users are authenticated in the dashboard flow, project creation should not require asking for email again.
+
 ## Post-MVP / Future Enhancements
 
 - Support more file types (PDFs, docs)
@@ -253,6 +255,7 @@ Status markers for tasks:
 6.2.g Manage languages
 6.2.h Preview project changes before final save
 6.2.i View/download QR code
+6.2.j If the user has no projects yet, show a clear empty state instead of a generic load/error message.
 6.3 Define first account model decisions.
 6.3.a [DECIDED] One user can manage multiple projects
 6.3.b Owner profile display name
@@ -356,6 +359,7 @@ Status markers for tasks:
 12.3.d Billing webhook handling
 12.4 Add environment setup documentation.
 [PARTIAL] 12.4.a Auth env vars
+[DONE] 12.4.a.1 Backend Google auth supports user-secrets / env-based local configuration.
 12.4.b Storage env vars
 12.4.c Billing env vars
 12.4.d Email env vars (if temporary flow remains)
@@ -400,6 +404,23 @@ Use this README as the working product brief when planning changes. If the produ
 ```sh
 npm install
 npm run dev
+```
+
+This starts both:
+
+- local PostgreSQL in Docker
+- frontend Svelte app
+- backend ASP.NET Core API
+
+Local Docker PostgreSQL is exposed on port `5433` to avoid conflicts with any existing local Postgres already using `5432`.
+
+You can also run them separately:
+
+```sh
+npm run dev:db
+npm run dev:frontend
+npm run dev:backend
+npm run dev:down
 ```
 
 ## Build

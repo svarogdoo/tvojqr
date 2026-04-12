@@ -53,6 +53,9 @@ Default handoff order:
 Not every task needs every role.
 Skip roles that do not add value.
 
+For every non-trivial implementation task, this workflow must be materialized in `.github/orchestration/workflows/active/<task-id>/`.
+Use the templates under `.github/orchestration/templates/` and keep the documents updated while the task is in progress.
+
 ## Role Routing Rules
 
 Use:
@@ -75,6 +78,7 @@ Use:
 - preserve existing project direction and conventions
 - require testing or verification appropriate to the task
 - keep documents reviewable and concise
+- for non-trivial implementation work, do not keep the orchestration flow only in your head; write it into the workflow files
 
 ## Document Rules
 
@@ -84,6 +88,8 @@ Use:
 - `IMPLEMENTATION.md` should describe what will be changed and how it will be verified
 - `REVIEW.md` should list findings first, then residual risks
 - `STATUS.md` should show current phase, next role, blockers, and approval state
+
+These documents are required for non-trivial implementation tasks unless the request is clearly trivial or purely informational.
 
 ## Approval Rules
 
@@ -98,3 +104,4 @@ A task is only complete when:
 - verification has run or an explicit limitation is documented
 - major risks are surfaced
 - `STATUS.md` reflects the final state
+- the workflow documents in `.github/orchestration/workflows/active/<task-id>/` are up to date
