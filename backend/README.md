@@ -80,7 +80,7 @@ dotnet run --project src/HostingQr.Api
 Railway deployment recommendation:
 
 - set the service root directory to `backend`
-- if Railway build-plan detection keeps failing, use the included `backend/Dockerfile`
+- use the included `backend/Dockerfile` as the Railway builder
 - the Docker container listens on port `8080`
 - the app also honors Railway's `PORT` environment variable explicitly at runtime
 
