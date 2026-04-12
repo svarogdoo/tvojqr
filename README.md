@@ -195,6 +195,7 @@ Status markers for tasks:
 [DONE] 2.4.a Check landing page sections for spacing and overflow.
 [DONE] 2.4.b Check create/upload flow form readability on smaller screens.
 [DONE] 2.4.c Check public slug page readability on mobile.
+[DONE] 2.4.d Check dashboard and project settings responsiveness on mobile.
 
 ### 3. Manual Intake Flow (`/create-new`) -> Product Onboarding
 

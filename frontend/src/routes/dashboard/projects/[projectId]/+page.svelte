@@ -428,8 +428,8 @@
         {error}
       </section>
     {:else if project || isDraft}
-      <section class="rounded-[2rem] border border-black/8 bg-white/96 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
-          <div class="mb-6 flex items-start justify-between gap-4">
+      <section class="rounded-[2rem] border border-black/8 bg-white/96 p-6 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
+          <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p class="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Project settings</p>
               <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">{project?.name || form.name || "New project"}</h1>
@@ -461,8 +461,8 @@
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Active slug</p>
-              <div class="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-stone-200 bg-white p-2">
-                <div class="flex min-w-[16rem] flex-1 overflow-hidden rounded-[1rem] border border-stone-200 bg-stone-50">
+              <div class="mt-3 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-2 lg:flex-row lg:items-center">
+                <div class="flex min-w-0 flex-1 overflow-hidden rounded-[1rem] border border-stone-200 bg-stone-50">
                   <span class="flex items-center border-r border-stone-200 px-4 text-sm text-stone-500">
                     hostingqr.com/
                   </span>
@@ -473,7 +473,7 @@
                   />
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2 lg:flex-nowrap">
                   <button
                     type="button"
                     class={`btn-secondary text-sm ${slugCheckToneClasses}`}
@@ -501,12 +501,12 @@
               {/if}
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
-              <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Images</p>
                   <p class="mt-2 text-sm leading-7 text-stone-600">Upload one or more images for the default project language.</p>
                 </div>
-                <label class="btn-secondary cursor-pointer text-sm">
+                <label class="btn-secondary w-full cursor-pointer text-center text-sm sm:w-auto">
                   <span>{uploading ? "Uploading..." : "Add images"}</span>
                   <input type="file" accept="image/*" multiple class="hidden" on:change={uploadImages} disabled={uploading} />
                 </label>
@@ -543,16 +543,16 @@
 
             <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />
 
-            <div class="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
+            <div class="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Save settings</p>
                 <p class="mt-2 text-sm leading-7 text-stone-600">Save the project name and active slug before moving on to uploads and preview.</p>
               </div>
-              <div class="flex flex-wrap gap-3">
+              <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {#if !isDraft}
                   <button
                     type="button"
-                    class="btn-secondary text-sm"
+                    class="btn-secondary w-full text-sm sm:w-auto"
                     on:click={() => updateProjectStatus((project?.status ?? "active") === "disabled" ? "active" : "disabled")}
                     disabled={updatingStatus || deletingProject}
                   >
@@ -563,7 +563,7 @@
                         : "Disable project"}
                   </button>
                 {/if}
-                <button type="button" class="btn-primary text-sm" on:click={saveProject} disabled={saving || deletingProject}>
+                <button type="button" class="btn-primary w-full text-sm sm:w-auto" on:click={saveProject} disabled={saving || deletingProject}>
                   {saving ? "Saving..." : "Save settings"}
                 </button>
               </div>
@@ -571,14 +571,14 @@
 
             {#if !isDraft}
             <div class="mt-3 rounded-[1.5rem] border border-[rgba(165,93,79,0.16)] bg-[rgba(249,238,234,0.72)] px-6 py-5 shadow-sm">
-              <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="text-xs uppercase tracking-[0.18em] text-[color:var(--error-strong)]">Danger zone</p>
                   <p class="mt-2 text-sm leading-7 text-stone-600">Delete this project completely. This removes its settings, slug, and uploaded assets.</p>
                 </div>
                 <button
                   type="button"
-                  class="inline-flex items-center rounded-full border border-[rgba(165,93,79,0.28)] bg-white px-5 py-3 text-sm font-medium text-[color:var(--error-strong)] transition-colors hover:bg-[rgba(249,238,234,0.5)]"
+                  class="inline-flex w-full items-center justify-center rounded-full border border-[rgba(165,93,79,0.28)] bg-white px-5 py-3 text-sm font-medium text-[color:var(--error-strong)] transition-colors hover:bg-[rgba(249,238,234,0.5)] sm:w-auto"
                   on:click={promptDeleteProject}
                   disabled={deletingProject || saving || updatingStatus}
                 >

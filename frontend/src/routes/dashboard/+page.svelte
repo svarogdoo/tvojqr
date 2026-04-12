@@ -73,13 +73,13 @@ import type { ProjectListItem } from "$lib/types/projects";
 
 <div class="min-h-screen px-4 pb-16 pt-28 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-5xl">
-      <section class="rounded-[2rem] border border-black/8 bg-white/96 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
-        <div class="flex items-center justify-between gap-4">
+      <section class="rounded-[2rem] border border-black/8 bg-white/96 p-6 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="text-2xl font-semibold tracking-tight text-stone-900">Your projects</h2>
             <p class="mt-2 text-sm leading-7 text-stone-600">Start with a project you already have, or create a new one when the editor flow is ready.</p>
           </div>
-          <button type="button" class="btn-secondary text-sm" on:click={createProject} disabled={creatingProject}>
+          <button type="button" class="btn-secondary w-full text-sm sm:w-auto" on:click={createProject} disabled={creatingProject}>
             {creatingProject ? "Creating..." : "New project"}
           </button>
         </div>
@@ -113,9 +113,9 @@ import type { ProjectListItem } from "$lib/types/projects";
                     goto(`/dashboard/projects/${project.id}`);
                   }
                 }}
-                class="flex cursor-pointer items-center justify-between rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300"
+                class="flex cursor-pointer flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-5 py-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300 sm:flex-row sm:items-center sm:justify-between sm:px-6"
               >
-                <div>
+                <div class="min-w-0">
                   <p class="text-lg font-semibold text-stone-900">{project.name || "Untitled project"}</p>
                   <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-stone-500">
                     <span>hostingqr.com/{project.slug}</span>
@@ -126,7 +126,7 @@ import type { ProjectListItem } from "$lib/types/projects";
                     </span>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center justify-end gap-3 sm:justify-start">
                   <a
                     href={`/${project.slug}`}
                     target="_blank"
