@@ -2,6 +2,7 @@ using HostingQr.Api.Endpoints;
 using HostingQr.Application;
 using HostingQr.Infrastructure;
 using HostingQr.Infrastructure.Migrations;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,12 @@ if (!string.IsNullOrWhiteSpace(port))
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -28,6 +35,7 @@ var app = builder.Build();
 
 await app.Services.RunDatabaseMigrationsAsync();
 
+app.UseForwardedHeaders();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseStaticFiles();
