@@ -49,7 +49,7 @@ public sealed class MigrationRunner
 
     private async Task RunMigrationsInternalAsync(CancellationToken cancellationToken)
     {
-        await using NpgsqlConnection connection = new(ConnectionStringResolver.Resolve(_databaseOptions.ConnectionString!));
+        await using NpgsqlConnection connection = new(ConnectionStringResolver.Resolve(_databaseOptions));
         await connection.OpenAsync(cancellationToken);
 
         const string historySql = """

@@ -1,9 +1,50 @@
+using HostingQr.Infrastructure.Configuration;
 using Npgsql;
 
 namespace HostingQr.Infrastructure.Data;
 
 public static class ConnectionStringResolver
 {
+    public static string Resolve(DatabaseOptions options)
+    {
+        if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+        {
+            return Resolve(options.ConnectionString);
+        }
+
+        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        if (!string.IsNullOrWhiteSpace(databaseUrl))
+        {
+            return Resolve(databaseUrl);
+        }
+
+        string? host = Environment.GetEnvironmentVariable("PGHOST");
+        string? port = Environment.GetEnvironmentVariable("PGPORT");
+        string? database = Environment.GetEnvironmentVariable("PGDATABASE");
+        string? username = Environment.GetEnvironmentVariable("PGUSER");
+        string? password = Environment.GetEnvironmentVariable("PGPASSWORD");
+
+        if (!string.IsNullOrWhiteSpace(host) &&
+            !string.IsNullOrWhiteSpace(database) &&
+            !string.IsNullOrWhiteSpace(username) &&
+            !string.IsNullOrWhiteSpace(password))
+        {
+            NpgsqlConnectionStringBuilder builder = new()
+            {
+                Host = host,
+                Database = database,
+                Username = username,
+                Password = password,
+                Port = int.TryParse(port, out int parsedPort) ? parsedPort : 5432,
+                SslMode = SslMode.Require,
+            };
+
+            return builder.ConnectionString;
+        }
+
+        throw new InvalidOperationException("Database connection string is not configured.");
+    }
+
     public static string Resolve(string rawConnectionString)
     {
         if (string.IsNullOrWhiteSpace(rawConnectionString))
@@ -38,6 +79,7 @@ public static class ConnectionStringResolver
             Username = username,
             Password = password,
             Database = database,
+            SslMode = SslMode.Require,
         };
 
         if (!string.IsNullOrWhiteSpace(uri.Query))

@@ -18,9 +18,9 @@ public sealed class NpgsqlConnectionFactory : IDbConnectionFactory
     {
         if (string.IsNullOrWhiteSpace(_options.ConnectionString))
         {
-            throw new InvalidOperationException("Database connection string is not configured.");
+            return new NpgsqlConnection(ConnectionStringResolver.Resolve(_options));
         }
 
-        return new NpgsqlConnection(ConnectionStringResolver.Resolve(_options.ConnectionString));
+        return new NpgsqlConnection(ConnectionStringResolver.Resolve(_options));
     }
 }
