@@ -271,6 +271,11 @@ public sealed class ProjectEndpointTests
     {
         public IReadOnlyList<AssetResponse> MapAssets(IReadOnlyList<HostingQr.Domain.Assets.Asset> assets) => [];
 
+        public Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(true);
+        }
+
         public Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, IFormFileCollection files, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<AssetResponse> assets =

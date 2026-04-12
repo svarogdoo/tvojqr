@@ -84,6 +84,14 @@ public static class ProjectEndpoints
             .WithName("UploadProjectAssets")
             .WithSummary("Uploads one or more image assets to a project.");
 
+        group.MapDelete("/{projectId:guid}/assets/{assetId:guid}", async (Guid projectId, Guid assetId, IAssetService assetService, CancellationToken cancellationToken) =>
+        {
+            bool deleted = await assetService.DeleteImageAsync(projectId, assetId, cancellationToken);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        })
+            .WithName("DeleteProjectAsset")
+            .WithSummary("Deletes one uploaded image asset from a project.");
+
         group.MapPatch("/{projectId:guid}/status", async (Guid projectId, UpdateProjectStatusRequest request, IProjectService projectService, CancellationToken cancellationToken) =>
         {
             try

@@ -1,8 +1,10 @@
 using HostingQr.Api.Endpoints;
 using HostingQr.Application;
 using HostingQr.Infrastructure;
+using HostingQr.Infrastructure.Configuration;
 using HostingQr.Infrastructure.Migrations;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,16 @@ app.UseForwardedHeaders();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseStaticFiles();
+var storageOptions = app.Services.GetRequiredService<IOptions<StorageOptions>>().Value;
+if (!string.IsNullOrWhiteSpace(storageOptions.UploadsRootPath))
+{
+    Directory.CreateDirectory(storageOptions.UploadsRootPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(storageOptions.UploadsRootPath),
+        RequestPath = "/uploads"
+    });
+}
 app.UseCors("FrontendClient");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -37,6 +37,27 @@ public sealed class AssetRepository : IAssetRepository
         return rows.ToArray();
     }
 
+    public async Task<Asset?> GetByIdAsync(Guid assetId, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            select
+                id,
+                project_id as ProjectId,
+                language_code as LanguageCode,
+                original_file_name as OriginalFileName,
+                stored_file_name as StoredFileName,
+                content_type as ContentType,
+                size_bytes as SizeBytes,
+                sort_order as SortOrder,
+                created_at as CreatedAt
+            from assets
+            where id = @AssetId;
+            """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<Asset>(new CommandDefinition(sql, new { AssetId = assetId }, cancellationToken: cancellationToken));
+    }
+
     public async Task<IReadOnlyList<Asset>> CreateAsync(Guid projectId, string languageCode, IReadOnlyList<CreateAssetRecord> assets, CancellationToken cancellationToken = default)
     {
         const string sql = """
@@ -65,5 +86,14 @@ public sealed class AssetRepository : IAssetRepository
 
         transaction.Commit();
         return await ListByProjectAsync(projectId, cancellationToken);
+    }
+
+    public async Task<bool> DeleteAsync(Guid assetId, CancellationToken cancellationToken = default)
+    {
+        const string sql = "delete from assets where id = @AssetId;";
+
+        using var connection = _connectionFactory.CreateConnection();
+        int affected = await connection.ExecuteAsync(new CommandDefinition(sql, new { AssetId = assetId }, cancellationToken: cancellationToken));
+        return affected > 0;
     }
 }

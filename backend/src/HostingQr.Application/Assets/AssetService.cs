@@ -64,6 +64,25 @@ public sealed class AssetService : IAssetService
         return MapAssets(saved);
     }
 
+    public async Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null)
+        {
+            return false;
+        }
+
+        var asset = await _assetRepository.GetByIdAsync(assetId, cancellationToken);
+        if (asset is null || asset.ProjectId != projectId)
+        {
+            return false;
+        }
+
+        await _assetStorageService.DeleteAsync(asset.StoredFileName, cancellationToken);
+        return await _assetRepository.DeleteAsync(assetId, cancellationToken);
+    }
+
     public IReadOnlyList<AssetResponse> MapAssets(IReadOnlyList<Domain.Assets.Asset> assets)
     {
         return assets

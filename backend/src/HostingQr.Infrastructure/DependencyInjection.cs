@@ -42,6 +42,10 @@ public static class DependencyInjection
             .AddOptions<GoogleAuthOptions>()
             .Bind(configuration.GetSection(GoogleAuthOptions.SectionName));
 
+        services
+            .AddOptions<StorageOptions>()
+            .Bind(configuration.GetSection(StorageOptions.SectionName));
+
         services.AddHttpContextAccessor();
         services.AddCors(options =>
         {

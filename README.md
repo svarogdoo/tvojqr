@@ -276,7 +276,7 @@ Status markers for tasks:
 [PARTIAL] 7.1.c Save metadata (file type, size, language, order).
 [DONE] 7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
 7.2 Add file lifecycle management.
-7.2.a Delete/replace uploads
+[PARTIAL] 7.2.a Delete/replace uploads
 7.2.b Versioning strategy (optional later)
 7.2.c Storage cleanup when content is removed
 7.2.d Support multiple images per project and per language variant.

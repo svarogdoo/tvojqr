@@ -41,6 +41,7 @@ Current notes:
 - SQL migration support is included through embedded `.sql` scripts
 - migrations run automatically in the Development environment once local PostgreSQL is available
 - local Docker PostgreSQL is expected on `localhost:5433`
+- uploaded files are currently stored on local disk unless a persistent `Storage__UploadsRootPath` is configured
 
 Required local auth/frontend config:
 
@@ -92,6 +93,7 @@ Railway deployment recommendation:
 - `Database__ConnectionString` may be either a standard Npgsql connection string or a Railway-style `postgres://` / `postgresql://` URL
 - if `Database__ConnectionString` is not set, the app can also build a connection string from Railway `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and `PGPASSWORD` variables
 - Railway internal DB hosts such as `*.railway.internal` now default to `SSL Mode=Disable`; external/public hosts still default to `SSL Mode=Require`
+- for persistent uploaded files on Railway, mount a volume and set `Storage__UploadsRootPath` to that mounted directory (for example `/data/uploads`)
 
 Config note:
 

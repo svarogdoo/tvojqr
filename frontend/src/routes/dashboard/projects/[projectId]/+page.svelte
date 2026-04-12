@@ -46,6 +46,7 @@
   let deletingProject = false;
   let showDeleteConfirmation = false;
   let isDraft = false;
+  let deletingAssetId = "";
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -385,6 +386,41 @@
     }
   }
 
+  function removeDraftAsset(assetId: string) {
+    const asset = draftAssets.find((item) => item.id === assetId);
+    if (asset) {
+      URL.revokeObjectURL(asset.previewUrl);
+    }
+
+    draftAssets = draftAssets.filter((item) => item.id !== assetId);
+    showSnackbar("Draft image removed.", "success");
+  }
+
+  async function deleteSavedAsset(assetId: string) {
+    if (!project) {
+      return;
+    }
+
+    deletingAssetId = assetId;
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}/assets/${assetId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        showSnackbar("Unable to delete image.", "error");
+        return;
+      }
+
+      await loadProject(true);
+      showSnackbar("Image deleted.", "success");
+    } catch {
+      showSnackbar("Unable to delete image.", "error");
+    } finally {
+      deletingAssetId = "";
+    }
+  }
+
   onMount(async () => {
     projectId = window.location.pathname.split("/").at(-1) ?? "";
     isDraft = projectId === "new";
@@ -520,8 +556,21 @@
                 <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
                   {#if isDraft}
                     {#each draftAssets as asset}
-                      <div class="overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                      <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
                         <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          on:click={() => removeDraftAsset(asset.id)}
+                          class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
+                          aria-label={`Delete ${asset.originalFileName}`}
+                        >
+                          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
+                          </svg>
+                        </button>
                         <div class="border-t border-stone-100 px-3 py-3">
                           <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
                         </div>
@@ -529,8 +578,26 @@
                     {/each}
                   {:else}
                     {#each project?.assets ?? [] as asset}
-                      <div class="overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                      <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
                         <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          on:click={() => deleteSavedAsset(asset.id)}
+                          class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
+                          aria-label={`Delete ${asset.originalFileName}`}
+                          disabled={deletingAssetId === asset.id}
+                        >
+                          {#if deletingAssetId === asset.id}
+                            <span class="text-xs font-semibold">...</span>
+                          {:else}
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
+                            </svg>
+                          {/if}
+                        </button>
                         <div class="border-t border-stone-100 px-3 py-3">
                           <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
                         </div>
