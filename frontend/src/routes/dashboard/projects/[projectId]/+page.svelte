@@ -494,16 +494,16 @@
                   />
                 </div>
 
-                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-nowrap lg:items-center">
                   <button
                     type="button"
-                    class={`btn-secondary w-full text-sm ${slugCheckToneClasses}`}
+                    class={`btn-secondary w-full text-sm lg:w-auto ${slugCheckToneClasses}`}
                     on:click={checkSlugAvailability}
                     disabled={checkingSlug}
                   >
                     {checkingSlug ? "Checking..." : "Check"}
                   </button>
-                  <button type="button" class="btn-secondary w-full text-sm" on:click={generateSlug} disabled={generatingSlug}>
+                  <button type="button" class="btn-secondary w-full text-sm lg:w-auto" on:click={generateSlug} disabled={generatingSlug}>
                     {generatingSlug ? "Generating..." : "Random"}
                   </button>
                 </div>
