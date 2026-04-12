@@ -24,4 +24,13 @@ public sealed class ConnectionStringResolverTests
         Assert.Contains("Host=postgres.railway.internal", result);
         Assert.Contains("SSL Mode=Disable", result);
     }
+
+    [Fact]
+    public void Resolve_StripsWrappingQuotesFromConnectionString()
+    {
+        string result = ConnectionStringResolver.Resolve("\"postgresql://postgres:secret@postgres.railway.internal:5432/railway\"");
+
+        Assert.Contains("Host=postgres.railway.internal", result);
+        Assert.Contains("Database=railway", result);
+    }
 }

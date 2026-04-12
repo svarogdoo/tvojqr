@@ -18,6 +18,7 @@ public static class ConnectionStringResolver
         }
 
         string trimmed = rawConnectionString.Trim();
+        trimmed = trimmed.Trim('"', '\'', '“', '”');
 
         if (trimmed.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
             trimmed.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
