@@ -128,8 +128,8 @@
   }
 </script>
 
-<div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
-  <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+<div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-5 py-5 shadow-sm sm:px-6">
+  <div class="grid gap-5 xl:grid-cols-[0.85fr_1.15fr] xl:items-start">
     <div class="rounded-[1.5rem] border border-stone-200 bg-white px-5 py-5 shadow-sm">
       <p class="text-xs uppercase tracking-[0.18em] text-stone-500">QR builder</p>
       <p class="mt-2 text-sm leading-7 text-stone-600">
@@ -175,7 +175,7 @@
 
     <div class="grid gap-4">
       <div class="rounded-[1.5rem] border border-stone-200 bg-white p-4 shadow-sm">
-        <div bind:this={qrMount} class="flex min-h-[220px] items-center justify-center"></div>
+        <div bind:this={qrMount} class="flex min-h-[200px] items-center justify-center sm:min-h-[220px]"></div>
       </div>
 
       <div class="rounded-[1.5rem] border border-stone-200 bg-white px-5 py-5 shadow-sm">
@@ -184,11 +184,11 @@
         {buildTargetUrl() || "Set a slug to generate a project QR code."}
       </p>
 
-      <div class="mt-5 flex flex-wrap gap-3">
-        <button type="button" class="btn-primary text-sm" on:click={() => downloadQr("png")}>
+      <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <button type="button" class="btn-primary w-full text-sm sm:w-auto" on:click={() => downloadQr("png")}>
           Download PNG
         </button>
-        <button type="button" class="btn-secondary text-sm" on:click={() => downloadQr("svg")}>
+        <button type="button" class="btn-secondary w-full text-sm sm:w-auto" on:click={() => downloadQr("svg")}>
           Download SVG
         </button>
       </div>

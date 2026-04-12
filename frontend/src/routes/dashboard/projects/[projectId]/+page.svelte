@@ -482,9 +482,9 @@
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Active slug</p>
-              <div class="mt-3 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-2 lg:flex-row lg:items-center">
-                <div class="flex min-w-0 flex-1 overflow-hidden rounded-[1rem] border border-stone-200 bg-stone-50">
-                  <span class="flex items-center border-r border-stone-200 px-4 text-sm text-stone-500">
+              <div class="mt-3 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-2">
+                <div class="flex min-w-0 flex-col overflow-hidden rounded-[1rem] border border-stone-200 bg-stone-50 sm:flex-row">
+                  <span class="flex items-center border-b border-stone-200 px-4 py-2 text-sm text-stone-500 sm:border-b-0 sm:border-r sm:py-0">
                     hostingqr.com/
                   </span>
                   <input
@@ -494,16 +494,16 @@
                   />
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 lg:flex-nowrap">
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center">
                   <button
                     type="button"
-                    class={`btn-secondary text-sm ${slugCheckToneClasses}`}
+                    class={`btn-secondary w-full text-sm ${slugCheckToneClasses}`}
                     on:click={checkSlugAvailability}
                     disabled={checkingSlug}
                   >
                     {checkingSlug ? "Checking..." : "Check"}
                   </button>
-                  <button type="button" class="btn-secondary text-sm" on:click={generateSlug} disabled={generatingSlug}>
+                  <button type="button" class="btn-secondary w-full text-sm" on:click={generateSlug} disabled={generatingSlug}>
                     {generatingSlug ? "Generating..." : "Random"}
                   </button>
                 </div>
@@ -538,7 +538,7 @@
                   No images uploaded yet.
                 </div>
               {:else}
-                <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {#each visibleSavedAssets as asset}
                     <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
                       <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
