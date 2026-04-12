@@ -83,6 +83,7 @@ Railway deployment recommendation:
 - use the included `backend/Dockerfile` as the Railway builder
 - the Docker container listens on port `8080`
 - the app also honors Railway's `PORT` environment variable explicitly at runtime
+- `Database__ConnectionString` may be either a standard Npgsql connection string or a Railway-style `postgres://` / `postgresql://` URL
 
 Open Swagger:
 

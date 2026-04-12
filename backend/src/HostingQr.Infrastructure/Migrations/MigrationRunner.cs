@@ -1,4 +1,5 @@
 using HostingQr.Infrastructure.Configuration;
+using HostingQr.Infrastructure.Data;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -48,7 +49,7 @@ public sealed class MigrationRunner
 
     private async Task RunMigrationsInternalAsync(CancellationToken cancellationToken)
     {
-        await using NpgsqlConnection connection = new(_databaseOptions.ConnectionString);
+        await using NpgsqlConnection connection = new(ConnectionStringResolver.Resolve(_databaseOptions.ConnectionString!));
         await connection.OpenAsync(cancellationToken);
 
         const string historySql = """
