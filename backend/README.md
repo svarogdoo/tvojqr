@@ -82,6 +82,7 @@ Railway deployment recommendation:
 - set the service root directory to `backend`
 - if Railway build-plan detection keeps failing, use the included `backend/Dockerfile`
 - the Docker container listens on port `8080`
+- the app also honors Railway's `PORT` environment variable explicitly at runtime
 
 Open Swagger:
 
