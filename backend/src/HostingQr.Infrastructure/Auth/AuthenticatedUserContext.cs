@@ -15,13 +15,26 @@ public sealed class AuthenticatedUserContext : ICurrentUserContext
 
     public Guid GetCurrentUserId()
     {
+        return GetCurrentUser().Id;
+    }
+
+    public CurrentUser GetCurrentUser()
+    {
         ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
-        string? raw = user?.FindFirstValue(AuthConstants.UserIdClaimType);
-        if (raw is null || !Guid.TryParse(raw, out Guid userId))
+        string? rawId = user?.FindFirstValue(AuthConstants.UserIdClaimType);
+        string? email = user?.FindFirstValue(ClaimTypes.Email);
+        string? displayName = user?.FindFirstValue(ClaimTypes.Name);
+
+        if (rawId is null || !Guid.TryParse(rawId, out Guid userId))
         {
             throw new InvalidOperationException("Authenticated user id is not available in the current request.");
         }
 
-        return userId;
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(displayName))
+        {
+            throw new InvalidOperationException("Authenticated user profile is incomplete in the current request.");
+        }
+
+        return new CurrentUser(userId, email, displayName);
     }
 }

@@ -1,13 +1,20 @@
 <script lang="ts">
-  import Navigation from "$lib/components/Navigation.svelte";
-  import { apiFetch } from "$lib/api";
-  import { auth, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
-  import type { ProjectListItem } from "$lib/types/projects";
+import { goto } from "$app/navigation";
+import Navigation from "$lib/components/Navigation.svelte";
+import { apiFetch } from "$lib/api";
+import { auth, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
+import { showSnackbar } from "$lib/stores/snackbar";
+import type { ProjectListItem } from "$lib/types/projects";
   import { onMount } from "svelte";
 
   let projects: ProjectListItem[] = [];
   let loadingProjects = true;
   let projectError = "";
+  let creatingProject = false;
+
+  function statusLabel(status: ProjectListItem["status"]) {
+    return status === "disabled" ? "Disabled" : "Active";
+  }
 
   async function loadProjects() {
     loadingProjects = true;
@@ -36,48 +43,45 @@
     await refreshSession();
     await loadProjects();
   });
+
+  async function createProject() {
+    if ($auth.status === "loading") {
+      return;
+    }
+
+    if ($auth.status !== "authenticated") {
+      startGoogleSignIn();
+      return;
+    }
+
+    try {
+      creatingProject = true;
+      await goto(`/dashboard/projects/new`);
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "Unable to create a new project right now.";
+      projectError = message;
+      showSnackbar(message, "error");
+    } finally {
+      creatingProject = false;
+    }
+  }
 </script>
 
 <Navigation />
 
 <div class="min-h-screen px-4 pb-16 pt-28 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-6xl">
-    <div class="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
-      <section class="rounded-[2rem] border border-black/8 bg-[rgba(220,228,216,0.92)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.08)] sm:p-10">
-        {#if $auth.status === "authenticated"}
-          <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
-            Dashboard
-          </p>
-          <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-            Welcome back, {$auth.user.displayName}
-          </h1>
-          <p class="mt-5 max-w-md text-base leading-7 text-stone-600">
-            Choose one of your existing projects or create a new one to keep building your public QR page.
-          </p>
-        {:else if $auth.status === "loading"}
-          <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">Checking your session</h1>
-          <p class="mt-5 max-w-md text-base leading-7 text-stone-600">Please wait while we look for your current login.</p>
-        {:else}
-          <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
-            Dashboard
-          </p>
-          <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-            Sign in to manage your projects
-          </h1>
-          <p class="mt-5 max-w-md text-base leading-7 text-stone-600">
-            Your account dashboard will show every project you own so you can open one, adjust settings, and continue editing later.
-          </p>
-          <button class="mt-8 btn-primary" on:click={startGoogleSignIn}>Continue with Google</button>
-        {/if}
-      </section>
-
+  <div class="mx-auto max-w-5xl">
       <section class="rounded-[2rem] border border-black/8 bg-white/96 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
         <div class="flex items-center justify-between gap-4">
           <div>
             <h2 class="text-2xl font-semibold tracking-tight text-stone-900">Your projects</h2>
             <p class="mt-2 text-sm leading-7 text-stone-600">Start with a project you already have, or create a new one when the editor flow is ready.</p>
           </div>
-          <a href="/create-new" class="btn-secondary text-sm">New project</a>
+          <button type="button" class="btn-secondary text-sm" on:click={createProject} disabled={creatingProject}>
+            {creatingProject ? "Creating..." : "New project"}
+          </button>
         </div>
 
         {#if $auth.status === "anonymous"}
@@ -99,21 +103,49 @@
         {:else}
           <div class="mt-8 grid gap-4">
             {#each projects as project}
-              <a
-                href={`/dashboard/projects/${project.id}`}
-                class="flex items-center justify-between rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300"
+              <div
+                role="link"
+                tabindex="0"
+                on:click={() => goto(`/dashboard/projects/${project.id}`)}
+                on:keydown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    goto(`/dashboard/projects/${project.id}`);
+                  }
+                }}
+                class="flex cursor-pointer items-center justify-between rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300"
               >
                 <div>
-                  <p class="text-lg font-semibold text-stone-900">{project.name}</p>
-                  <p class="mt-1 text-sm text-stone-500">hostingqr.com/{project.slug}</p>
+                  <p class="text-lg font-semibold text-stone-900">{project.name || "Untitled project"}</p>
+                  <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-stone-500">
+                    <span>hostingqr.com/{project.slug}</span>
+                    <span class={`rounded-full border px-2.5 py-1 text-xs font-medium ${project.status === "active"
+                      ? "border-[rgba(77,106,83,0.18)] bg-[rgba(236,245,238,0.96)] text-[color:var(--success-strong)]"
+                      : "border-stone-200 bg-stone-100 text-stone-600"}`}>
+                      {statusLabel(project.status)}
+                    </span>
+                  </div>
                 </div>
-                <span class="text-sm font-medium text-stone-700">Open</span>
-              </a>
+                <div class="flex items-center gap-3">
+                  <a
+                    href={`/${project.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 transition-all duration-200 hover:border-stone-400 hover:bg-stone-100 hover:text-stone-900"
+                    aria-label={`View public page for ${project.name || 'project'}`}
+                    on:click|stopPropagation
+                  >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
             {/each}
           </div>
         {/if}
       </section>
-    </div>
   </div>
 </div>
 

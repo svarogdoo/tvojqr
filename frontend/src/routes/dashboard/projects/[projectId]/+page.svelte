@@ -1,17 +1,31 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
+  import ConfirmationModal from "$lib/components/ConfirmationModal.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import ProjectQrBuilder from "$lib/components/ProjectQrBuilder.svelte";
   import { apiFetch } from "$lib/api";
+  import { toApiUrl } from "$lib/config";
   import { auth, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
+  import { showSnackbar } from "$lib/stores/snackbar";
   import type {
     GeneratedSlugResponse,
     ProjectDetail,
     SlugAvailabilityResponse,
     UpdateProjectRequest,
+    UpdateProjectStatusRequest,
   } from "$lib/types/projects";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
+
+  type DraftAsset = {
+    id: string;
+    file: File;
+    previewUrl: string;
+    originalFileName: string;
+  };
 
   let projectId = "";
   let project: ProjectDetail | null = null;
+  let draftAssets: DraftAsset[] = [];
   let originalSlug = "";
   let form = {
     name: "",
@@ -20,13 +34,36 @@
   let loading = true;
   let error = "";
   let saving = false;
+  let uploading = false;
   let saveMessage = "";
   let slugMessage = "";
   let slugError = "";
+  let uploadError = "";
   let checkingSlug = false;
   let generatingSlug = false;
+  let initializedProjectId = "";
+  let updatingStatus = false;
+  let deletingProject = false;
+  let showDeleteConfirmation = false;
+  let isDraft = false;
 
-  async function loadProject() {
+  $: slugCheckToneClasses = slugError
+    ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
+    : slugMessage && slugMessage.includes("taken")
+      ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
+    : slugMessage && !slugMessage.includes("taken") && !slugMessage.includes("Enter") && !slugMessage.includes("current")
+      ? "border-[rgba(77,106,83,0.18)] bg-[rgba(236,245,238,0.96)] text-[color:var(--success-strong)]"
+      : "";
+
+  async function loadProject(preserveForm = false) {
+    if (isDraft) {
+      loading = false;
+      error = "";
+      project = null;
+      originalSlug = form.slug;
+      return;
+    }
+
     loading = true;
     error = "";
 
@@ -49,12 +86,16 @@
 
       project = (await response.json()) as ProjectDetail;
       originalSlug = project.slug;
-      form = {
-        name: project.name,
-        slug: project.slug,
-      };
+      if (!preserveForm || initializedProjectId !== project.id) {
+        form = {
+          name: project.name,
+          slug: project.slug,
+        };
+        initializedProjectId = project.id;
+      }
       slugMessage = "";
       slugError = "";
+      uploadError = "";
     } catch {
       error = "Unable to load this project right now.";
     } finally {
@@ -122,12 +163,12 @@
   }
 
   async function saveProject() {
-    if (!project) {
+    if (!form.name.trim()) {
+      showSnackbar("Project title is required.", "error");
       return;
     }
 
     saving = true;
-    saveMessage = "";
     slugError = "";
 
     try {
@@ -136,48 +177,235 @@
         slug: form.slug.trim(),
       };
 
-      const response = await apiFetch(`/api/projects/${project.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
+      let response: Response;
+      let savedProject: ProjectDetail;
 
-      if (!response.ok) {
-        const body = (await response.json()) as { message?: string };
-        const message = body.message ?? "Unable to save project settings.";
-        if (response.status === 409 || response.status === 400) {
-          slugError = message;
-        } else {
-          saveMessage = message;
+      if (isDraft) {
+        response = await apiFetch(`/api/projects`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const body = (await response.json()) as { message?: string };
+          const message = body.message ?? "Unable to save project settings.";
+          if (response.status === 409 || response.status === 400) {
+            slugError = message;
+          }
+          showSnackbar(message, "error");
+          return;
         }
-        return;
+
+        savedProject = (await response.json()) as ProjectDetail;
+
+        if (draftAssets.length > 0) {
+          const formData = new FormData();
+          draftAssets.forEach((asset) => {
+            formData.append("files", asset.file);
+          });
+
+          const uploadResponse = await apiFetch(`/api/projects/${savedProject.id}/assets`, {
+            method: "POST",
+            body: formData,
+            headers: {},
+          });
+
+          if (!uploadResponse.ok) {
+            const body = (await uploadResponse.json()) as { message?: string };
+            showSnackbar(body.message ?? "Project saved, but images could not be uploaded.", "error");
+            await goto(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
+        }
+      } else {
+        response = await apiFetch(`/api/projects/${project!.id}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const body = (await response.json()) as { message?: string };
+          const message = body.message ?? "Unable to save project settings.";
+          if (response.status === 409 || response.status === 400) {
+            slugError = message;
+          }
+          showSnackbar(message, "error");
+          return;
+        }
+
+        savedProject = (await response.json()) as ProjectDetail;
       }
 
-      const body = (await response.json()) as ProjectDetail;
-      project = body;
-      originalSlug = body.slug;
+      project = savedProject;
+      originalSlug = savedProject.slug;
       form = {
-        name: body.name,
-        slug: body.slug,
+        name: savedProject.name,
+        slug: savedProject.slug,
       };
+      draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
+      draftAssets = [];
+      isDraft = false;
       slugMessage = "";
-      saveMessage = "Project settings saved.";
+      showSnackbar("Project settings saved.", "success");
+      await goto("/dashboard");
     } catch {
-      saveMessage = "Unable to save project settings right now.";
+      showSnackbar("Unable to save project settings right now.", "error");
     } finally {
       saving = false;
     }
   }
 
+  async function updateProjectStatus(status: UpdateProjectStatusRequest["status"]) {
+    if (!project || isDraft) {
+      return;
+    }
+
+    updatingStatus = true;
+
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status } satisfies UpdateProjectStatusRequest),
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as { message?: string };
+        showSnackbar(body.message ?? "Unable to update project status.", "error");
+        return;
+      }
+
+      project = (await response.json()) as ProjectDetail;
+      showSnackbar(
+        status === "disabled" ? "Project disabled." : "Project enabled.",
+        "success",
+      );
+    } catch {
+      showSnackbar("Unable to update project status.", "error");
+    } finally {
+      updatingStatus = false;
+    }
+  }
+
+  function promptDeleteProject() {
+    showDeleteConfirmation = true;
+  }
+
+  function closeDeleteConfirmation() {
+    if (!deletingProject) {
+      showDeleteConfirmation = false;
+    }
+  }
+
+  async function deleteProject() {
+    if (!project || isDraft) {
+      return;
+    }
+
+    deletingProject = true;
+
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        showSnackbar("Unable to delete this project.", "error");
+        return;
+      }
+
+      showSnackbar("Project deleted.", "success");
+      showDeleteConfirmation = false;
+      await goto("/dashboard");
+    } catch {
+      showSnackbar("Unable to delete this project.", "error");
+    } finally {
+      deletingProject = false;
+    }
+  }
+
   function resetMessages() {
-    saveMessage = "";
     slugMessage = "";
     slugError = "";
   }
 
+  async function uploadImages(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const files = input.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    uploading = true;
+    uploadError = "";
+
+    try {
+      if (isDraft) {
+        const nextAssets = Array.from(files).map((file) => ({
+          id: crypto.randomUUID(),
+          file,
+          previewUrl: URL.createObjectURL(file),
+          originalFileName: file.name,
+        }));
+
+        draftAssets = [...draftAssets, ...nextAssets];
+        showSnackbar("Images added to draft.", "success");
+        return;
+      }
+
+      if (!project) {
+        return;
+      }
+
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const response = await apiFetch(`/api/projects/${project.id}/assets`, {
+        method: "POST",
+        body: formData,
+        headers: {},
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as { message?: string };
+        uploadError = body.message ?? "Unable to upload images right now.";
+        showSnackbar(uploadError, "error");
+        return;
+      }
+
+      await loadProject(true);
+      showSnackbar("Images uploaded.", "success");
+    } catch {
+      uploadError = "Unable to upload images right now.";
+      showSnackbar(uploadError, "error");
+    } finally {
+      uploading = false;
+      input.value = "";
+    }
+  }
+
   onMount(async () => {
     projectId = window.location.pathname.split("/").at(-1) ?? "";
+    isDraft = projectId === "new";
     await refreshSession();
+    if (isDraft) {
+      loading = false;
+      error = "";
+      project = null;
+      form = {
+        name: "",
+        slug: "",
+      };
+      originalSlug = "";
+      return;
+    }
+
     await loadProject();
+  });
+
+  onDestroy(() => {
+    draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
   });
 </script>
 
@@ -199,72 +427,183 @@
       <section class="rounded-[2rem] border border-[color:var(--error-soft)] bg-[color:var(--error-soft)] p-8 text-[color:var(--error-strong)] shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
         {error}
       </section>
-    {:else if project}
-      <div class="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-        <section class="rounded-[2rem] border border-black/8 bg-[rgba(220,228,216,0.92)] p-8 shadow-[0_20px_50px_rgba(45,53,46,0.08)] sm:p-10">
-          <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Project settings</p>
-          <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">{project.name}</h1>
-          <p class="mt-5 max-w-md text-base leading-7 text-stone-600">Update the core identity for this hosted page now. Uploads, language variants, preview, and publish flow can follow on top of these settings.</p>
-        </section>
+    {:else if project || isDraft}
+      <section class="rounded-[2rem] border border-black/8 bg-white/96 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
+          <div class="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <p class="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Project settings</p>
+              <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">{project?.name || form.name || "New project"}</h1>
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                {#if !isDraft}
+                  <span class="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm font-medium text-stone-700">
+                    {project?.status === "disabled" ? "Disabled" : "Active"}
+                  </span>
+                {:else}
+                  <span class="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm font-medium text-stone-700">
+                    Draft
+                  </span>
+                {/if}
+                <p class="text-base leading-7 text-stone-600">Update the core identity for this hosted page now. Uploads, language variants, preview, and publish flow can follow on top of these settings.</p>
+              </div>
+            </div>
+          </div>
 
-        <section class="rounded-[2rem] border border-black/8 bg-white/96 p-8 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
           <div class="grid gap-5">
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Project name</p>
               <input
                 bind:value={form.name}
                 on:input={resetMessages}
+                required
                 class="mt-3 block w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-stone-900 outline-none transition-all focus:border-stone-400"
+                placeholder="Project title"
               />
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Active slug</p>
-              <div class="mt-3 overflow-hidden rounded-2xl border border-stone-200 bg-white sm:flex sm:items-center">
-                <span class="block border-b border-stone-200 px-4 py-3 text-sm text-stone-500 sm:border-b-0 sm:border-r">
-                  hostingqr.com/
-                </span>
-                <input
-                  bind:value={form.slug}
-                  on:input={resetMessages}
-                  class="block w-full bg-transparent px-4 py-3 text-stone-900 outline-none"
-                />
-              </div>
-              <div class="mt-4 flex flex-wrap gap-3">
-                <button type="button" class="btn-secondary text-sm" on:click={checkSlugAvailability} disabled={checkingSlug}>
-                  {checkingSlug ? "Checking..." : "Check availability"}
-                </button>
-                <button type="button" class="btn-secondary text-sm" on:click={generateSlug} disabled={generatingSlug}>
-                  {generatingSlug ? "Generating..." : "Random slug"}
-                </button>
+              <div class="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-stone-200 bg-white p-2">
+                <div class="flex min-w-[16rem] flex-1 overflow-hidden rounded-[1rem] border border-stone-200 bg-stone-50">
+                  <span class="flex items-center border-r border-stone-200 px-4 text-sm text-stone-500">
+                    hostingqr.com/
+                  </span>
+                  <input
+                    bind:value={form.slug}
+                    on:input={resetMessages}
+                    class="block min-w-0 flex-1 bg-white px-4 py-3 text-stone-900 outline-none"
+                  />
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    class={`btn-secondary text-sm ${slugCheckToneClasses}`}
+                    on:click={checkSlugAvailability}
+                    disabled={checkingSlug}
+                  >
+                    {checkingSlug ? "Checking..." : "Check"}
+                  </button>
+                  <button type="button" class="btn-secondary text-sm" on:click={generateSlug} disabled={generatingSlug}>
+                    {generatingSlug ? "Generating..." : "Random"}
+                  </button>
+                </div>
               </div>
               {#if slugMessage}
-                <p class="mt-3 text-sm text-stone-600">{slugMessage}</p>
+                <p class={`mt-3 text-sm ${slugMessage.includes("taken")
+                  ? "text-[color:var(--error-strong)]"
+                  : slugCheckToneClasses
+                    ? "text-[color:var(--success-strong)]"
+                    : "text-stone-600"}`}>
+                  {slugMessage}
+                </p>
               {/if}
               {#if slugError}
                 <p class="mt-3 text-sm text-[color:var(--error-strong)]">{slugError}</p>
               {/if}
             </div>
-            <div class="rounded-[1.5rem] border border-dashed border-stone-300 bg-stone-50 px-6 py-6 text-sm leading-7 text-stone-600">
-              Uploads, language variants, preview, and save controls are the next step on this page.
+            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Images</p>
+                  <p class="mt-2 text-sm leading-7 text-stone-600">Upload one or more images for the default project language.</p>
+                </div>
+                <label class="btn-secondary cursor-pointer text-sm">
+                  <span>{uploading ? "Uploading..." : "Add images"}</span>
+                  <input type="file" accept="image/*" multiple class="hidden" on:change={uploadImages} disabled={uploading} />
+                </label>
+              </div>
+
+              {#if isDraft ? draftAssets.length === 0 : (project?.assets.length ?? 0) === 0}
+                <div class="mt-5 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
+                  No images uploaded yet.
+                </div>
+              {:else}
+                <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  {#if isDraft}
+                    {#each draftAssets as asset}
+                      <div class="overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                        <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                        <div class="border-t border-stone-100 px-3 py-3">
+                          <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
+                        </div>
+                      </div>
+                    {/each}
+                  {:else}
+                    {#each project?.assets ?? [] as asset}
+                      <div class="overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                        <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                        <div class="border-t border-stone-100 px-3 py-3">
+                          <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
+                        </div>
+                      </div>
+                    {/each}
+                  {/if}
+                </div>
+              {/if}
             </div>
+
+            <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />
+
             <div class="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <div>
                 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Save settings</p>
                 <p class="mt-2 text-sm leading-7 text-stone-600">Save the project name and active slug before moving on to uploads and preview.</p>
-                {#if saveMessage}
-                  <p class="mt-2 text-sm text-stone-700">{saveMessage}</p>
-                {/if}
               </div>
-              <button type="button" class="btn-primary text-sm" on:click={saveProject} disabled={saving}>
-                {saving ? "Saving..." : "Save settings"}
-              </button>
+              <div class="flex flex-wrap gap-3">
+                {#if !isDraft}
+                  <button
+                    type="button"
+                    class="btn-secondary text-sm"
+                    on:click={() => updateProjectStatus((project?.status ?? "active") === "disabled" ? "active" : "disabled")}
+                    disabled={updatingStatus || deletingProject}
+                  >
+                    {updatingStatus
+                      ? "Updating..."
+                      : project?.status === "disabled"
+                        ? "Enable project"
+                        : "Disable project"}
+                  </button>
+                {/if}
+                <button type="button" class="btn-primary text-sm" on:click={saveProject} disabled={saving || deletingProject}>
+                  {saving ? "Saving..." : "Save settings"}
+                </button>
+              </div>
             </div>
+
+            {#if !isDraft}
+            <div class="mt-3 rounded-[1.5rem] border border-[rgba(165,93,79,0.16)] bg-[rgba(249,238,234,0.72)] px-6 py-5 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.18em] text-[color:var(--error-strong)]">Danger zone</p>
+                  <p class="mt-2 text-sm leading-7 text-stone-600">Delete this project completely. This removes its settings, slug, and uploaded assets.</p>
+                </div>
+                <button
+                  type="button"
+                  class="inline-flex items-center rounded-full border border-[rgba(165,93,79,0.28)] bg-white px-5 py-3 text-sm font-medium text-[color:var(--error-strong)] transition-colors hover:bg-[rgba(249,238,234,0.5)]"
+                  on:click={promptDeleteProject}
+                  disabled={deletingProject || saving || updatingStatus}
+                >
+                  {deletingProject ? "Deleting..." : "Delete project"}
+                </button>
+              </div>
+            </div>
+            {/if}
           </div>
-        </section>
-      </div>
+      </section>
     {/if}
   </div>
 </div>
+
+<ConfirmationModal
+  show={showDeleteConfirmation}
+  title="Delete project?"
+  description={`This will permanently remove ${project?.name || "this project"}, including its slug and uploaded assets. This cannot be undone.`}
+  confirmLabel="Delete permanently"
+  cancelLabel="Keep project"
+  destructive={true}
+  loading={deletingProject}
+  onClose={closeDeleteConfirmation}
+  onConfirm={deleteProject}
+/>
 
 <svelte:head>
   <title>Project - HostingQr</title>

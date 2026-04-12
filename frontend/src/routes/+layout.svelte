@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Snackbar from "$lib/components/Snackbar.svelte";
   import favicon from "$lib/assets/favicon.svg";
   import { refreshSession } from "$lib/stores/auth";
   import "../app.css";
@@ -16,3 +17,4 @@
 </svelte:head>
 
 {@render children()}
+<Snackbar />

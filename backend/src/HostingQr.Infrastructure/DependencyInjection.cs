@@ -1,5 +1,6 @@
 using HostingQr.Application.Abstractions;
 using HostingQr.Infrastructure.Auth;
+using HostingQr.Infrastructure.Assets;
 using HostingQr.Infrastructure.Configuration;
 using HostingQr.Infrastructure.Data;
 using HostingQr.Infrastructure.Migrations;
@@ -104,9 +105,11 @@ public static class DependencyInjection
 
         services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
         services.AddSingleton<IBackendInfoService, BackendInfoService>();
+        services.AddSingleton<IAssetStorageService, LocalAssetStorageService>();
         services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<ISlugRepository, SlugRepository>();
         services.AddSingleton<MigrationRunner>();
 

@@ -63,6 +63,50 @@ public static class ProjectEndpoints
             .WithName("UpdateProject")
             .WithSummary("Updates one project name and active slug.");
 
+        group.MapPost("/{projectId:guid}/assets", async (Guid projectId, HttpRequest request, IAssetService assetService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                IFormCollection form = await request.ReadFormAsync(cancellationToken);
+                var assets = await assetService.UploadImagesAsync(projectId, form.Files, cancellationToken);
+                return Results.Ok(assets);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.NotFound(new { message = ex.Message });
+            }
+        })
+            .DisableAntiforgery()
+            .WithName("UploadProjectAssets")
+            .WithSummary("Uploads one or more image assets to a project.");
+
+        group.MapPatch("/{projectId:guid}/status", async (Guid projectId, UpdateProjectStatusRequest request, IProjectService projectService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ProjectDetailResponse? project = await projectService.UpdateProjectStatusAsync(projectId, request, cancellationToken);
+                return project is null ? Results.NotFound() : Results.Ok(project);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+        })
+            .WithName("UpdateProjectStatus")
+            .WithSummary("Updates the current project status.");
+
+        group.MapDelete("/{projectId:guid}", async (Guid projectId, IProjectService projectService, CancellationToken cancellationToken) =>
+        {
+            bool deleted = await projectService.DeleteProjectAsync(projectId, cancellationToken);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        })
+            .WithName("DeleteProject")
+            .WithSummary("Deletes the current project and its dependent data.");
+
         return endpoints;
     }
 }

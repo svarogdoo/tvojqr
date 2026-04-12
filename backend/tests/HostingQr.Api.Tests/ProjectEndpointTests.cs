@@ -1,11 +1,14 @@
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using HostingQr.Application.Abstractions;
+using HostingQr.Application.Assets;
 using HostingQr.Application.Auth;
 using HostingQr.Application.Projects;
 using HostingQr.Application.Slugs;
+using Microsoft.AspNetCore.Http;
 using HostingQr.Infrastructure.Auth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authentication;
@@ -98,6 +101,25 @@ public sealed class ProjectEndpointTests
         Assert.Equal("demo@hostingqr.local", payload.Email);
     }
 
+    [Fact]
+    public async Task PostProjectAssets_ReturnsUploadedAssets()
+    {
+        await using TestApplicationFactory factory = new(authenticated: true);
+        HttpClient client = factory.CreateClient();
+
+        using MultipartFormDataContent form = new();
+        form.Add(new ByteArrayContent([1, 2, 3]), "files", "menu.png");
+
+        HttpResponseMessage response = await client.PostAsync("/api/projects/11111111-1111-1111-1111-111111111111/assets", form);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        List<AssetResponse>? payload = await response.Content.ReadFromJsonAsync<List<AssetResponse>>();
+        Assert.NotNull(payload);
+        Assert.Single(payload);
+        Assert.Equal("menu.png", payload[0].OriginalFileName);
+    }
+
     private sealed class TestApplicationFactory : WebApplicationFactory<Program>
     {
         private readonly bool _authenticated;
@@ -114,9 +136,11 @@ public sealed class ProjectEndpointTests
                 services.RemoveAll<IProjectService>();
                 services.RemoveAll<ISlugService>();
                 services.RemoveAll<IUserRepository>();
+                services.RemoveAll<IAssetService>();
                 services.AddScoped<IProjectService, FakeProjectService>();
                 services.AddScoped<ISlugService, FakeSlugService>();
                 services.AddScoped<IUserRepository, FakeUserRepository>();
+                services.AddScoped<IAssetService, FakeAssetService>();
 
                 if (_authenticated)
                 {
@@ -183,27 +207,42 @@ public sealed class ProjectEndpointTests
     {
         public Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
+            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
         }
 
         public Task<ProjectDetailResponse?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
+            IReadOnlyList<AssetResponse> assets =
+            [
+                new AssetResponse(Guid.NewGuid(), "existing-menu.png", "image/png", 1234, "/uploads/existing-menu.png", "default", 0, DateTimeOffset.UtcNow),
+            ];
+
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, assets));
         }
 
         public Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, "active", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+        }
+
+        public Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", request.Status, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+        }
+
+        public Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(true);
         }
 
         public Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User"));
+            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", []));
         }
 
         public Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default)
         {
-            IReadOnlyList<ProjectListItem> items = [new ProjectListItem(Guid.NewGuid(), "Summer Menu", "summer-menu", DateTimeOffset.UtcNow)];
+            IReadOnlyList<ProjectListItem> items = [new ProjectListItem(Guid.NewGuid(), "Summer Menu", "summer-menu", "active", DateTimeOffset.UtcNow)];
             return Task.FromResult(items);
         }
     }
@@ -226,5 +265,20 @@ public sealed class ProjectEndpointTests
         }
 
         public string NormalizeOrThrow(string slug) => slug.Trim().ToLowerInvariant();
+    }
+
+    private sealed class FakeAssetService : IAssetService
+    {
+        public IReadOnlyList<AssetResponse> MapAssets(IReadOnlyList<HostingQr.Domain.Assets.Asset> assets) => [];
+
+        public Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, IFormFileCollection files, CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<AssetResponse> assets =
+            [
+                new AssetResponse(Guid.NewGuid(), "menu.png", "image/png", 3, "/uploads/test-menu.png", "default", 0, DateTimeOffset.UtcNow),
+            ];
+
+            return Task.FromResult(assets);
+        }
     }
 }

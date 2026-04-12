@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using HostingQr.Application.Abstractions;
+using HostingQr.Application.Assets;
 using HostingQr.Application.Projects;
 using HostingQr.Application.Slugs;
 
@@ -11,6 +12,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ISlugService, SlugService>();
+        services.AddScoped<IAssetService, AssetService>();
 
         return services;
     }

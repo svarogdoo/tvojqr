@@ -14,4 +14,6 @@ public sealed class DevelopmentUserContext : ICurrentUserContext
     }
 
     public Guid GetCurrentUserId() => _options.Id;
+
+    public CurrentUser GetCurrentUser() => new(_options.Id, _options.Email, _options.DisplayName);
 }

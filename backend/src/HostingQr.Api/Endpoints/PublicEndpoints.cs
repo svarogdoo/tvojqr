@@ -13,7 +13,17 @@ public static class PublicEndpoints
             try
             {
                 var project = await projectService.GetPublicProjectAsync(slug, cancellationToken);
-                return project is null ? Results.NotFound() : Results.Ok(project);
+                if (project is null)
+                {
+                    return Results.NotFound();
+                }
+
+                if (project.Status == HostingQr.Domain.Projects.ProjectStatus.Disabled)
+                {
+                    return Results.Json(project, statusCode: StatusCodes.Status410Gone);
+                }
+
+                return Results.Ok(project);
             }
             catch (ArgumentException ex)
             {

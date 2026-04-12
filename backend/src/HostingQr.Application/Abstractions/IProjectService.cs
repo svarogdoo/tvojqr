@@ -12,5 +12,9 @@ public interface IProjectService
 
     Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default);
 
+    Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
+
     Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default);
 }

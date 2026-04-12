@@ -234,10 +234,12 @@ Status markers for tasks:
 5.3 Support more than one asset/file per hosted page.
 5.3.a Image gallery / multi-page menu display.
 5.3.b PDF display/download behavior (if included in MVP).
-[DONE] 5.4 Improve public page UX.
+[PARTIAL] 5.4 Improve public page UX.
 [DONE] 5.4.a Better empty/not-found states (brand-consistent and localized).
 [DONE] 5.4.b Mobile-first reading experience for menus/documents.
 [DONE] 5.4.c Optional file title/description display.
+[DONE] 5.4.d Render saved default-language images on the public slug page.
+[DONE] 5.4.e Show a distinct disabled-project state with a path back to HostingQr.
 
 ### 6. Authentication & User Dashboard (Core Missing Product Layer)
 
@@ -247,14 +249,19 @@ Status markers for tasks:
 [DONE] 6.1.c Sign out flow
 [PARTIAL] 6.2 Build initial dashboard.
 [DONE] 6.2.a List user hosted pages/projects
-6.2.b Create new hosted page/project
+[PARTIAL] 6.2.b Create new hosted page/project
+[DONE] 6.2.b.1 Keep new project in frontend draft state until explicit save.
 [DONE] 6.2.c Open a specific project from the project list
 [DONE] 6.2.d Edit project name
 [DONE] 6.2.e Edit one active slug per project
-6.2.f Manage uploads
+[DONE] 6.2.e.1 Group language selection into a navigation dropdown.
+[DONE] 6.2.e.2 Add an auth-aware user menu with projects/sign-out or sign-in actions.
+[PARTIAL] 6.2.f Manage uploads
+[DONE] 6.2.f.1 Add quick public-view access from dashboard project rows.
+[DONE] 6.2.f.2 Show project status in the dashboard list.
 6.2.g Manage languages
 6.2.h Preview project changes before final save
-6.2.i View/download QR code
+[PARTIAL] 6.2.i View/download QR code
 6.2.j If the user has no projects yet, show a clear empty state instead of a generic load/error message.
 6.3 Define first account model decisions.
 6.3.a [DECIDED] One user can manage multiple projects
@@ -264,8 +271,8 @@ Status markers for tasks:
 
 7.1 Replace email attachments as "storage" with real file storage provider.
 7.1.a Choose storage backend (e.g. S3-compatible, Supabase Storage, Cloudflare R2, etc.)
-7.1.b Implement upload pipeline from authenticated users.
-7.1.c Save metadata (file type, size, language, order).
+[PARTIAL] 7.1.b Implement upload pipeline from authenticated users.
+[PARTIAL] 7.1.c Save metadata (file type, size, language, order).
 7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
 7.2 Add file lifecycle management.
 7.2.a Delete/replace uploads
@@ -280,9 +287,10 @@ Status markers for tasks:
 ### 8. QR Code Generation
 
 8.1 Add QR code generation for each published slug.
-8.1.a Generate QR from final public URL
-8.1.b Display in dashboard
-8.1.c Download/export (PNG/SVG)
+[DONE] 8.1.a Generate QR from final public URL
+[DONE] 8.1.b Display in project dashboard/editor
+[DONE] 8.1.c Download/export (PNG/SVG)
+8.1.d Add QR styling presets and color controls
 8.2 Decide QR storage strategy.
 8.2.a Generate on demand vs persist generated assets
 8.3 Add QR regeneration rules if slug changes.
@@ -317,7 +325,7 @@ Status markers for tasks:
 [DONE] 10.1.b Projects/hosted pages (one user -> many projects)
 [DONE] 10.1.c Slugs (one active slug per project)
 10.1.d Language variants
-10.1.e Assets/files
+[PARTIAL] 10.1.e Assets/files
 10.1.f Subscriptions/plans
 10.1.g Billing events
 [PARTIAL] 10.2 Build server-side CRUD endpoints/actions for dashboard operations.
@@ -325,7 +333,10 @@ Status markers for tasks:
 [DONE] 10.2.b Create a new project
 [DONE] 10.2.c Fetch one project for editing/settings
 [PARTIAL] 10.2.d Save project settings and uploads
-10.2.d.1 Save project name and slug settings
+[DONE] 10.2.d.1 Save project name and slug settings
+[DONE] 10.2.d.2 Upload default-language image assets
+[DONE] 10.2.d.3 Preserve project form state during upload/save attempts
+[DONE] 10.2.d.4 Update project status and delete a project
 10.2.e Preview project before final save/publish
 [PARTIAL] 10.3 Add slug uniqueness checks and conflict handling.
 [DONE] 10.3.a Check custom slug availability
@@ -347,7 +358,9 @@ Status markers for tasks:
 12.1 Add form/file validation on both client and server for all upload flows.
 [DONE] 12.1.a Slug format validation
 [DONE] 12.1.b Random slug generation validation/path coverage
-12.1.c Image-only upload validation for MVP
+[PARTIAL] 12.1.c Image-only upload validation for MVP
+[DONE] 12.1.e Reusable snackbar feedback for save/upload outcomes
+[DONE] 12.1.f Reusable confirmation modal for destructive actions
 12.1.d Per-language upload validation
 12.2 Add abuse protection.
 12.2.a Rate limiting
