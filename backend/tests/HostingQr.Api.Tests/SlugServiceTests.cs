@@ -39,5 +39,10 @@ public sealed class SlugServiceTests
         {
             return Task.FromResult(_existing.Contains(slug));
         }
+
+        public Task<bool> ExistsForOtherProjectAsync(string slug, Guid projectId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(_existing.Contains(slug));
+        }
     }
 }

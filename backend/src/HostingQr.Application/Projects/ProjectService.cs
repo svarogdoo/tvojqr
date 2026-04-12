@@ -54,6 +54,33 @@ public sealed class ProjectService : IProjectService
         return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.CreatedAt, project.UpdatedAt);
     }
 
+    public async Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            throw new ArgumentException("Project name is required.", nameof(request));
+        }
+
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        string normalizedSlug = _slugService.NormalizeOrThrow(request.Slug);
+
+        if (await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken) is not { } existingProject)
+        {
+            return null;
+        }
+
+        bool slugTakenElsewhere = await _slugService.ExistsForOtherProjectAsync(normalizedSlug, projectId, cancellationToken);
+        if (slugTakenElsewhere)
+        {
+            throw new InvalidOperationException("Slug is already in use.");
+        }
+
+        Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(userId, projectId, request.Name.Trim(), normalizedSlug, cancellationToken);
+        return updatedProject is null
+            ? null
+            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.CreatedAt, updatedProject.UpdatedAt);
+    }
+
     public async Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)
     {
         string normalizedSlug = _slugService.NormalizeOrThrow(slug);

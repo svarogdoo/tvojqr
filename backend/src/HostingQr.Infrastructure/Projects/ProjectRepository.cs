@@ -101,4 +101,47 @@ public sealed class ProjectRepository : IProjectRepository
 
         return (await GetByIdAsync(ownerUserId, projectId, cancellationToken))!;
     }
+
+    public async Task<ProjectWithSlug?> UpdateAsync(Guid ownerUserId, Guid projectId, string name, string slug, CancellationToken cancellationToken = default)
+    {
+        const string projectSql = """
+            update projects
+            set name = @Name,
+                updated_at = now()
+            where id = @ProjectId and owner_user_id = @OwnerUserId;
+            """;
+
+        const string slugSql = """
+            update slugs
+            set slug = @Slug
+            where project_id = @ProjectId and is_primary = true;
+            """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        int affectedProjects = await connection.ExecuteAsync(new CommandDefinition(projectSql, new
+        {
+            ProjectId = projectId,
+            OwnerUserId = ownerUserId,
+            Name = name,
+        }, transaction, cancellationToken: cancellationToken));
+
+        if (affectedProjects == 0)
+        {
+            transaction.Rollback();
+            return null;
+        }
+
+        await connection.ExecuteAsync(new CommandDefinition(slugSql, new
+        {
+            ProjectId = projectId,
+            Slug = slug,
+        }, transaction, cancellationToken: cancellationToken));
+
+        transaction.Commit();
+
+        return await GetByIdAsync(ownerUserId, projectId, cancellationToken);
+    }
 }

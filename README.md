@@ -249,8 +249,8 @@ Status markers for tasks:
 [DONE] 6.2.a List user hosted pages/projects
 6.2.b Create new hosted page/project
 [DONE] 6.2.c Open a specific project from the project list
-6.2.d Edit project name
-6.2.e Edit one active slug per project
+[DONE] 6.2.d Edit project name
+[DONE] 6.2.e Edit one active slug per project
 6.2.f Manage uploads
 6.2.g Manage languages
 6.2.h Preview project changes before final save
@@ -324,7 +324,8 @@ Status markers for tasks:
 [DONE] 10.2.a List projects for the current user dashboard
 [DONE] 10.2.b Create a new project
 [DONE] 10.2.c Fetch one project for editing/settings
-10.2.d Save project settings and uploads
+[PARTIAL] 10.2.d Save project settings and uploads
+10.2.d.1 Save project name and slug settings
 10.2.e Preview project before final save/publish
 [PARTIAL] 10.3 Add slug uniqueness checks and conflict handling.
 [DONE] 10.3.a Check custom slug availability

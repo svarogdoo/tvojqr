@@ -12,3 +12,17 @@ export type ProjectDetail = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type UpdateProjectRequest = {
+  name: string;
+  slug: string;
+};
+
+export type SlugAvailabilityResponse = {
+  slug: string;
+  isAvailable: boolean;
+};
+
+export type GeneratedSlugResponse = {
+  slug: string;
+};

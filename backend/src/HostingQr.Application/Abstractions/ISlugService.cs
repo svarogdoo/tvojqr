@@ -8,5 +8,7 @@ public interface ISlugService
 
     Task<GeneratedSlugResponse> GenerateUniqueSlugAsync(CancellationToken cancellationToken = default);
 
+    Task<bool> ExistsForOtherProjectAsync(string slug, Guid projectId, CancellationToken cancellationToken = default);
+
     string NormalizeOrThrow(string slug);
 }

@@ -6,4 +6,6 @@ public sealed record ProjectDetailResponse(Guid Id, string Name, string Slug, Da
 
 public sealed record CreateProjectRequest(string Name, string Slug);
 
+public sealed record UpdateProjectRequest(string Name, string Slug);
+
 public sealed record PublicProjectResponse(Guid ProjectId, string Name, string Slug, string OwnerDisplayName);

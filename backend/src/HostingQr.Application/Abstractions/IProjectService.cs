@@ -10,5 +10,7 @@ public interface IProjectService
 
     Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default);
 
+    Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default);
+
     Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default);
 }

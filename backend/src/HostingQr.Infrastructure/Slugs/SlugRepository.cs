@@ -21,4 +21,13 @@ public sealed class SlugRepository : ISlugRepository
         var command = new CommandDefinition(sql, new { Slug = slug }, cancellationToken: cancellationToken);
         return await connection.ExecuteScalarAsync<bool>(command);
     }
+
+    public async Task<bool> ExistsForOtherProjectAsync(string slug, Guid projectId, CancellationToken cancellationToken = default)
+    {
+        const string sql = "select exists(select 1 from slugs where slug = @Slug and project_id <> @ProjectId);";
+
+        using var connection = _connectionFactory.CreateConnection();
+        var command = new CommandDefinition(sql, new { Slug = slug, ProjectId = projectId }, cancellationToken: cancellationToken);
+        return await connection.ExecuteScalarAsync<bool>(command);
+    }
 }

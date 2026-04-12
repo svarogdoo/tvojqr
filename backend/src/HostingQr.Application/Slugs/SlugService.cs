@@ -35,6 +35,12 @@ public sealed class SlugService : ISlugService
         throw new InvalidOperationException("Unable to generate a unique slug right now.");
     }
 
+    public async Task<bool> ExistsForOtherProjectAsync(string slug, Guid projectId, CancellationToken cancellationToken = default)
+    {
+        string normalized = NormalizeOrThrow(slug);
+        return await _slugRepository.ExistsForOtherProjectAsync(normalized, projectId, cancellationToken);
+    }
+
     public string NormalizeOrThrow(string slug)
     {
         string normalized = slug.Trim().ToLowerInvariant();

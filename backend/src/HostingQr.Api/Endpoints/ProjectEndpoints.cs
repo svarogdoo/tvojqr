@@ -44,6 +44,25 @@ public static class ProjectEndpoints
             .WithName("CreateProject")
             .WithSummary("Creates a new project with one active slug.");
 
+        group.MapPut("/{projectId:guid}", async (Guid projectId, UpdateProjectRequest request, IProjectService projectService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ProjectDetailResponse? project = await projectService.UpdateProjectAsync(projectId, request, cancellationToken);
+                return project is null ? Results.NotFound() : Results.Ok(project);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Conflict(new { message = ex.Message });
+            }
+        })
+            .WithName("UpdateProject")
+            .WithSummary("Updates one project name and active slug.");
+
         return endpoints;
     }
 }

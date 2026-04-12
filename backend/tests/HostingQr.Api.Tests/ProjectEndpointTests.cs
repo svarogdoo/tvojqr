@@ -66,6 +66,24 @@ public sealed class ProjectEndpointTests
     }
 
     [Fact]
+    public async Task PutProject_ReturnsUpdatedProject()
+    {
+        await using TestApplicationFactory factory = new(authenticated: true);
+        HttpClient client = factory.CreateClient();
+
+        HttpResponseMessage response = await client.PutAsJsonAsync(
+            "/api/projects/11111111-1111-1111-1111-111111111111",
+            new UpdateProjectRequest("Updated Menu", "updated-menu"));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        ProjectDetailResponse? payload = await response.Content.ReadFromJsonAsync<ProjectDetailResponse>();
+        Assert.NotNull(payload);
+        Assert.Equal("Updated Menu", payload.Name);
+        Assert.Equal("updated-menu", payload.Slug);
+    }
+
+    [Fact]
     public async Task GetCurrentUser_ReturnsAuthenticatedUser()
     {
         await using TestApplicationFactory factory = new(authenticated: true);
@@ -173,6 +191,11 @@ public sealed class ProjectEndpointTests
             return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
         }
 
+        public Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
+        }
+
         public Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)
         {
             return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User"));
@@ -195,6 +218,11 @@ public sealed class ProjectEndpointTests
         public Task<GeneratedSlugResponse> GenerateUniqueSlugAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult(new GeneratedSlugResponse("randm123"));
+        }
+
+        public Task<bool> ExistsForOtherProjectAsync(string slug, Guid projectId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(false);
         }
 
         public string NormalizeOrThrow(string slug) => slug.Trim().ToLowerInvariant();
