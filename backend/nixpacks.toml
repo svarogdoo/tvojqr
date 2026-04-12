@@ -1,0 +1,5 @@
+[phases.build]
+cmds = ["dotnet publish src/HostingQr.Api -c Release -o out"]
+
+[start]
+cmd = "dotnet out/HostingQr.Api.dll"
