@@ -51,4 +51,13 @@ public sealed class ConnectionStringResolverTests
             Environment.SetEnvironmentVariable("PGPASSWORD", previousPassword);
         }
     }
+
+    [Fact]
+    public void Resolve_DisablesSslForRailwayInternalHosts()
+    {
+        string result = ConnectionStringResolver.Resolve("postgresql://postgres:secret@postgres.railway.internal:5432/railway");
+
+        Assert.Contains("Host=postgres.railway.internal", result);
+        Assert.Contains("SSL Mode=Disable", result);
+    }
 }

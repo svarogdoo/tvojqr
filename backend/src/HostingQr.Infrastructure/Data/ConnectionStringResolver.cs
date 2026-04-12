@@ -36,7 +36,7 @@ public static class ConnectionStringResolver
                 Username = username,
                 Password = password,
                 Port = int.TryParse(port, out int parsedPort) ? parsedPort : 5432,
-                SslMode = SslMode.Require,
+                SslMode = GetDefaultSslMode(host),
             };
 
             return builder.ConnectionString;
@@ -79,7 +79,7 @@ public static class ConnectionStringResolver
             Username = username,
             Password = password,
             Database = database,
-            SslMode = SslMode.Require,
+            SslMode = GetDefaultSslMode(uri.Host),
         };
 
         if (!string.IsNullOrWhiteSpace(uri.Query))
@@ -107,5 +107,12 @@ public static class ConnectionStringResolver
         }
 
         return builder.ConnectionString;
+    }
+
+    private static SslMode GetDefaultSslMode(string host)
+    {
+        return host.EndsWith(".railway.internal", StringComparison.OrdinalIgnoreCase)
+            ? SslMode.Disable
+            : SslMode.Require;
     }
 }
