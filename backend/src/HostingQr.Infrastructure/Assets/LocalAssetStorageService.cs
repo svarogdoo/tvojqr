@@ -1,5 +1,7 @@
 using HostingQr.Application.Abstractions;
 using Microsoft.AspNetCore.Hosting;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
 
 namespace HostingQr.Infrastructure.Assets;
 
@@ -14,8 +16,7 @@ public sealed class LocalAssetStorageService : IAssetStorageService
 
     public async Task<StoredAssetFile> SaveImageAsync(Guid projectId, Stream stream, string originalFileName, string contentType, CancellationToken cancellationToken = default)
     {
-        string extension = Path.GetExtension(originalFileName);
-        string storedFileName = $"{projectId:N}-{Guid.NewGuid():N}{extension}";
+        string storedFileName = $"{projectId:N}-{Guid.NewGuid():N}.webp";
         string webRootPath = _environment.WebRootPath;
         if (string.IsNullOrWhiteSpace(webRootPath))
         {
@@ -26,11 +27,18 @@ public sealed class LocalAssetStorageService : IAssetStorageService
         Directory.CreateDirectory(uploadsPath);
         string fullPath = Path.Combine(uploadsPath, storedFileName);
 
+        using Image image = await Image.LoadAsync(stream, cancellationToken);
+        WebpEncoder encoder = new()
+        {
+            Quality = 80,
+            FileFormat = WebpFileFormatType.Lossy,
+        };
+
         await using FileStream output = File.Create(fullPath);
-        await stream.CopyToAsync(output, cancellationToken);
+        await image.SaveAsWebpAsync(output, encoder, cancellationToken);
         await output.FlushAsync(cancellationToken);
 
-        return new StoredAssetFile(storedFileName, contentType, output.Length);
+        return new StoredAssetFile(storedFileName, "image/webp", output.Length);
     }
 
     public string GetPublicUrl(string storedFileName) => $"/uploads/{storedFileName}";

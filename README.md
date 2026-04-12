@@ -273,7 +273,7 @@ Status markers for tasks:
 7.1.a Choose storage backend (e.g. S3-compatible, Supabase Storage, Cloudflare R2, etc.)
 [PARTIAL] 7.1.b Implement upload pipeline from authenticated users.
 [PARTIAL] 7.1.c Save metadata (file type, size, language, order).
-7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
+[DONE] 7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
 7.2 Add file lifecycle management.
 7.2.a Delete/replace uploads
 7.2.b Versioning strategy (optional later)
