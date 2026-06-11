@@ -1,4 +1,5 @@
 <script lang="ts">
+  import logo from "$lib/assets/hostinqr-logo-black.svg";
   import { auth, signOut, startGoogleSignIn } from "$lib/stores/auth";
   import { language, languages } from "$lib/stores/language";
   import { translations } from "$lib/translations";
@@ -41,11 +42,18 @@
 </script>
 
 <!-- Navigation -->
-<nav class="fixed top-0 w-full z-50 border-b border-black/5 bg-white/75 backdrop-blur-xl">
+<nav
+  class="fixed top-0 w-full z-50 border-b border-black/5 bg-white/75 backdrop-blur-xl"
+>
   <div
     class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
   >
-    <a href="/" class="text-2xl font-semibold tracking-tight text-stone-900">HostingQr</a>
+    <a href="/" class="text-2xl font-semibold tracking-tight text-stone-700"
+      ><div class="flex gap-x-2 items-center">
+        <img src={logo} alt="logo" class="w-6 h-6" />
+        <p>HostingQr</p>
+      </div></a
+    >
     <div class="hidden md:flex space-x-6 items-center">
       <a
         href="/#services"
@@ -83,18 +91,23 @@
           class="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/90 px-3 py-2 text-sm text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:text-stone-900"
         >
           <span>{currentLanguage.flag}</span>
-          <span class="hidden sm:inline">{currentLanguage.code.toUpperCase()}</span>
+          <span class="hidden sm:inline"
+            >{currentLanguage.code.toUpperCase()}</span
+          >
           <span class="text-xs text-stone-400">▾</span>
         </button>
 
         {#if languageMenuOpen}
-          <div class="absolute right-0 top-full min-w-44 overflow-hidden rounded-2xl border border-stone-200 bg-white/98 shadow-[0_18px_45px_rgba(45,53,46,0.14)] backdrop-blur-sm">
+          <div
+            class="absolute right-0 top-full min-w-44 overflow-hidden rounded-2xl border border-stone-200 bg-white/98 shadow-[0_18px_45px_rgba(45,53,46,0.14)] backdrop-blur-sm"
+          >
             {#each languages as lang (lang.code)}
               <button
                 type="button"
                 on:click={() =>
                   changeLanguage(lang.code as "en" | "sr" | "ru" | "el")}
-                class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors hover:bg-stone-50 {currentLang === lang.code
+                class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors hover:bg-stone-50 {currentLang ===
+                lang.code
                   ? 'text-stone-900'
                   : 'text-stone-600'}"
               >
@@ -111,7 +124,11 @@
         {/if}
       </div>
 
-      <div class="relative py-2" role="presentation" on:mouseleave={() => (userMenuOpen = false)}>
+      <div
+        class="relative py-2"
+        role="presentation"
+        on:mouseleave={() => (userMenuOpen = false)}
+      >
         <button
           type="button"
           on:click={toggleUserMenu}
@@ -143,13 +160,20 @@
         </button>
 
         {#if userMenuOpen}
-          <div class="absolute right-0 top-full min-w-52 overflow-hidden rounded-2xl border border-stone-200 bg-white/98 shadow-[0_18px_45px_rgba(45,53,46,0.14)] backdrop-blur-sm">
+          <div
+            class="absolute right-0 top-full min-w-52 overflow-hidden rounded-2xl border border-stone-200 bg-white/98 shadow-[0_18px_45px_rgba(45,53,46,0.14)] backdrop-blur-sm"
+          >
             {#if $auth.status === "authenticated"}
               <div class="border-b border-stone-100 px-4 py-3">
-                <p class="text-sm font-medium text-stone-900">{$auth.user.displayName}</p>
+                <p class="text-sm font-medium text-stone-900">
+                  {$auth.user.displayName}
+                </p>
                 <p class="mt-1 text-xs text-stone-500">{$auth.user.email}</p>
               </div>
-              <a href="/dashboard" class="block px-4 py-3 text-sm text-stone-700 transition-colors hover:bg-stone-50">
+              <a
+                href="/dashboard"
+                class="block px-4 py-3 text-sm text-stone-700 transition-colors hover:bg-stone-50"
+              >
                 Your projects
               </a>
               <button
@@ -160,7 +184,9 @@
                 Log out
               </button>
             {:else if $auth.status === "loading"}
-              <div class="px-4 py-3 text-sm text-stone-500">Checking session...</div>
+              <div class="px-4 py-3 text-sm text-stone-500">
+                Checking session...
+              </div>
             {:else}
               <button
                 type="button"

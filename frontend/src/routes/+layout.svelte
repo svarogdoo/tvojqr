@@ -1,9 +1,9 @@
 <script lang="ts">
+  import favicon from "$lib/assets/hostinqr-logo.svg";
   import Snackbar from "$lib/components/Snackbar.svelte";
-  import favicon from "$lib/assets/favicon.svg";
   import { refreshSession } from "$lib/stores/auth";
-  import "../app.css";
   import { onMount } from "svelte";
+  import "../app.css";
 
   let { children } = $props();
 
