@@ -14,7 +14,16 @@ export type ProjectDetail = {
   backgroundColor: string;
   createdAt: string;
   updatedAt: string;
+  languages: ProjectLanguageVariant[];
   assets: Asset[];
+};
+
+export type ProjectLanguageVariant = {
+  id: string;
+  languageCode: string;
+  displayName: string;
+  isDefault: boolean;
+  sortOrder: number;
 };
 
 export type Asset = {

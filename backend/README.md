@@ -26,6 +26,8 @@ Current endpoint:
 - `GET /api/projects`
 - `POST /api/projects`
 - `GET /api/projects/{projectId}`
+- `POST /api/projects/{projectId}/languages`
+- `DELETE /api/projects/{projectId}/languages/{languageCode}`
 - `GET /api/slugs/{slug}/availability`
 - `POST /api/slugs/generate`
 - `GET /api/public/{slug}`
@@ -34,6 +36,7 @@ Current notes:
 
 - one user can own multiple projects
 - each project currently has one active slug
+- each project has one default language variant and can have additional language variants
 - random slug generation is server-side and uniqueness-checked
 - cookie auth is wired for backend sessions
 - session cookies currently use a 14-day idle timeout with sliding expiration

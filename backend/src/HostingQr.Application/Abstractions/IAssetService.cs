@@ -5,7 +5,7 @@ namespace HostingQr.Application.Abstractions;
 
 public interface IAssetService
 {
-    Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, IFormFileCollection files, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, string languageCode, IFormFileCollection files, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default);
 

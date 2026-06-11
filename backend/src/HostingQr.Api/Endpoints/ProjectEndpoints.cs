@@ -69,7 +69,8 @@ public static class ProjectEndpoints
             try
             {
                 IFormCollection form = await request.ReadFormAsync(cancellationToken);
-                var assets = await assetService.UploadImagesAsync(projectId, form.Files, cancellationToken);
+                string languageCode = form.TryGetValue("languageCode", out var value) ? value.ToString() : "en";
+                var assets = await assetService.UploadImagesAsync(projectId, languageCode, form.Files, cancellationToken);
                 return Results.Ok(assets);
             }
             catch (ArgumentException ex)
@@ -122,6 +123,40 @@ public static class ProjectEndpoints
         })
             .WithName("UpdateProjectStatus")
             .WithSummary("Updates the current project status.");
+
+        group.MapPost("/{projectId:guid}/languages", async (Guid projectId, CreateProjectLanguageRequest request, IProjectService projectService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ProjectDetailResponse? project = await projectService.AddLanguageAsync(projectId, request, cancellationToken);
+                return project is null ? Results.NotFound() : Results.Ok(project);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Conflict(new { message = ex.Message });
+            }
+        })
+            .WithName("AddProjectLanguage")
+            .WithSummary("Adds a language variant to a project.");
+
+        group.MapDelete("/{projectId:guid}/languages/{languageCode}", async (Guid projectId, string languageCode, IProjectService projectService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ProjectDetailResponse? project = await projectService.DeleteLanguageAsync(projectId, languageCode, cancellationToken);
+                return project is null ? Results.NotFound() : Results.Ok(project);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+        })
+            .WithName("DeleteProjectLanguage")
+            .WithSummary("Removes a non-default language variant from a project.");
 
         group.MapDelete("/{projectId:guid}", async (Guid projectId, IProjectService projectService, CancellationToken cancellationToken) =>
         {

@@ -11,6 +11,7 @@
     Asset,
     GeneratedSlugResponse,
     ProjectDetail,
+    ProjectLanguageVariant,
     SlugAvailabilityResponse,
     UpdateProjectRequest,
     UpdateProjectStatusRequest,
@@ -19,12 +20,24 @@
 
   const defaultBackgroundColor = "#f8f7f3";
   const slugCheckDelayMs = 700;
+  const availableLanguageOptions = [
+    { code: "en", name: "English", flag: "🇬🇧" },
+    { code: "hr", name: "Croatian", flag: "🇭🇷" },
+    { code: "de", name: "German", flag: "🇩🇪" },
+    { code: "it", name: "Italian", flag: "🇮🇹" },
+    { code: "fr", name: "French", flag: "🇫🇷" },
+    { code: "es", name: "Spanish", flag: "🇪🇸" },
+    { code: "sr", name: "Serbian", flag: "🇷🇸" },
+    { code: "ru", name: "Russian", flag: "🇷🇺" },
+    { code: "el", name: "Greek", flag: "🇬🇷" },
+  ];
 
   type DraftAsset = {
     id: string;
     file: File;
     previewUrl: string;
     originalFileName: string;
+    languageCode: string;
   };
 
   let projectId = "";
@@ -54,19 +67,22 @@
   let isDraft = false;
   let deletingAssetId = "";
   let removedSavedAssetIds = new Set<string>();
+  let removedLanguageCodes = new Set<string>();
   let allowNavigation = false;
   let slugCheckTimeout: ReturnType<typeof setTimeout> | null = null;
   let slugCheckRequestId = 0;
   let savedAssetOrderIds: string[] = [];
   let baselineSavedAssetOrderIds: string[] = [];
   let draggedSavedAssetId = "";
+  let addingLanguage = false;
+  let selectedNewLanguageCode = "";
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
     || form.backgroundColor !== savedForm.backgroundColor;
   $: hasAssetOrderChanges = savedAssetOrderIds.length === baselineSavedAssetOrderIds.length
     && savedAssetOrderIds.some((assetId, index) => assetId !== baselineSavedAssetOrderIds[index]);
-  $: hasUnsavedChanges = hasFormChanges || hasAssetOrderChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0;
+  $: hasUnsavedChanges = hasFormChanges || hasAssetOrderChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0 || removedLanguageCodes.size > 0;
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -119,6 +135,7 @@
         initializedProjectId = project.id;
       }
       removedSavedAssetIds = new Set<string>();
+      removedLanguageCodes = new Set<string>();
       slugMessage = "";
       slugError = "";
       uploadError = "";
@@ -308,38 +325,71 @@
         }
       }
 
-      if (!isDraft && hasAssetOrderChanges) {
-        const remainingAssetIds = savedAssetOrderIds.filter((assetId) => !removedSavedAssetIds.has(assetId));
-        const reorderResponse = await apiFetch(`/api/projects/${savedProject.id}/assets/order`, {
-          method: "PUT",
-          body: JSON.stringify({ assetIds: remainingAssetIds }),
-        });
+      if (!isDraft && removedLanguageCodes.size > 0) {
+        for (const languageCode of removedLanguageCodes) {
+          const deleteLanguageResponse = await apiFetch(`/api/projects/${savedProject.id}/languages/${languageCode}`, {
+            method: "DELETE",
+          });
 
-        if (!reorderResponse.ok) {
-          const body = (await reorderResponse.json()) as { message?: string };
-          showSnackbar(body.message ?? "Project settings saved, but image order could not be updated.", "error");
-          await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
-          return;
+          if (!deleteLanguageResponse.ok) {
+            const body = (await deleteLanguageResponse.json()) as { message?: string };
+            showSnackbar(body.message ?? "Project settings saved, but a language could not be removed.", "error");
+            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
+        }
+      }
+
+      if (!isDraft && hasAssetOrderChanges) {
+        for (const language of languageSections) {
+          const remainingAssetIds = savedAssetOrderIds.filter((assetId) => {
+            const asset = project?.assets.find((item) => item.id === assetId);
+            return asset?.languageCode === language.languageCode && !removedSavedAssetIds.has(assetId);
+          });
+
+          if (remainingAssetIds.length === 0) {
+            continue;
+          }
+
+          const reorderResponse = await apiFetch(`/api/projects/${savedProject.id}/assets/order`, {
+            method: "PUT",
+            body: JSON.stringify({ assetIds: remainingAssetIds }),
+          });
+
+          if (!reorderResponse.ok) {
+            const body = (await reorderResponse.json()) as { message?: string };
+            showSnackbar(body.message ?? "Project settings saved, but image order could not be updated.", "error");
+            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
         }
       }
 
       if (draftAssets.length > 0) {
-        const formData = new FormData();
-        draftAssets.forEach((asset) => {
-          formData.append("files", asset.file);
-        });
+        for (const language of languageSections) {
+          const languageDraftAssets = draftAssets.filter((asset) => asset.languageCode === language.languageCode);
+          if (languageDraftAssets.length === 0) {
+            continue;
+          }
 
-        const uploadResponse = await apiFetch(`/api/projects/${savedProject.id}/assets`, {
-          method: "POST",
-          body: formData,
-          headers: {},
-        });
+          const formData = new FormData();
+          formData.append("languageCode", language.languageCode);
+          languageDraftAssets.forEach((asset) => {
+            formData.append("files", asset.file);
+          });
 
-        if (!uploadResponse.ok) {
-          const body = (await uploadResponse.json()) as { message?: string };
-          showSnackbar(body.message ?? "Project saved, but images could not be uploaded.", "error");
-          await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
-          return;
+          const uploadResponse = await apiFetch(`/api/projects/${savedProject.id}/assets`, {
+            method: "POST",
+            body: formData,
+            headers: {},
+          });
+
+          if (!uploadResponse.ok) {
+            const body = (await uploadResponse.json()) as { message?: string };
+            showSnackbar(body.message ?? "Project saved, but images could not be uploaded.", "error");
+            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
         }
       }
 
@@ -354,6 +404,7 @@
       draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
       draftAssets = [];
       removedSavedAssetIds = new Set<string>();
+      removedLanguageCodes = new Set<string>();
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
       isDraft = false;
       slugMessage = "";
@@ -439,7 +490,60 @@
     slugError = "";
   }
 
-  async function uploadImages(event: Event) {
+  function languageMeta(languageCode: string) {
+    return availableLanguageOptions.find((language) => language.code === languageCode) ?? {
+      code: languageCode,
+      name: languageCode.toUpperCase(),
+      flag: "🌐",
+    };
+  }
+
+  async function addLanguage() {
+    if (!project || !selectedNewLanguageCode) {
+      return;
+    }
+
+    const option = languageMeta(selectedNewLanguageCode);
+    addingLanguage = true;
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}/languages`, {
+        method: "POST",
+        body: JSON.stringify({ languageCode: option.code, displayName: option.name }),
+      });
+
+      if (!response.ok) {
+        const body = (await response.json()) as { message?: string };
+        showSnackbar(body.message ?? "Unable to add language.", "error");
+        return;
+      }
+
+      project = (await response.json()) as ProjectDetail;
+      savedAssetOrderIds = project.assets.map((asset) => asset.id);
+      baselineSavedAssetOrderIds = [...savedAssetOrderIds];
+      selectedNewLanguageCode = "";
+      showSnackbar("Language added.", "success");
+    } catch {
+      showSnackbar("Unable to add language.", "error");
+    } finally {
+      addingLanguage = false;
+    }
+  }
+
+  function removeLanguage(language: ProjectLanguageVariant) {
+    if (!project || language.isDefault) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Remove ${language.displayName} and its images?`);
+    if (!confirmed) {
+      return;
+    }
+
+    removedLanguageCodes = new Set([...removedLanguageCodes, language.languageCode]);
+    showSnackbar("Language marked for removal. Save to apply changes.", "success");
+  }
+
+  async function uploadImages(event: Event, languageCode: string) {
     const input = event.currentTarget as HTMLInputElement;
     const files = input.files;
     if (!files || files.length === 0) {
@@ -455,6 +559,7 @@
         file,
         previewUrl: URL.createObjectURL(file),
         originalFileName: file.name,
+        languageCode,
       }));
 
       draftAssets = [...draftAssets, ...nextAssets];
@@ -529,7 +634,11 @@
   $: orderedSavedAssets = savedAssetOrderIds
     .map((assetId) => (project?.assets ?? []).find((asset: Asset) => asset.id === assetId))
     .filter((asset): asset is Asset => Boolean(asset));
-  $: visibleSavedAssets = orderedSavedAssets.filter((asset: Asset) => !removedSavedAssetIds.has(asset.id));
+  $: visibleSavedAssets = orderedSavedAssets.filter((asset: Asset) => !removedSavedAssetIds.has(asset.id) && !removedLanguageCodes.has(asset.languageCode));
+  $: languageSections = (project?.languages ?? [{ id: "draft-default", languageCode: "en", displayName: "English", isDefault: true, sortOrder: 0 }])
+    .filter((language) => !removedLanguageCodes.has(language.languageCode))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  $: addableLanguageOptions = availableLanguageOptions.filter((option) => !languageSections.some((language) => language.languageCode === option.code));
 
   onMount(async () => {
     projectId = window.location.pathname.split("/").at(-1) ?? "";
@@ -705,84 +814,84 @@
               </div>
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Images</p>
-                  <p class="mt-2 text-sm leading-7 text-stone-600">Upload one or more images for the default project language, then drag them into the order visitors should see.</p>
+                  <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Content languages</p>
+                  <p class="mt-2 text-sm leading-7 text-stone-600">Upload images per language, then drag them into the order visitors should see.</p>
                 </div>
-                <label class="btn-secondary w-full cursor-pointer text-center text-sm sm:w-auto">
-                  <span>{uploading ? "Uploading..." : "Add images"}</span>
-                  <input type="file" accept="image/*" multiple class="hidden" on:change={uploadImages} disabled={uploading} />
-                </label>
+                {#if !isDraft && addableLanguageOptions.length > 0}
+                  <div class="flex flex-col gap-2 sm:flex-row">
+                    <select bind:value={selectedNewLanguageCode} class="rounded-full border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 outline-none">
+                      <option value="">Add language...</option>
+                      {#each addableLanguageOptions as option}
+                        <option value={option.code}>{option.flag} {option.name}</option>
+                      {/each}
+                    </select>
+                    <button type="button" class="btn-secondary text-sm" on:click={addLanguage} disabled={!selectedNewLanguageCode || addingLanguage}>
+                      {addingLanguage ? "Adding..." : "+ Add"}
+                    </button>
+                  </div>
+                {/if}
               </div>
 
-              {#if isDraft ? draftAssets.length === 0 : visibleSavedAssets.length === 0 && draftAssets.length === 0}
-                <div class="mt-5 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
-                  No images uploaded yet.
-                </div>
-              {:else}
-                <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {#each visibleSavedAssets as asset}
-                    <div
-                      class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedSavedAssetId === asset.id ? "border-stone-400 opacity-60" : "border-stone-200"}`}
-                      draggable="true"
-                      on:dragstart={(event) => dragSavedAsset(event, asset.id)}
-                      on:dragend={() => draggedSavedAssetId = ""}
-                      on:dragover|preventDefault
-                      on:drop={(event) => dropSavedAsset(event, asset.id)}
-                      role="group"
-                      aria-label={`Drag to reorder ${asset.originalFileName}`}
-                    >
-                      <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
-                      <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h.01M12 7h.01M16 7h.01M8 12h.01M12 12h.01M16 12h.01M8 17h.01M12 17h.01M16 17h.01" />
-                        </svg>
-                        <span>Drag</span>
+              <div class="mt-5 grid gap-5">
+                {#each languageSections as language}
+                  {@const meta = languageMeta(language.languageCode)}
+                  {@const sectionSavedAssets = visibleSavedAssets.filter((asset) => asset.languageCode === language.languageCode)}
+                  {@const sectionDraftAssets = draftAssets.filter((asset) => asset.languageCode === language.languageCode)}
+                  <section class="rounded-[1.25rem] border border-stone-200 bg-white px-4 py-4 shadow-sm">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <p class="text-lg font-semibold text-stone-900">{meta.flag} {language.displayName}</p>
+                          <span class="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-medium uppercase text-stone-500">{language.languageCode}</span>
+                          {#if language.isDefault}
+                            <span class="rounded-full border border-[rgba(77,106,83,0.14)] bg-[rgba(236,245,238,0.7)] px-2.5 py-1 text-xs font-medium text-[color:var(--success-strong)]">Default</span>
+                          {/if}
+                        </div>
+                        <p class="mt-1 text-sm text-stone-500">Images in this section appear when visitors select this language.</p>
                       </div>
-                      <button
-                        type="button"
-                        on:click={() => deleteSavedAsset(asset.id)}
-                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
-                        aria-label={`Delete ${asset.originalFileName}`}
-                      >
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
-                        </svg>
-                      </button>
-                      <div class="border-t border-stone-100 px-3 py-3">
-                        <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
+                      <div class="flex flex-col gap-2 sm:flex-row">
+                        {#if !language.isDefault && !isDraft}
+                          <button type="button" class="btn-secondary text-sm" on:click={() => removeLanguage(language)}>Remove</button>
+                        {/if}
+                        <label class="btn-secondary cursor-pointer text-center text-sm">
+                          <span>{uploading ? "Uploading..." : "Add images"}</span>
+                          <input type="file" accept="image/*" multiple class="hidden" on:change={(event) => uploadImages(event, language.languageCode)} disabled={uploading} />
+                        </label>
                       </div>
                     </div>
-                  {/each}
 
-                  {#each draftAssets as asset}
-                    <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
-                      <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
-                      <button
-                        type="button"
-                        on:click={() => removeDraftAsset(asset.id)}
-                        class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white"
-                        aria-label={`Delete ${asset.originalFileName}`}
-                      >
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" />
-                        </svg>
-                      </button>
-                      <div class="border-t border-stone-100 px-3 py-3">
-                        <p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p>
-                        <p class="mt-1 text-xs text-stone-500">Pending upload</p>
+                    {#if sectionSavedAssets.length === 0 && sectionDraftAssets.length === 0}
+                      <div class="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
+                        No images uploaded for {language.displayName} yet.
                       </div>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
+                    {:else}
+                      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {#each sectionSavedAssets as asset}
+                          <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedSavedAssetId === asset.id ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragSavedAsset(event, asset.id)} on:dragend={() => draggedSavedAssetId = ""} on:dragover|preventDefault on:drop={(event) => dropSavedAsset(event, asset.id)} role="group" aria-label={`Drag to reorder ${asset.originalFileName}`}>
+                            <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                            <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">Drag</div>
+                            <button type="button" on:click={() => deleteSavedAsset(asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${asset.originalFileName}`}>
+                              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
+                            </button>
+                            <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p></div>
+                          </div>
+                        {/each}
+                        {#each sectionDraftAssets as asset}
+                          <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                            <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                            <button type="button" on:click={() => removeDraftAsset(asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${asset.originalFileName}`}>
+                              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
+                            </button>
+                            <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p><p class="mt-1 text-xs text-stone-500">Pending upload</p></div>
+                          </div>
+                        {/each}
+                      </div>
+                    {/if}
+                  </section>
+                {/each}
+              </div>
             </div>
 
             <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />

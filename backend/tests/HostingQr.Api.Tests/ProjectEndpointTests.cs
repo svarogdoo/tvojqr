@@ -225,29 +225,45 @@ public sealed class ProjectEndpointTests
 
     private sealed class FakeProjectService : IProjectService
     {
+        private static readonly IReadOnlyList<ProjectLanguageVariantResponse> Languages =
+        [
+            new ProjectLanguageVariantResponse(Guid.Parse("44444444-4444-4444-4444-444444444444"), "en", "English", true, 0),
+        ];
+
         public Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
         }
 
         public Task<ProjectDetailResponse?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<AssetResponse> assets =
             [
-                new AssetResponse(Guid.NewGuid(), "existing-menu.png", "image/png", 1234, "/uploads/existing-menu.png", "default", 0, DateTimeOffset.UtcNow),
+                new AssetResponse(Guid.NewGuid(), "existing-menu.png", "image/png", 1234, "/uploads/existing-menu.png", "en", 0, DateTimeOffset.UtcNow),
             ];
 
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, assets));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, assets));
         }
 
         public Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
         }
 
         public Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", request.Status, "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", request.Status, "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
+        }
+
+        public Task<ProjectDetailResponse?> AddLanguageAsync(Guid projectId, CreateProjectLanguageRequest request, CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<ProjectLanguageVariantResponse> languages = [..Languages, new ProjectLanguageVariantResponse(Guid.NewGuid(), request.LanguageCode, request.DisplayName, false, 1)];
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, languages, []));
+        }
+
+        public Task<ProjectDetailResponse?> DeleteLanguageAsync(Guid projectId, string languageCode, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
         }
 
         public Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -257,7 +273,7 @@ public sealed class ProjectEndpointTests
 
         public Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", "#f8f7f3", []));
+            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", "#f8f7f3", Languages, []));
         }
 
         public Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default)
@@ -296,11 +312,11 @@ public sealed class ProjectEndpointTests
             return Task.FromResult(true);
         }
 
-        public Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, IFormFileCollection files, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, string languageCode, IFormFileCollection files, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<AssetResponse> assets =
             [
-                new AssetResponse(Guid.NewGuid(), "menu.png", "image/png", 3, "/uploads/test-menu.png", "default", 0, DateTimeOffset.UtcNow),
+                new AssetResponse(Guid.NewGuid(), "menu.png", "image/png", 3, "/uploads/test-menu.png", languageCode, 0, DateTimeOffset.UtcNow),
             ];
 
             return Task.FromResult(assets);
@@ -309,7 +325,7 @@ public sealed class ProjectEndpointTests
         public Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<AssetResponse> assets = assetIds
-                .Select((assetId, index) => new AssetResponse(assetId, $"menu-{index}.png", "image/png", 3, $"/uploads/menu-{index}.png", "default", index, DateTimeOffset.UtcNow))
+                .Select((assetId, index) => new AssetResponse(assetId, $"menu-{index}.png", "image/png", 3, $"/uploads/menu-{index}.png", "en", index, DateTimeOffset.UtcNow))
                 .ToArray();
 
             return Task.FromResult<IReadOnlyList<AssetResponse>?>(assets);

@@ -119,6 +119,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IProjectLanguageVariantRepository, ProjectLanguageVariantRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<ISlugRepository, SlugRepository>();
         services.AddSingleton<MigrationRunner>();

@@ -30,7 +30,7 @@ public sealed class AssetService : IAssetService
         _assetStorageService = assetStorageService;
     }
 
-    public async Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, IFormFileCollection files, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, string languageCode, IFormFileCollection files, CancellationToken cancellationToken = default)
     {
         if (files.Count == 0)
         {
@@ -44,8 +44,9 @@ public sealed class AssetService : IAssetService
             throw new InvalidOperationException("Project was not found.");
         }
 
+        string normalizedLanguageCode = NormalizeLanguageCode(languageCode);
         List<CreateAssetRecord> records = [];
-        int startingOrder = (await _assetRepository.ListByProjectAsync(projectId, cancellationToken)).Count;
+        int startingOrder = (await _assetRepository.ListByProjectAsync(projectId, cancellationToken)).Count(asset => asset.LanguageCode == normalizedLanguageCode);
 
         for (int i = 0; i < files.Count; i++)
         {
@@ -60,7 +61,7 @@ public sealed class AssetService : IAssetService
             records.Add(new CreateAssetRecord(file.FileName, stored.StoredFileName, stored.ContentType, stored.SizeBytes, startingOrder + i));
         }
 
-        var saved = await _assetRepository.CreateAsync(projectId, "default", records, cancellationToken);
+        var saved = await _assetRepository.CreateAsync(projectId, normalizedLanguageCode, records, cancellationToken);
         return MapAssets(saved);
     }
 
@@ -98,15 +99,34 @@ public sealed class AssetService : IAssetService
         }
 
         var existingAssets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
-        HashSet<Guid> existingAssetIds = existingAssets.Select(asset => asset.Id).ToHashSet();
-        if (assetIds.Count != existingAssetIds.Count || assetIds.Any(assetId => !existingAssetIds.Contains(assetId)))
+        var orderedAssets = assetIds
+            .Select(assetId => existingAssets.SingleOrDefault(asset => asset.Id == assetId))
+            .ToArray();
+        if (orderedAssets.Any(asset => asset is null))
         {
-            throw new ArgumentException("Asset order must include every image for this project exactly once.");
+            throw new ArgumentException("Asset order contains an image that does not belong to this project.");
+        }
+
+        string languageCode = orderedAssets.FirstOrDefault()?.LanguageCode ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(languageCode) || existingAssets.Count(asset => asset.LanguageCode == languageCode) != assetIds.Count || orderedAssets.Any(asset => asset!.LanguageCode != languageCode))
+        {
+            throw new ArgumentException("Asset order must include every image for one language exactly once.");
         }
 
         await _assetRepository.UpdateSortOrderAsync(projectId, assetIds, cancellationToken);
         var updatedAssets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
         return MapAssets(updatedAssets);
+    }
+
+    private static string NormalizeLanguageCode(string languageCode)
+    {
+        string normalized = languageCode.Trim().ToLowerInvariant();
+        if (System.Text.RegularExpressions.Regex.IsMatch(normalized, "^[a-z]{2}$"))
+        {
+            return normalized;
+        }
+
+        throw new ArgumentException("Language code must be a two-letter code, for example en.", nameof(languageCode));
     }
 
     public IReadOnlyList<AssetResponse> MapAssets(IReadOnlyList<Domain.Assets.Asset> assets)

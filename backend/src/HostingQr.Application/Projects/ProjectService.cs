@@ -12,6 +12,7 @@ public sealed class ProjectService : IProjectService
     private readonly ISlugService _slugService;
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetService _assetService;
+    private readonly IProjectLanguageVariantRepository _languageVariantRepository;
 
     public ProjectService(
         ICurrentUserContext currentUserContext,
@@ -19,7 +20,8 @@ public sealed class ProjectService : IProjectService
         IProjectRepository projectRepository,
         ISlugService slugService,
         IAssetRepository assetRepository,
-        IAssetService assetService)
+        IAssetService assetService,
+        IProjectLanguageVariantRepository languageVariantRepository)
     {
         _currentUserContext = currentUserContext;
         _userRepository = userRepository;
@@ -27,6 +29,7 @@ public sealed class ProjectService : IProjectService
         _slugService = slugService;
         _assetRepository = assetRepository;
         _assetService = assetService;
+        _languageVariantRepository = languageVariantRepository;
     }
 
     public async Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default)
@@ -46,7 +49,7 @@ public sealed class ProjectService : IProjectService
 
         return project is null
             ? null
-            : new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetAssetsAsync(project.Id, cancellationToken));
+            : new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), await GetAssetsAsync(project.Id, cancellationToken));
     }
 
     public async Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
@@ -64,7 +67,8 @@ public sealed class ProjectService : IProjectService
 
         string backgroundColor = NormalizeBackgroundColor(request.BackgroundColor);
         Domain.Projects.ProjectWithSlug project = await _projectRepository.CreateAsync(userId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
-        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, []);
+        await _languageVariantRepository.CreateAsync(project.Id, "en", "English", true, 0, cancellationToken);
+        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), []);
     }
 
     public async Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
@@ -92,7 +96,7 @@ public sealed class ProjectService : IProjectService
         Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(userId, projectId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
         return updatedProject is null
             ? null
-            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetAssetsAsync(updatedProject.Id, cancellationToken));
+            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetLanguagesAsync(updatedProject.Id, cancellationToken), await GetAssetsAsync(updatedProject.Id, cancellationToken));
     }
 
     public async Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
@@ -103,7 +107,59 @@ public sealed class ProjectService : IProjectService
 
         return updatedProject is null
             ? null
-            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetAssetsAsync(updatedProject.Id, cancellationToken));
+            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetLanguagesAsync(updatedProject.Id, cancellationToken), await GetAssetsAsync(updatedProject.Id, cancellationToken));
+    }
+
+    public async Task<ProjectDetailResponse?> AddLanguageAsync(Guid projectId, CreateProjectLanguageRequest request, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null)
+        {
+            return null;
+        }
+
+        string languageCode = NormalizeLanguageCode(request.LanguageCode);
+        string displayName = string.IsNullOrWhiteSpace(request.DisplayName) ? languageCode.ToUpperInvariant() : request.DisplayName.Trim();
+        var languages = await _languageVariantRepository.ListByProjectAsync(projectId, cancellationToken);
+        if (languages.Any(language => language.LanguageCode == languageCode))
+        {
+            throw new InvalidOperationException("Language is already added to this project.");
+        }
+
+        await _languageVariantRepository.CreateAsync(projectId, languageCode, displayName, false, languages.Count, cancellationToken);
+        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), await GetAssetsAsync(project.Id, cancellationToken));
+    }
+
+    public async Task<ProjectDetailResponse?> DeleteLanguageAsync(Guid projectId, string languageCode, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null)
+        {
+            return null;
+        }
+
+        string normalizedLanguageCode = NormalizeLanguageCode(languageCode);
+        var languages = await _languageVariantRepository.ListByProjectAsync(projectId, cancellationToken);
+        if (languages.SingleOrDefault(language => language.LanguageCode == normalizedLanguageCode) is not { } language)
+        {
+            return null;
+        }
+
+        if (language.IsDefault)
+        {
+            throw new ArgumentException("Default language cannot be removed.");
+        }
+
+        var assets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
+        foreach (var asset in assets.Where(asset => asset.LanguageCode == normalizedLanguageCode))
+        {
+            await _assetService.DeleteImageAsync(projectId, asset.Id, cancellationToken);
+        }
+
+        await _languageVariantRepository.DeleteAsync(projectId, normalizedLanguageCode, cancellationToken);
+        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), await GetAssetsAsync(project.Id, cancellationToken));
     }
 
     public async Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -126,6 +182,7 @@ public sealed class ProjectService : IProjectService
                 project.OwnerDisplayName,
                 project.Status,
                 project.BackgroundColor,
+                await GetLanguagesAsync(project.ProjectId, cancellationToken),
                 project.Status == Domain.Projects.ProjectStatus.Active
                     ? await GetAssetsAsync(project.ProjectId, cancellationToken)
                     : []);
@@ -135,6 +192,14 @@ public sealed class ProjectService : IProjectService
     {
         var assets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
         return _assetService.MapAssets(assets);
+    }
+
+    private async Task<IReadOnlyList<ProjectLanguageVariantResponse>> GetLanguagesAsync(Guid projectId, CancellationToken cancellationToken)
+    {
+        var languages = await _languageVariantRepository.ListByProjectAsync(projectId, cancellationToken);
+        return languages
+            .Select(language => new ProjectLanguageVariantResponse(language.Id, language.LanguageCode, language.DisplayName, language.IsDefault, language.SortOrder))
+            .ToArray();
     }
 
     private static string NormalizeStatus(string status)
@@ -162,5 +227,16 @@ public sealed class ProjectService : IProjectService
         }
 
         throw new ArgumentException("Background color must be a valid hex color, for example #f8f7f3.", nameof(backgroundColor));
+    }
+
+    private static string NormalizeLanguageCode(string languageCode)
+    {
+        string normalized = languageCode.Trim().ToLowerInvariant();
+        if (System.Text.RegularExpressions.Regex.IsMatch(normalized, "^[a-z]{2}$"))
+        {
+            return normalized;
+        }
+
+        throw new ArgumentException("Language code must be a two-letter code, for example en.", nameof(languageCode));
     }
 }

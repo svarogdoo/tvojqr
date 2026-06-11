@@ -207,8 +207,8 @@ Status markers for tasks:
 3.2.a Reuse/keep multi-file preview and remove-file behavior from `src/routes/create-new/+page.svelte`.
 3.2.b Add upload validation (file type, file size, max file count).
 3.2.c Add user-facing validation messages before submit.
-3.3 Add language-aware content management to onboarding/dashboard.
-3.3.a Let user assign files to language variants.
+[PARTIAL] 3.3 Add language-aware content management to onboarding/dashboard.
+[DONE] 3.3.a Let user assign files to language variants.
 3.3.b Let user set default language.
 3.4 Add slug setup UX.
 3.4.a Validate slug format in UI.
@@ -230,9 +230,9 @@ Status markers for tasks:
 
 5.1 Replace hardcoded demo data with dynamic data source.
 5.1.a `src/lib/restaurants.ts` is currently a static example object.
-5.2 Implement real language switching on public pages.
-5.2.a Public page currently reads language store but does not render per-language assets/content yet.
-5.2.b Show only languages available for that page.
+[DONE] 5.2 Implement real language switching on public pages.
+[DONE] 5.2.a Public page currently reads language store but does not render per-language assets/content yet.
+[DONE] 5.2.b Show only languages available for that page.
 5.3 Support more than one asset/file per hosted page.
 5.3.a Image gallery / multi-page menu display.
 5.3.b PDF display/download behavior (if included in MVP).
@@ -265,7 +265,9 @@ Status markers for tasks:
 [DONE] 6.2.f.3 Stage asset add/remove changes in the editor until explicit save.
 [DONE] 6.2.f.4 Warn before leaving the project editor with unsaved changes.
 [DONE] 6.2.f.5 Reorder saved images from the project editor.
-6.2.g Manage languages
+[DONE] 6.2.g Manage languages
+[DONE] 6.2.g.1 Add/remove language sections in the project editor.
+[DONE] 6.2.g.2 Upload images into a selected language section.
 6.2.h Preview project changes before final save
 [PARTIAL] 6.2.i View/download QR code
 6.2.j If the user has no projects yet, show a clear empty state instead of a generic load/error message.
@@ -334,7 +336,7 @@ Status markers for tasks:
 [DONE] 10.1.b Projects/hosted pages (one user -> many projects)
 [DONE] 10.1.c Slugs (one active slug per project)
 [DONE] 10.1.c.1 Persist per-project public page background color.
-10.1.d Language variants
+[DONE] 10.1.d Language variants
 [PARTIAL] 10.1.e Assets/files
 10.1.f Subscriptions/plans
 10.1.g Billing events
@@ -347,6 +349,7 @@ Status markers for tasks:
 [DONE] 10.2.d.2 Upload default-language image assets
 [DONE] 10.2.d.3 Preserve project form state during upload/save attempts
 [DONE] 10.2.d.4 Update project status and delete a project
+[DONE] 10.2.d.5 Add/remove project language variants and upload assets per language.
 10.2.e Preview project before final save/publish
 [PARTIAL] 10.3 Add slug uniqueness checks and conflict handling.
 [DONE] 10.3.a Check custom slug availability
