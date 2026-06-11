@@ -42,6 +42,7 @@ Current notes:
 - migrations run automatically in the Development environment once local PostgreSQL is available
 - local Docker PostgreSQL is expected on `localhost:5433`
 - uploaded files are currently stored on local disk unless a persistent `Storage__UploadsRootPath` is configured
+- production uploads can be stored in Cloudflare R2 by setting `Storage__Provider=R2` and the R2 settings below
 
 Required local auth/frontend config:
 
@@ -57,6 +58,22 @@ Production auth/frontend alignment:
 - backend `Auth__FrontendBaseUrl` must be your real frontend origin, for example `https://hostingqr.com`
 - frontend `PUBLIC_API_BASE_URL` must be your real backend API origin, for example `https://api.hostingqr.com`
 - if backend `Auth__FrontendBaseUrl` still points to localhost, Google sign-in will redirect back to localhost even if the frontend API URL is correct
+
+Cloudflare R2 storage config:
+
+- keep these values only in backend env/user-secrets/Railway variables, never in frontend env
+- local development defaults to local disk storage when `Storage__Provider` is omitted
+
+```bash
+Storage__Provider=R2
+Storage__R2__AccountId=your-cloudflare-account-id
+Storage__R2__AccessKeyId=your-r2-access-key-id
+Storage__R2__SecretAccessKey=your-r2-secret-access-key
+Storage__R2__BucketName=your-r2-bucket-name
+Storage__R2__PublicBaseUrl=https://your-public-r2-url-or-custom-domain
+```
+
+When R2 is enabled, the backend stores the R2 object key in Postgres and returns public image URLs built from `Storage__R2__PublicBaseUrl`.
 
 Recommended local setup:
 

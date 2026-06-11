@@ -107,9 +107,15 @@ public static class DependencyInjection
         services.AddAuthorization();
         services.AddSingleton<IConfigureOptions<GoogleOptions>, GoogleAuthenticationConfigurator>();
 
+        StorageOptions storageOptions = configuration.GetSection(StorageOptions.SectionName).Get<StorageOptions>() ?? new StorageOptions();
+
         services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
         services.AddSingleton<IBackendInfoService, BackendInfoService>();
-        services.AddSingleton<IAssetStorageService, LocalAssetStorageService>();
+        services.AddSingleton<IAssetStorageService>(provider => storageOptions.UsesR2()
+            ? provider.GetRequiredService<R2AssetStorageService>()
+            : provider.GetRequiredService<LocalAssetStorageService>());
+        services.AddSingleton<LocalAssetStorageService>();
+        services.AddSingleton<R2AssetStorageService>();
         services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();

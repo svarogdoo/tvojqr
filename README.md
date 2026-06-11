@@ -272,15 +272,15 @@ Status markers for tasks:
 
 ### 7. File Storage & Hosting Infrastructure
 
-7.1 Replace email attachments as "storage" with real file storage provider.
-7.1.a Choose storage backend (e.g. S3-compatible, Supabase Storage, Cloudflare R2, etc.)
-[PARTIAL] 7.1.b Implement upload pipeline from authenticated users.
+[PARTIAL] 7.1 Replace email attachments as "storage" with real file storage provider.
+[DONE] 7.1.a Choose storage backend (Cloudflare R2).
+[DONE] 7.1.b Implement upload pipeline from authenticated users.
 [PARTIAL] 7.1.c Save metadata (file type, size, language, order).
 [DONE] 7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
 7.2 Add file lifecycle management.
 [PARTIAL] 7.2.a Delete/replace uploads
 7.2.b Versioning strategy (optional later)
-7.2.c Storage cleanup when content is removed
+7.2.c [PARTIAL] Storage cleanup when content is removed
 7.2.d Support multiple images per project and per language variant.
 7.3 Enforce limits (especially once billing exists).
 7.3.a Max file size
@@ -377,7 +377,7 @@ Status markers for tasks:
 12.4 Add environment setup documentation.
 [PARTIAL] 12.4.a Auth env vars
 [DONE] 12.4.a.1 Backend Google auth supports user-secrets / env-based local configuration.
-12.4.b Storage env vars
+12.4.b [DONE] Storage env vars
 12.4.c Billing env vars
 12.4.d Email env vars (if temporary flow remains)
 12.5 Add monitoring/error tracking for production.

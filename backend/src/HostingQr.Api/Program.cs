@@ -42,7 +42,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseStaticFiles();
 var storageOptions = app.Services.GetRequiredService<IOptions<StorageOptions>>().Value;
-if (!string.IsNullOrWhiteSpace(storageOptions.UploadsRootPath))
+if (!storageOptions.UsesR2() && !string.IsNullOrWhiteSpace(storageOptions.UploadsRootPath))
 {
     Directory.CreateDirectory(storageOptions.UploadsRootPath);
     app.UseStaticFiles(new StaticFileOptions
