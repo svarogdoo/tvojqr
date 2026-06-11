@@ -708,7 +708,7 @@
               <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Images</p>
-                  <p class="mt-2 text-sm leading-7 text-stone-600">Upload one or more images for the default project language.</p>
+                  <p class="mt-2 text-sm leading-7 text-stone-600">Upload one or more images for the default project language, then drag them into the order visitors should see.</p>
                 </div>
                 <label class="btn-secondary w-full cursor-pointer text-center text-sm sm:w-auto">
                   <span>{uploading ? "Uploading..." : "Add images"}</span>
