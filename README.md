@@ -258,6 +258,7 @@ Status markers for tasks:
 [DONE] 6.2.e Edit one active slug per project
 [DONE] 6.2.e.1 Group language selection into a navigation dropdown.
 [DONE] 6.2.e.2 Add an auth-aware user menu with projects/sign-out or sign-in actions.
+[DONE] 6.2.e.3 Auto-check slug availability after typing pauses.
 [PARTIAL] 6.2.f Manage uploads
 [DONE] 6.2.f.1 Add quick public-view access from dashboard project rows.
 [DONE] 6.2.f.2 Show project status in the dashboard list.
@@ -349,6 +350,7 @@ Status markers for tasks:
 [DONE] 10.3.a Check custom slug availability
 [DONE] 10.3.b Generate a random unique slug
 [DONE] 10.3.c Enforce one active slug per project
+[DONE] 10.3.d Debounce project-editor slug availability checks.
 10.4 Add audit/logging for important state changes (publish/unpublish, billing changes).
 
 ### 11. Localization / Translation System
