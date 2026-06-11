@@ -11,6 +11,7 @@ export type ProjectDetail = {
   name: string;
   slug: string;
   status: "active" | "disabled";
+  backgroundColor: string;
   createdAt: string;
   updatedAt: string;
   assets: Asset[];
@@ -30,6 +31,7 @@ export type Asset = {
 export type UpdateProjectRequest = {
   name: string;
   slug: string;
+  backgroundColor: string;
 };
 
 export type UpdateProjectStatusRequest = {

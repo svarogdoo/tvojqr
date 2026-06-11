@@ -15,6 +15,7 @@
     slug: string;
     ownerDisplayName: string;
     status: "active" | "disabled";
+    backgroundColor: string;
     assets: PublicAsset[];
   };
 
@@ -65,7 +66,7 @@
   {/if}
 </svelte:head>
 
-<div class="min-h-screen px-4 py-10 sm:px-6 lg:px-8">
+<div class="min-h-screen px-4 py-10 sm:px-6 lg:px-8" style={`background-color: ${project?.backgroundColor ?? "#f8f7f3"};`}>
   {#if state === "loading"}
     <div class="mx-auto max-w-3xl rounded-[2rem] border border-black/6 bg-white/86 p-10 text-center shadow-[0_24px_60px_rgba(45,53,46,0.08)]">
       <p class="text-lg text-stone-600">Loading page...</p>
@@ -79,7 +80,7 @@
           </div>
         {:else}
           {#each project.assets as asset}
-            <div class="overflow-hidden rounded-[1.75rem] border border-black/6 bg-white/92 shadow-[0_18px_45px_rgba(45,53,46,0.08)]">
+            <div class="overflow-hidden rounded-md">
               <img
                 src={toApiUrl(asset.url)}
                 alt={asset.originalFileName}

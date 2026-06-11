@@ -76,7 +76,7 @@ public sealed class ProjectEndpointTests
 
         HttpResponseMessage response = await client.PutAsJsonAsync(
             "/api/projects/11111111-1111-1111-1111-111111111111",
-            new UpdateProjectRequest("Updated Menu", "updated-menu"));
+            new UpdateProjectRequest("Updated Menu", "updated-menu", "#efece6"));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -84,6 +84,7 @@ public sealed class ProjectEndpointTests
         Assert.NotNull(payload);
         Assert.Equal("Updated Menu", payload.Name);
         Assert.Equal("updated-menu", payload.Slug);
+        Assert.Equal("#efece6", payload.BackgroundColor);
     }
 
     [Fact]
@@ -207,7 +208,7 @@ public sealed class ProjectEndpointTests
     {
         public Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
         }
 
         public Task<ProjectDetailResponse?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -217,17 +218,17 @@ public sealed class ProjectEndpointTests
                 new AssetResponse(Guid.NewGuid(), "existing-menu.png", "image/png", 1234, "/uploads/existing-menu.png", "default", 0, DateTimeOffset.UtcNow),
             ];
 
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, assets));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, assets));
         }
 
         public Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, "active", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
         }
 
         public Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", request.Status, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", request.Status, "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, []));
         }
 
         public Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -237,7 +238,7 @@ public sealed class ProjectEndpointTests
 
         public Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", []));
+            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", "#f8f7f3", []));
         }
 
         public Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default)

@@ -4,6 +4,8 @@ namespace HostingQr.Application.Projects;
 
 public sealed class ProjectService : IProjectService
 {
+    private const string DefaultBackgroundColor = "#f8f7f3";
+
     private readonly ICurrentUserContext _currentUserContext;
     private readonly IUserRepository _userRepository;
     private readonly IProjectRepository _projectRepository;
@@ -44,7 +46,7 @@ public sealed class ProjectService : IProjectService
 
         return project is null
             ? null
-            : new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.CreatedAt, project.UpdatedAt, await GetAssetsAsync(project.Id, cancellationToken));
+            : new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetAssetsAsync(project.Id, cancellationToken));
     }
 
     public async Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
@@ -60,8 +62,9 @@ public sealed class ProjectService : IProjectService
 
         await _userRepository.UpsertAsync(currentUser.Id, currentUser.Email, currentUser.DisplayName, cancellationToken);
 
-        Domain.Projects.ProjectWithSlug project = await _projectRepository.CreateAsync(userId, request.Name.Trim(), normalizedSlug, cancellationToken);
-        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.CreatedAt, project.UpdatedAt, []);
+        string backgroundColor = NormalizeBackgroundColor(request.BackgroundColor);
+        Domain.Projects.ProjectWithSlug project = await _projectRepository.CreateAsync(userId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
+        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, []);
     }
 
     public async Task<ProjectDetailResponse?> UpdateProjectAsync(Guid projectId, UpdateProjectRequest request, CancellationToken cancellationToken = default)
@@ -85,10 +88,11 @@ public sealed class ProjectService : IProjectService
             throw new InvalidOperationException("Slug is already in use.");
         }
 
-        Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(userId, projectId, request.Name.Trim(), normalizedSlug, cancellationToken);
+        string backgroundColor = NormalizeBackgroundColor(request.BackgroundColor);
+        Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(userId, projectId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
         return updatedProject is null
             ? null
-            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetAssetsAsync(updatedProject.Id, cancellationToken));
+            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetAssetsAsync(updatedProject.Id, cancellationToken));
     }
 
     public async Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
@@ -99,7 +103,7 @@ public sealed class ProjectService : IProjectService
 
         return updatedProject is null
             ? null
-            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetAssetsAsync(updatedProject.Id, cancellationToken));
+            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetAssetsAsync(updatedProject.Id, cancellationToken));
     }
 
     public async Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -121,6 +125,7 @@ public sealed class ProjectService : IProjectService
                 project.Slug,
                 project.OwnerDisplayName,
                 project.Status,
+                project.BackgroundColor,
                 project.Status == Domain.Projects.ProjectStatus.Active
                     ? await GetAssetsAsync(project.ProjectId, cancellationToken)
                     : []);
@@ -141,5 +146,21 @@ public sealed class ProjectService : IProjectService
             Domain.Projects.ProjectStatus.Disabled => Domain.Projects.ProjectStatus.Disabled,
             _ => throw new ArgumentException("Project status is invalid.", nameof(status)),
         };
+    }
+
+    private static string NormalizeBackgroundColor(string? backgroundColor)
+    {
+        if (string.IsNullOrWhiteSpace(backgroundColor))
+        {
+            return DefaultBackgroundColor;
+        }
+
+        string normalized = backgroundColor.Trim().ToLowerInvariant();
+        if (System.Text.RegularExpressions.Regex.IsMatch(normalized, "^#[0-9a-f]{6}$"))
+        {
+            return normalized;
+        }
+
+        throw new ArgumentException("Background color must be a valid hex color, for example #f8f7f3.", nameof(backgroundColor));
     }
 }

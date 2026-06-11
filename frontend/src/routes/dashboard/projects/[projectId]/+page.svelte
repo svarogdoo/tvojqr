@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
+  import { beforeNavigate, goto } from "$app/navigation";
   import ConfirmationModal from "$lib/components/ConfirmationModal.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
   import ProjectQrBuilder from "$lib/components/ProjectQrBuilder.svelte";
@@ -17,6 +17,8 @@
   } from "$lib/types/projects";
   import { onDestroy, onMount } from "svelte";
 
+  const defaultBackgroundColor = "#f8f7f3";
+
   type DraftAsset = {
     id: string;
     file: File;
@@ -31,7 +33,9 @@
   let form = {
     name: "",
     slug: "",
+    backgroundColor: defaultBackgroundColor,
   };
+  let savedForm = { ...form };
   let loading = true;
   let error = "";
   let saving = false;
@@ -49,6 +53,12 @@
   let isDraft = false;
   let deletingAssetId = "";
   let removedSavedAssetIds = new Set<string>();
+  let allowNavigation = false;
+
+  $: hasFormChanges = form.name !== savedForm.name
+    || form.slug !== savedForm.slug
+    || form.backgroundColor !== savedForm.backgroundColor;
+  $: hasUnsavedChanges = hasFormChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0;
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -93,7 +103,9 @@
         form = {
           name: project.name,
           slug: project.slug,
+          backgroundColor: project.backgroundColor || defaultBackgroundColor,
         };
+        savedForm = { ...form };
         initializedProjectId = project.id;
       }
       removedSavedAssetIds = new Set<string>();
@@ -166,6 +178,15 @@
     }
   }
 
+  async function gotoWithoutUnsavedWarning(path: string) {
+    allowNavigation = true;
+    try {
+      await goto(path);
+    } finally {
+      allowNavigation = false;
+    }
+  }
+
   async function saveProject() {
     if (!form.name.trim()) {
       showSnackbar("Project title is required.", "error");
@@ -179,6 +200,7 @@
       const payload: UpdateProjectRequest = {
         name: form.name.trim(),
         slug: form.slug.trim(),
+        backgroundColor: form.backgroundColor,
       };
 
       let response: Response;
@@ -229,7 +251,7 @@
 
           if (!deleteResponse.ok) {
             showSnackbar("Project settings saved, but some image deletions failed.", "error");
-            await goto(`/dashboard/projects/${savedProject.id}`);
+            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
             return;
           }
         }
@@ -250,7 +272,7 @@
         if (!uploadResponse.ok) {
           const body = (await uploadResponse.json()) as { message?: string };
           showSnackbar(body.message ?? "Project saved, but images could not be uploaded.", "error");
-          await goto(`/dashboard/projects/${savedProject.id}`);
+          await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
           return;
         }
       }
@@ -260,14 +282,16 @@
       form = {
         name: savedProject.name,
         slug: savedProject.slug,
+        backgroundColor: savedProject.backgroundColor || defaultBackgroundColor,
       };
+      savedForm = { ...form };
       draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
       draftAssets = [];
       removedSavedAssetIds = new Set<string>();
       isDraft = false;
       slugMessage = "";
+      await gotoWithoutUnsavedWarning("/dashboard");
       showSnackbar("Project settings saved.", "success");
-      await goto("/dashboard");
     } catch {
       showSnackbar("Unable to save project settings right now.", "error");
     } finally {
@@ -417,7 +441,9 @@
       form = {
         name: "",
         slug: "",
+        backgroundColor: defaultBackgroundColor,
       };
+      savedForm = { ...form };
       originalSlug = "";
       return;
     }
@@ -427,6 +453,31 @@
 
   onDestroy(() => {
     draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
+  });
+
+  beforeNavigate((navigation) => {
+    if (allowNavigation || !hasUnsavedChanges) {
+      return;
+    }
+
+    const shouldLeave = window.confirm("You have unsaved changes. Leave this page without saving?");
+    if (!shouldLeave) {
+      navigation.cancel();
+    }
+  });
+
+  onMount(() => {
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges || allowNavigation) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
   });
 </script>
 
@@ -522,6 +573,31 @@
               {/if}
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Public page background</p>
+              <p class="mt-2 text-sm leading-7 text-stone-600">Choose the background color visitors see behind your uploaded images.</p>
+              <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <label class="flex h-14 w-full cursor-pointer items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 sm:w-auto">
+                  <span class="text-sm font-medium text-stone-700">Color</span>
+                  <input
+                    type="color"
+                    bind:value={form.backgroundColor}
+                    class="h-9 w-14 cursor-pointer rounded-lg border border-stone-200 bg-transparent p-1"
+                    aria-label="Public page background color"
+                  />
+                </label>
+                <input
+                  bind:value={form.backgroundColor}
+                  pattern="#[0-9a-fA-F]{6}"
+                  maxlength="7"
+                  class="block w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 font-mono text-sm text-stone-900 outline-none transition-all focus:border-stone-400 sm:max-w-40"
+                  aria-label="Background color hex value"
+                />
+                <div class="h-14 rounded-2xl border border-stone-200 px-5 py-3 text-sm text-stone-600 sm:flex-1" style={`background-color: ${form.backgroundColor};`}>
+                  Preview
+                </div>
+              </div>
+            </div>
+            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Images</p>
@@ -592,7 +668,9 @@
             <div class="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Save settings</p>
-                <p class="mt-2 text-sm leading-7 text-stone-600">Save the project name and active slug before moving on to uploads and preview.</p>
+                <p class="mt-2 text-sm leading-7 text-stone-600">
+                  {hasUnsavedChanges ? "You have unsaved changes. Save before leaving this page." : "Your project settings are saved."}
+                </p>
               </div>
               <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {#if !isDraft}
@@ -609,8 +687,13 @@
                         : "Disable project"}
                   </button>
                 {/if}
-                <button type="button" class="btn-primary w-full text-sm sm:w-auto" on:click={saveProject} disabled={saving || deletingProject}>
-                  {saving ? "Saving..." : "Save settings"}
+                <button
+                  type="button"
+                  class={`w-full text-sm sm:w-auto ${hasUnsavedChanges ? "btn-primary shadow-[0_12px_28px_rgba(77,106,83,0.22)] ring-2 ring-[rgba(77,106,83,0.18)]" : "btn-secondary"}`}
+                  on:click={saveProject}
+                  disabled={saving || deletingProject || !hasUnsavedChanges}
+                >
+                  {saving ? "Saving..." : hasUnsavedChanges ? "Save changes" : "Saved"}
                 </button>
               </div>
             </div>

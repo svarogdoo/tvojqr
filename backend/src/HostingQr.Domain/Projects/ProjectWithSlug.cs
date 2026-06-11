@@ -10,6 +10,8 @@ public sealed record ProjectWithSlug
 
     public string Status { get; init; } = string.Empty;
 
+    public string BackgroundColor { get; init; } = string.Empty;
+
     public string Slug { get; init; } = string.Empty;
 
     public DateTimeOffset CreatedAt { get; init; }

@@ -11,4 +11,6 @@ public sealed record PublicProject
     public string OwnerDisplayName { get; init; } = string.Empty;
 
     public string Status { get; init; } = string.Empty;
+
+    public string BackgroundColor { get; init; } = string.Empty;
 }

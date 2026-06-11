@@ -262,10 +262,12 @@ Status markers for tasks:
 [DONE] 6.2.f.1 Add quick public-view access from dashboard project rows.
 [DONE] 6.2.f.2 Show project status in the dashboard list.
 [DONE] 6.2.f.3 Stage asset add/remove changes in the editor until explicit save.
+[DONE] 6.2.f.4 Warn before leaving the project editor with unsaved changes.
 6.2.g Manage languages
 6.2.h Preview project changes before final save
 [PARTIAL] 6.2.i View/download QR code
 6.2.j If the user has no projects yet, show a clear empty state instead of a generic load/error message.
+[DONE] 6.2.k Choose a public page background color from project settings.
 6.3 Define first account model decisions.
 6.3.a [DECIDED] One user can manage multiple projects
 6.3.b Owner profile display name
@@ -282,6 +284,7 @@ Status markers for tasks:
 7.2.b Versioning strategy (optional later)
 7.2.c [PARTIAL] Storage cleanup when content is removed
 7.2.d Support multiple images per project and per language variant.
+7.2.e Use a custom R2 asset domain for production image URLs, e.g. `assets.hostingqr.com` via `Storage__R2__PublicBaseUrl`.
 7.3 Enforce limits (especially once billing exists).
 7.3.a Max file size
 7.3.b Max total storage
@@ -327,6 +330,7 @@ Status markers for tasks:
 [DONE] 10.1.a Users
 [DONE] 10.1.b Projects/hosted pages (one user -> many projects)
 [DONE] 10.1.c Slugs (one active slug per project)
+[DONE] 10.1.c.1 Persist per-project public page background color.
 10.1.d Language variants
 [PARTIAL] 10.1.e Assets/files
 10.1.f Subscriptions/plans
@@ -364,6 +368,7 @@ Status markers for tasks:
 [PARTIAL] 12.1.c Image-only upload validation for MVP
 [DONE] 12.1.e Reusable snackbar feedback for save/upload outcomes
 [DONE] 12.1.f Reusable confirmation modal for destructive actions
+[DONE] 12.1.g Unsaved-change warning for project editor navigation/refresh.
 12.1.d Per-language upload validation
 12.2 Add abuse protection.
 12.2.a Rate limiting
