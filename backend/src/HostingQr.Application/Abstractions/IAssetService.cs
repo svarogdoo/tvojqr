@@ -9,5 +9,7 @@ public interface IAssetService
 
     Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default);
+
     IReadOnlyList<AssetResponse> MapAssets(IReadOnlyList<Domain.Assets.Asset> assets);
 }

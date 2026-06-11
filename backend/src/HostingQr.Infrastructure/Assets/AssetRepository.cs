@@ -96,4 +96,29 @@ public sealed class AssetRepository : IAssetRepository
         int affected = await connection.ExecuteAsync(new CommandDefinition(sql, new { AssetId = assetId }, cancellationToken: cancellationToken));
         return affected > 0;
     }
+
+    public async Task UpdateSortOrderAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            update assets
+            set sort_order = @SortOrder
+            where id = @AssetId and project_id = @ProjectId;
+            """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        for (int i = 0; i < assetIds.Count; i++)
+        {
+            await connection.ExecuteAsync(new CommandDefinition(sql, new
+            {
+                ProjectId = projectId,
+                AssetId = assetIds[i],
+                SortOrder = i,
+            }, transaction, cancellationToken: cancellationToken));
+        }
+
+        transaction.Commit();
+    }
 }

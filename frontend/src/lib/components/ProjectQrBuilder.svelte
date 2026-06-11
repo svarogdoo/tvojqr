@@ -102,6 +102,21 @@
     });
   }
 
+  async function copyTargetUrl() {
+    const targetUrl = buildTargetUrl();
+    if (!targetUrl) {
+      showSnackbar("Add a slug first so there is a URL to copy.", "error");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(targetUrl);
+      showSnackbar("Public URL copied.", "success");
+    } catch {
+      showSnackbar("Unable to copy public URL.", "error");
+    }
+  }
+
   function renderQr() {
     if (!QRCodeStylingCtor || !qrMount) {
       return;
@@ -179,10 +194,26 @@
       </div>
 
       <div class="rounded-[1.5rem] border border-stone-200 bg-white px-5 py-5 shadow-sm">
-      <p class="text-sm font-medium text-stone-700">Target</p>
-      <p class="mt-2 break-all text-sm leading-7 text-stone-600">
-        {buildTargetUrl() || "Set a slug to generate a project QR code."}
-      </p>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-stone-700">Target</p>
+          <p class="mt-2 break-all text-sm leading-7 text-stone-600">
+            {buildTargetUrl() || "Set a slug to generate a project QR code."}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 shadow-sm transition-colors hover:border-stone-300 hover:text-stone-900"
+          on:click={copyTargetUrl}
+          aria-label="Copy public URL"
+          title="Copy public URL"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="11" height="11" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+      </div>
 
       <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <button type="button" class="btn-primary w-full text-sm sm:w-auto" on:click={() => downloadQr("png")}>

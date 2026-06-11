@@ -264,6 +264,7 @@ Status markers for tasks:
 [DONE] 6.2.f.2 Show project status in the dashboard list.
 [DONE] 6.2.f.3 Stage asset add/remove changes in the editor until explicit save.
 [DONE] 6.2.f.4 Warn before leaving the project editor with unsaved changes.
+[DONE] 6.2.f.5 Reorder saved images from the project editor.
 6.2.g Manage languages
 6.2.h Preview project changes before final save
 [PARTIAL] 6.2.i View/download QR code
@@ -284,7 +285,8 @@ Status markers for tasks:
 [PARTIAL] 7.2.a Delete/replace uploads
 7.2.b Versioning strategy (optional later)
 7.2.c [PARTIAL] Storage cleanup when content is removed
-7.2.d Support multiple images per project and per language variant.
+[PARTIAL] 7.2.d Support multiple images per project and per language variant.
+[DONE] 7.2.d.1 Persist saved image display order per project.
 7.2.e Use a custom R2 asset domain for production image URLs, e.g. `assets.hostingqr.com` via `Storage__R2__PublicBaseUrl`.
 7.3 Enforce limits (especially once billing exists).
 7.3.a Max file size

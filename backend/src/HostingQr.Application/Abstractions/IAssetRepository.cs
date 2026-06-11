@@ -10,6 +10,8 @@ public interface IAssetRepository
 
     Task<Asset?> GetByIdAsync(Guid assetId, CancellationToken cancellationToken = default);
 
+    Task UpdateSortOrderAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default);
+
     Task<bool> DeleteAsync(Guid assetId, CancellationToken cancellationToken = default);
 }
 

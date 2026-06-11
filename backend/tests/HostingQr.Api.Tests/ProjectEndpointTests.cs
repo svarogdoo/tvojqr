@@ -121,6 +121,25 @@ public sealed class ProjectEndpointTests
         Assert.Equal("menu.png", payload[0].OriginalFileName);
     }
 
+    [Fact]
+    public async Task PutProjectAssetsOrder_ReturnsReorderedAssets()
+    {
+        await using TestApplicationFactory factory = new(authenticated: true);
+        HttpClient client = factory.CreateClient();
+        Guid firstAssetId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        Guid secondAssetId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+
+        HttpResponseMessage response = await client.PutAsJsonAsync(
+            "/api/projects/11111111-1111-1111-1111-111111111111/assets/order",
+            new ReorderAssetsRequest([secondAssetId, firstAssetId]));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        List<AssetResponse>? payload = await response.Content.ReadFromJsonAsync<List<AssetResponse>>();
+        Assert.NotNull(payload);
+        Assert.Equal([secondAssetId, firstAssetId], payload.Select(asset => asset.Id));
+    }
+
     private sealed class TestApplicationFactory : WebApplicationFactory<Program>
     {
         private readonly bool _authenticated;
@@ -285,6 +304,15 @@ public sealed class ProjectEndpointTests
             ];
 
             return Task.FromResult(assets);
+        }
+
+        public Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<AssetResponse> assets = assetIds
+                .Select((assetId, index) => new AssetResponse(assetId, $"menu-{index}.png", "image/png", 3, $"/uploads/menu-{index}.png", "default", index, DateTimeOffset.UtcNow))
+                .ToArray();
+
+            return Task.FromResult<IReadOnlyList<AssetResponse>?>(assets);
         }
     }
 }

@@ -9,3 +9,5 @@ public sealed record AssetResponse(
     string LanguageCode,
     int SortOrder,
     DateTimeOffset CreatedAt);
+
+public sealed record ReorderAssetsRequest(IReadOnlyList<Guid> AssetIds);

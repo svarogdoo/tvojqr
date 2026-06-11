@@ -57,11 +57,16 @@
   let allowNavigation = false;
   let slugCheckTimeout: ReturnType<typeof setTimeout> | null = null;
   let slugCheckRequestId = 0;
+  let savedAssetOrderIds: string[] = [];
+  let baselineSavedAssetOrderIds: string[] = [];
+  let draggedSavedAssetId = "";
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
     || form.backgroundColor !== savedForm.backgroundColor;
-  $: hasUnsavedChanges = hasFormChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0;
+  $: hasAssetOrderChanges = savedAssetOrderIds.length === baselineSavedAssetOrderIds.length
+    && savedAssetOrderIds.some((assetId, index) => assetId !== baselineSavedAssetOrderIds[index]);
+  $: hasUnsavedChanges = hasFormChanges || hasAssetOrderChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0;
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -102,6 +107,8 @@
 
       project = (await response.json()) as ProjectDetail;
       originalSlug = project.slug;
+      savedAssetOrderIds = project.assets.map((asset) => asset.id);
+      baselineSavedAssetOrderIds = [...savedAssetOrderIds];
       if (!preserveForm || initializedProjectId !== project.id) {
         form = {
           name: project.name,
@@ -301,6 +308,21 @@
         }
       }
 
+      if (!isDraft && hasAssetOrderChanges) {
+        const remainingAssetIds = savedAssetOrderIds.filter((assetId) => !removedSavedAssetIds.has(assetId));
+        const reorderResponse = await apiFetch(`/api/projects/${savedProject.id}/assets/order`, {
+          method: "PUT",
+          body: JSON.stringify({ assetIds: remainingAssetIds }),
+        });
+
+        if (!reorderResponse.ok) {
+          const body = (await reorderResponse.json()) as { message?: string };
+          showSnackbar(body.message ?? "Project settings saved, but image order could not be updated.", "error");
+          await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+          return;
+        }
+      }
+
       if (draftAssets.length > 0) {
         const formData = new FormData();
         draftAssets.forEach((asset) => {
@@ -332,6 +354,7 @@
       draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
       draftAssets = [];
       removedSavedAssetIds = new Set<string>();
+      baselineSavedAssetOrderIds = [...savedAssetOrderIds];
       isDraft = false;
       slugMessage = "";
       await gotoWithoutUnsavedWarning("/dashboard");
@@ -472,7 +495,41 @@
     showSnackbar("Image restored.", "info");
   }
 
-  $: visibleSavedAssets = (project?.assets ?? []).filter((asset: Asset) => !removedSavedAssetIds.has(asset.id));
+  function moveSavedAsset(targetAssetId: string) {
+    if (!draggedSavedAssetId || draggedSavedAssetId === targetAssetId) {
+      return;
+    }
+
+    const nextOrder = [...savedAssetOrderIds];
+    const fromIndex = nextOrder.indexOf(draggedSavedAssetId);
+    const toIndex = nextOrder.indexOf(targetAssetId);
+    if (fromIndex === -1 || toIndex === -1) {
+      return;
+    }
+
+    const [assetId] = nextOrder.splice(fromIndex, 1);
+    nextOrder.splice(toIndex, 0, assetId);
+    savedAssetOrderIds = nextOrder;
+  }
+
+  function dragSavedAsset(event: DragEvent, assetId: string) {
+    draggedSavedAssetId = assetId;
+    event.dataTransfer?.setData("text/plain", assetId);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+    }
+  }
+
+  function dropSavedAsset(event: DragEvent, targetAssetId: string) {
+    event.preventDefault();
+    moveSavedAsset(targetAssetId);
+    draggedSavedAssetId = "";
+  }
+
+  $: orderedSavedAssets = savedAssetOrderIds
+    .map((assetId) => (project?.assets ?? []).find((asset: Asset) => asset.id === assetId))
+    .filter((asset): asset is Asset => Boolean(asset));
+  $: visibleSavedAssets = orderedSavedAssets.filter((asset: Asset) => !removedSavedAssetIds.has(asset.id));
 
   onMount(async () => {
     projectId = window.location.pathname.split("/").at(-1) ?? "";
@@ -666,8 +723,23 @@
               {:else}
                 <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {#each visibleSavedAssets as asset}
-                    <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                    <div
+                      class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedSavedAssetId === asset.id ? "border-stone-400 opacity-60" : "border-stone-200"}`}
+                      draggable="true"
+                      on:dragstart={(event) => dragSavedAsset(event, asset.id)}
+                      on:dragend={() => draggedSavedAssetId = ""}
+                      on:dragover|preventDefault
+                      on:drop={(event) => dropSavedAsset(event, asset.id)}
+                      role="group"
+                      aria-label={`Drag to reorder ${asset.originalFileName}`}
+                    >
                       <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                      <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h.01M12 7h.01M16 7h.01M8 12h.01M12 12h.01M16 12h.01M8 17h.01M12 17h.01M16 17h.01" />
+                        </svg>
+                        <span>Drag</span>
+                      </div>
                       <button
                         type="button"
                         on:click={() => deleteSavedAsset(asset.id)}

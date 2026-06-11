@@ -83,6 +83,32 @@ public sealed class AssetService : IAssetService
         return await _assetRepository.DeleteAsync(assetId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null)
+        {
+            return null;
+        }
+
+        if (assetIds.Count != assetIds.Distinct().Count())
+        {
+            throw new ArgumentException("Asset order contains duplicate images.");
+        }
+
+        var existingAssets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
+        HashSet<Guid> existingAssetIds = existingAssets.Select(asset => asset.Id).ToHashSet();
+        if (assetIds.Count != existingAssetIds.Count || assetIds.Any(assetId => !existingAssetIds.Contains(assetId)))
+        {
+            throw new ArgumentException("Asset order must include every image for this project exactly once.");
+        }
+
+        await _assetRepository.UpdateSortOrderAsync(projectId, assetIds, cancellationToken);
+        var updatedAssets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
+        return MapAssets(updatedAssets);
+    }
+
     public IReadOnlyList<AssetResponse> MapAssets(IReadOnlyList<Domain.Assets.Asset> assets)
     {
         return assets

@@ -1,4 +1,5 @@
 using HostingQr.Application.Abstractions;
+using HostingQr.Application.Assets;
 using HostingQr.Application.Projects;
 using Microsoft.AspNetCore.Authorization;
 
@@ -91,6 +92,21 @@ public static class ProjectEndpoints
         })
             .WithName("DeleteProjectAsset")
             .WithSummary("Deletes one uploaded image asset from a project.");
+
+        group.MapPut("/{projectId:guid}/assets/order", async (Guid projectId, ReorderAssetsRequest request, IAssetService assetService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                IReadOnlyList<AssetResponse>? assets = await assetService.ReorderImagesAsync(projectId, request.AssetIds, cancellationToken);
+                return assets is null ? Results.NotFound() : Results.Ok(assets);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+        })
+            .WithName("ReorderProjectAssets")
+            .WithSummary("Updates the display order for project image assets.");
 
         group.MapPatch("/{projectId:guid}/status", async (Guid projectId, UpdateProjectStatusRequest request, IProjectService projectService, CancellationToken cancellationToken) =>
         {
