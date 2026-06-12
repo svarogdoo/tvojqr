@@ -167,9 +167,9 @@ Status markers for tasks:
 [DONE] 1.1.c Align examples/services sections with actual MVP features.
 1.2 Replace placeholder contact form behavior with real backend handling or remove it until supported.
 1.2.a `src/lib/components/Contact.svelte` currently simulates success locally only.
-1.3 Add pricing section on front page (even if prices are "coming soon" initially).
-1.3.a Show planned tiers and key differences.
-1.3.b Add billing/subscription CTA.
+[DONE] 1.3 Add pricing section on front page (even if prices are "coming soon" initially).
+[DONE] 1.3.a Show planned tiers and key differences.
+[DONE] 1.3.b Add billing/subscription CTA.
 1.4 Improve navigation for product app flow.
 1.4.a Add clear links for `Login`, `Dashboard`, `Pricing`.
 1.4.b Keep current multilingual language switch but ensure labels remain consistent.

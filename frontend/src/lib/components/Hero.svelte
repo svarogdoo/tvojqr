@@ -29,7 +29,7 @@
         </p>
         <div class="mt-10 flex flex-col gap-3 sm:flex-row">
           <a
-            href="/create-new"
+            href="/pricing"
             class="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3.5 text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
           >
             {t.hero.cta}

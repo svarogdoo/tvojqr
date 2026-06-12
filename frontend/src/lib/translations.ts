@@ -3,10 +3,11 @@ export const translations = {
     nav: {
       services: "Services",
       examples: "Examples",
+      pricing: "Pricing",
       contact: "Contact",
     },
     hero: {
-      title: "Upload your file, choose your slug, share your QR",
+      title: "Upload your file, share your QR",
       description:
         "Create a simple public page for menus, documents, and images. HostingQr helps you upload content, set a shareable URL, and generate a QR code in minutes.",
       cta: "Create your page",
@@ -162,6 +163,7 @@ export const translations = {
     nav: {
       services: "Usluge",
       examples: "Primeri",
+      pricing: "Cenovnik",
       contact: "Kontakt",
     },
     hero: {
@@ -323,6 +325,7 @@ export const translations = {
     nav: {
       services: "Услуги",
       examples: "Примеры",
+      pricing: "Цены",
       contact: "Контакт",
     },
     hero: {
@@ -483,6 +486,7 @@ export const translations = {
     nav: {
       services: "Υπηρεσίες",
       examples: "Παραδείγματα",
+      pricing: "Τιμολόγηση",
       contact: "Επικοινωνία",
     },
     hero: {

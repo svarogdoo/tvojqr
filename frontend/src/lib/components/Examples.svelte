@@ -25,7 +25,7 @@
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
       {#each t.examples.list as example, idx (example.title)}
         <a
-          href={idx === 0 ? "/restoran" : "/create-new"}
+          href={idx === 0 ? "/restoran" : "/pricing#multilanguage-example"}
           class="group overflow-hidden rounded-[1.75rem] border border-black/8 bg-white/94 shadow-[0_16px_40px_rgba(45,53,46,0.08)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(45,53,46,0.12)]"
         >
           <div class="border-b border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-8">
@@ -37,7 +37,7 @@
           </div>
           <div class="flex items-center justify-between px-6 py-5">
             <span class="text-sm font-medium text-stone-900">
-              {idx === 0 ? t.examples.viewDetails : "Start your own"}
+              {idx === 0 ? t.examples.viewDetails : "See multilanguage example"}
             </span>
             <span class="text-stone-400 transition-transform duration-300 group-hover:translate-x-1">-></span>
           </div>

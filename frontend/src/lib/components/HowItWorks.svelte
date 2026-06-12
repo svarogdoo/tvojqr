@@ -66,7 +66,7 @@
     <div class="text-center mt-16">
       <p class="mb-6 text-stone-600">{t.howItWorks.ctaDescription}</p>
       <a
-        href="/create-new"
+        href="/pricing"
         class="inline-flex items-center rounded-full border border-stone-300 bg-white px-6 py-3.5 text-base font-medium text-stone-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-400"
       >
         {t.howItWorks.cta}

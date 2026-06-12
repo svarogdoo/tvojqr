@@ -68,6 +68,12 @@
         {t.nav.examples}
       </a>
       <a
+        href="/pricing"
+        class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
+      >
+        {t.nav.pricing}
+      </a>
+      <a
         href="/#contact"
         class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >

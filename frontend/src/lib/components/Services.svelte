@@ -42,7 +42,7 @@
               {service.description}
             </p>
             <a
-              href="/create-new"
+              href="/pricing"
               class="text-sm font-medium text-stone-900 transition-colors duration-300 hover:text-stone-600"
             >
               {t.services.readMore} ->
@@ -54,7 +54,7 @@
 
     <div class="mt-12 text-center">
       <a
-        href="/create-new"
+        href="/pricing"
         class="inline-flex items-center rounded-full bg-stone-900 px-6 py-3.5 text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
       >
         {t.services.cta}
