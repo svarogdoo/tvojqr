@@ -2,20 +2,20 @@
 
 ## User-Facing Goal
 
-People entering the site should land on a pricing page instead of the old create-new intake page.
+People entering the site should land on a pricing page with a clear main pricing grid plus dedicated custom and service cards.
 
 ## Success Criteria
 
-- `/pricing` is the new entry destination.
-- The page shows Free, Monthly, and Pro options.
-- The page includes simple and multilanguage example buttons/previews.
+- `/pricing` remains the entry destination.
+- The page shows the core plan grid and a restored Custom plan presentation.
+- The page includes dedicated translation/redesign and custom-work cards.
 - No live Polar.sh checkout is connected yet.
 
 ## UX Notes
 
 - Keep the pricing page clean and easy to scan.
-- Make the plan limits obvious.
-- Make the example previews feel like real product demos.
+- Keep the custom plan visually understated.
+- Make the translate/redesign card feel like a distinct service callout.
 
 ## Risks Or Tradeoffs
 

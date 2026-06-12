@@ -311,7 +311,7 @@ Status markers for tasks:
 
 ### 9. Billing, Pricing & Payments (Deferred Until Core Product Flow Is Stable)
 
-9.1 Define plan structure before pricing amounts.
+[PARTIAL] 9.1 Define plan structure before pricing amounts.
 9.1.a Tier names
 9.1.b Feature limits (projects, languages, storage, traffic, file types)
 9.1.c Free tier and/or free trial policy

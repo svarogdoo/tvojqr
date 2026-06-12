@@ -65,3 +65,7 @@ Latest pass moved World Cup to the lead position and softened Standard so the Wo
 Latest pass removed the bottom table, moved the pricing details into the cards, and used the provided football background asset.
 
 Latest pass removed the Design row, increased button spacing, and updated the contact callout copy.
+
+Latest pass restored the Custom plan as a one-line note and added a quote-style translate/redesign section.
+
+Verified with `npm run check` and `npm run build`.
