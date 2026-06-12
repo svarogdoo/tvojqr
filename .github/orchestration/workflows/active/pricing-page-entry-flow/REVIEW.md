@@ -7,7 +7,7 @@
 ## Residual Risks
 
 - Pricing buttons are non-functional until Polar wiring is added.
-- The custom and service cards may need copy tuning after a visual pass.
+- Email delivery depends on valid SMTP credentials.
 
 ## Verification Notes
 

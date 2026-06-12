@@ -18,7 +18,7 @@ None
 
 ## Notes
 
-The old `/create-new` route is being removed and replaced with `/pricing`.
+The pricing page now routes contact CTAs to a dedicated `/contact` page.
 
 Pricing page has been simplified for a cleaner visual hierarchy.
 
@@ -66,6 +66,6 @@ Latest pass removed the bottom table, moved the pricing details into the cards, 
 
 Latest pass removed the Design row, increased button spacing, and updated the contact callout copy.
 
-Latest pass restored the Custom plan as a one-line note and added a quote-style translate/redesign section.
+Latest pass updated World Cup pricing to dollars and added a dedicated contact request form.
 
 Verified with `npm run check` and `npm run build`.

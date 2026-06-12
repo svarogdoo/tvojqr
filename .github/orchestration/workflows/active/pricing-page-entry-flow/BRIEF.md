@@ -2,20 +2,20 @@
 
 ## User-Facing Goal
 
-People entering the site should land on a pricing page with a clear main pricing grid plus dedicated custom and service cards.
+People entering the site should see a pricing page with a clear contact path and a dedicated contact form page for request submissions.
 
 ## Success Criteria
 
 - `/pricing` remains the entry destination.
-- The page shows the core plan grid and a restored Custom plan presentation.
-- The page includes dedicated translation/redesign and custom-work cards.
-- No live Polar.sh checkout is connected yet.
+- Contact buttons go to `/contact`.
+- The contact page collects name, email, optional files, optional languages, and a free-form message.
+- Submitted requests are emailed to the configured address.
 
 ## UX Notes
 
 - Keep the pricing page clean and easy to scan.
 - Keep the custom plan visually understated.
-- Make the translate/redesign card feel like a distinct service callout.
+- Make the contact form straightforward and confidence-building.
 
 ## Risks Or Tradeoffs
 

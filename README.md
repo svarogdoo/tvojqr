@@ -327,6 +327,11 @@ Status markers for tasks:
 9.4.a Block/limit actions when user exceeds tier
 9.4.b Grace period behavior after failed payment
 9.4.c Downgrade handling when usage exceeds new tier
+[DONE] 9.5 Add a pricing contact form that emails inbound requests.
+9.5.a Name and email required
+9.5.b Optional file upload for hosted content
+9.5.c Optional multiple-language request details
+9.5.d Success confirmation after submission
 
 ### 10. Data Model & Backend Foundation
 

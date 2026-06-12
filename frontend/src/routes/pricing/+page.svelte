@@ -21,10 +21,11 @@
       badge: "World Cup",
       featured: false,
       price: {
-        monthly: "£15 / month",
-        annual: "£150 / year",
+        monthly: "$15 / month",
+        annual: "$150 / year",
       },
-      description: "Need your menu in many languages or change prices quickly?",
+      description:
+        "Need your menu in many languages or to change prices quickly?",
       button: "Choose World Cup",
       details: [
         { label: "Projects", value: "2" },
@@ -235,8 +236,10 @@
 
     <div class="mx-auto mt-10 max-w-3xl text-center">
       <p class="text-sm text-stone-600">
-        <span class="font-medium text-stone-900">Custom plan</span> available if you need something tailored. <a
-          href="/#contact"
+        <span class="font-medium text-stone-900">Custom plan</span> available if
+        you need something tailored.
+        <a
+          href="/contact"
           class="inline-flex rounded-full bg-stone-200 px-2.5 py-1 font-medium text-stone-800 transition-colors hover:bg-stone-300"
           >Contact us</a
         >.
@@ -244,17 +247,19 @@
     </div>
 
     <blockquote class="mx-auto mt-10 max-w-3xl text-center">
-      <p class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]">
+      <p
+        class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]"
+      >
         Need the menu translated or redesigned?
       </p>
       <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
-        We can translate your content, polish the layout, or do both as a priority task so you move faster.
+        We can do that too. Just click below!
       </p>
     </blockquote>
 
     <div class="mt-6 text-center">
       <a
-        href="/#contact"
+        href="/contact"
         class="inline-flex rounded-full bg-stone-200 px-2.5 py-1 font-medium text-stone-800 transition-colors hover:bg-stone-300"
         >Contact us</a
       >

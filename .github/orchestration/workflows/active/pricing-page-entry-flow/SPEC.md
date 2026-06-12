@@ -2,29 +2,31 @@
 
 ## Scope
 
-- Keep the `/pricing` route and refine its content blocks.
-- Restore a Custom plan section.
-- Add a separate translation/redesign service card below the main pricing grid.
+- Keep the `/pricing` route and route contact CTAs to `/contact`.
+- Add a `/contact` route with an email submission form.
+- Support optional file uploads, optional language details, and a free-form message.
 - Keep Polar-ready visual plan markup only.
 
 ## Affected Areas
 
 - Pricing page layout
+- Contact page route
+- Navigation links
 - README task tracking
 - Workflow docs
 
 ## Technical Approach
 
 - Build the pricing page as a static Svelte route with reusable sections.
+- Add a new contact route with a SvelteKit action that sends email via nodemailer.
+- Use multipart form data for optional uploads and normal fields for request details.
 - Use buttons and `data-*` hooks to keep the plan cards ready for Polar wiring later.
-- Keep the custom plan visually close to the existing pricing cards.
-- Make the translation/redesign card a separate promotional block.
 
 ## Assumptions
 
 - Pricing amounts are not final yet.
-- The example/service sections can be purely visual.
+- Email credentials are available in `EMAIL_USER` and `EMAIL_PASS`.
 
 ## Risks
 
-- Existing pricing copy may need another pass if the service cards change again.
+- Email delivery depends on environment variables and Gmail transport compatibility.

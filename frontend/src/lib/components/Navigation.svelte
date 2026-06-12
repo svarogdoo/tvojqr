@@ -74,7 +74,7 @@
         {t.nav.pricing}
       </a>
       <a
-        href="/#contact"
+        href="/contact"
         class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >
         {t.nav.contact}
