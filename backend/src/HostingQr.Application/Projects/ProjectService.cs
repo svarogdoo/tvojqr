@@ -67,7 +67,9 @@ public sealed class ProjectService : IProjectService
 
         string backgroundColor = NormalizeBackgroundColor(request.BackgroundColor);
         Domain.Projects.ProjectWithSlug project = await _projectRepository.CreateAsync(userId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
-        await _languageVariantRepository.CreateAsync(project.Id, "en", "English", true, 0, cancellationToken);
+        string defaultLanguageCode = NormalizeLanguageCode(request.DefaultLanguageCode);
+        string defaultLanguageDisplayName = NormalizeLanguageDisplayName(request.DefaultLanguageDisplayName, defaultLanguageCode);
+        await _languageVariantRepository.CreateAsync(project.Id, defaultLanguageCode, defaultLanguageDisplayName, true, 0, cancellationToken);
         return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), []);
     }
 
@@ -94,9 +96,12 @@ public sealed class ProjectService : IProjectService
 
         string backgroundColor = NormalizeBackgroundColor(request.BackgroundColor);
         Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(userId, projectId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
-        return updatedProject is null
-            ? null
-            : new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetLanguagesAsync(updatedProject.Id, cancellationToken), await GetAssetsAsync(updatedProject.Id, cancellationToken));
+        if (updatedProject is null)
+        {
+            return null;
+        }
+
+        return new ProjectDetailResponse(updatedProject.Id, updatedProject.Name, updatedProject.Slug, updatedProject.Status, updatedProject.BackgroundColor, updatedProject.CreatedAt, updatedProject.UpdatedAt, await GetLanguagesAsync(updatedProject.Id, cancellationToken), await GetAssetsAsync(updatedProject.Id, cancellationToken));
     }
 
     public async Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
@@ -128,6 +133,37 @@ public sealed class ProjectService : IProjectService
         }
 
         await _languageVariantRepository.CreateAsync(projectId, languageCode, displayName, false, languages.Count, cancellationToken);
+        return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), await GetAssetsAsync(project.Id, cancellationToken));
+    }
+
+    public async Task<ProjectDetailResponse?> UpdateLanguageAsync(Guid projectId, string languageCode, UpdateProjectLanguageRequest request, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null)
+        {
+            return null;
+        }
+
+        string currentLanguageCode = NormalizeLanguageCode(languageCode);
+        string nextLanguageCode = NormalizeLanguageCode(request.LanguageCode);
+        string displayName = NormalizeLanguageDisplayName(request.DisplayName, nextLanguageCode);
+        var languages = await _languageVariantRepository.ListByProjectAsync(projectId, cancellationToken);
+        var currentLanguage = languages.SingleOrDefault(language => language.LanguageCode == currentLanguageCode);
+        if (currentLanguage is null)
+        {
+            return null;
+        }
+
+        if (currentLanguage.IsDefault)
+        {
+            await _languageVariantRepository.UpdateDefaultAsync(projectId, nextLanguageCode, displayName, cancellationToken);
+        }
+        else
+        {
+            await _languageVariantRepository.UpdateAsync(projectId, currentLanguageCode, nextLanguageCode, displayName, cancellationToken);
+        }
+
         return new ProjectDetailResponse(project.Id, project.Name, project.Slug, project.Status, project.BackgroundColor, project.CreatedAt, project.UpdatedAt, await GetLanguagesAsync(project.Id, cancellationToken), await GetAssetsAsync(project.Id, cancellationToken));
     }
 
@@ -239,4 +275,12 @@ public sealed class ProjectService : IProjectService
 
         throw new ArgumentException("Language code must be a two-letter code, for example en.", nameof(languageCode));
     }
+
+    private static string NormalizeLanguageDisplayName(string? displayName, string languageCode)
+    {
+        return string.IsNullOrWhiteSpace(displayName)
+            ? languageCode.ToUpperInvariant()
+            : displayName.Trim();
+    }
+
 }

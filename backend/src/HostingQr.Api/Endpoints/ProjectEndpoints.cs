@@ -140,8 +140,27 @@ public static class ProjectEndpoints
                 return Results.Conflict(new { message = ex.Message });
             }
         })
-            .WithName("AddProjectLanguage")
+        .WithName("AddProjectLanguage")
             .WithSummary("Adds a language variant to a project.");
+
+        group.MapPut("/{projectId:guid}/languages/{languageCode}", async (Guid projectId, string languageCode, UpdateProjectLanguageRequest request, IProjectService projectService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ProjectDetailResponse? project = await projectService.UpdateLanguageAsync(projectId, languageCode, request, cancellationToken);
+                return project is null ? Results.NotFound() : Results.Ok(project);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Conflict(new { message = ex.Message });
+            }
+        })
+            .WithName("UpdateProjectLanguage")
+            .WithSummary("Updates a language variant for a project.");
 
         group.MapDelete("/{projectId:guid}/languages/{languageCode}", async (Guid projectId, string languageCode, IProjectService projectService, CancellationToken cancellationToken) =>
         {

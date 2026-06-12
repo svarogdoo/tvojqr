@@ -232,7 +232,8 @@ public sealed class ProjectEndpointTests
 
         public Task<ProjectDetailResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
+            IReadOnlyList<ProjectLanguageVariantResponse> languages = [new ProjectLanguageVariantResponse(Guid.NewGuid(), request.DefaultLanguageCode, request.DefaultLanguageDisplayName ?? request.DefaultLanguageCode.ToUpperInvariant(), true, 0)];
+            return Task.FromResult(new ProjectDetailResponse(Guid.NewGuid(), request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, languages, []));
         }
 
         public Task<ProjectDetailResponse?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -250,6 +251,11 @@ public sealed class ProjectEndpointTests
             return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, request.Name, request.Slug, "active", request.BackgroundColor ?? "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
         }
 
+        public Task<ProjectLanguageVariantResponse> UpdateDefaultAsync(Guid projectId, string languageCode, string displayName, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new ProjectLanguageVariantResponse(Guid.NewGuid(), languageCode, displayName, true, 0));
+        }
+
         public Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
         {
             return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", request.Status, "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Languages, []));
@@ -258,6 +264,12 @@ public sealed class ProjectEndpointTests
         public Task<ProjectDetailResponse?> AddLanguageAsync(Guid projectId, CreateProjectLanguageRequest request, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<ProjectLanguageVariantResponse> languages = [..Languages, new ProjectLanguageVariantResponse(Guid.NewGuid(), request.LanguageCode, request.DisplayName, false, 1)];
+            return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, languages, []));
+        }
+
+        public Task<ProjectDetailResponse?> UpdateLanguageAsync(Guid projectId, string languageCode, UpdateProjectLanguageRequest request, CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<ProjectLanguageVariantResponse> languages = [new ProjectLanguageVariantResponse(Guid.NewGuid(), request.LanguageCode, request.DisplayName, false, 0), ..Languages.Where(language => !language.LanguageCode.Equals(languageCode, StringComparison.OrdinalIgnoreCase))];
             return Task.FromResult<ProjectDetailResponse?>(new ProjectDetailResponse(projectId, "Summer Menu", "summer-menu", "active", "#f8f7f3", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, languages, []));
         }
 

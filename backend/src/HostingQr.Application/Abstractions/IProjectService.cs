@@ -16,6 +16,8 @@ public interface IProjectService
 
     Task<ProjectDetailResponse?> AddLanguageAsync(Guid projectId, CreateProjectLanguageRequest request, CancellationToken cancellationToken = default);
 
+    Task<ProjectDetailResponse?> UpdateLanguageAsync(Guid projectId, string languageCode, UpdateProjectLanguageRequest request, CancellationToken cancellationToken = default);
+
     Task<ProjectDetailResponse?> DeleteLanguageAsync(Guid projectId, string languageCode, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default);

@@ -48,6 +48,8 @@
     name: "",
     slug: "",
     backgroundColor: defaultBackgroundColor,
+    defaultLanguageCode: "en",
+    defaultLanguageDisplayName: "English",
   };
   let savedForm = { ...form };
   let loading = true;
@@ -73,16 +75,37 @@
   let slugCheckRequestId = 0;
   let savedAssetOrderIds: string[] = [];
   let baselineSavedAssetOrderIds: string[] = [];
+  let baselineLanguages: ProjectLanguageVariant[] = [];
   let draggedSavedAssetId = "";
   let addingLanguage = false;
-  let selectedNewLanguageCode = "";
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
     || form.backgroundColor !== savedForm.backgroundColor;
   $: hasAssetOrderChanges = savedAssetOrderIds.length === baselineSavedAssetOrderIds.length
     && savedAssetOrderIds.some((assetId, index) => assetId !== baselineSavedAssetOrderIds[index]);
-  $: hasUnsavedChanges = hasFormChanges || hasAssetOrderChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0 || removedLanguageCodes.size > 0;
+  $: hasLanguageChanges = (() => {
+    const current = languageSections.map((language) => ({
+      id: language.id,
+      languageCode: language.languageCode,
+      displayName: language.displayName,
+      isDefault: language.isDefault,
+      sortOrder: language.sortOrder,
+    }));
+
+    const baseline = baselineLanguages
+      .filter((language) => !removedLanguageCodes.has(language.languageCode))
+      .map((language) => ({
+        id: language.id,
+        languageCode: language.languageCode,
+        displayName: language.displayName,
+        isDefault: language.isDefault,
+        sortOrder: language.sortOrder,
+      }));
+
+    return JSON.stringify(current) !== JSON.stringify(baseline);
+  })();
+  $: hasUnsavedChanges = hasFormChanges || hasAssetOrderChanges || hasLanguageChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0 || removedLanguageCodes.size > 0;
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -125,12 +148,15 @@
       originalSlug = project.slug;
       savedAssetOrderIds = project.assets.map((asset) => asset.id);
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
+      baselineLanguages = project.languages.map((language) => ({ ...language }));
       if (!preserveForm || initializedProjectId !== project.id) {
-        form = {
-          name: project.name,
-          slug: project.slug,
-          backgroundColor: project.backgroundColor || defaultBackgroundColor,
-        };
+      form = {
+        name: project.name,
+        slug: project.slug,
+        backgroundColor: project.backgroundColor || defaultBackgroundColor,
+        defaultLanguageCode: project.languages.find((language) => language.isDefault)?.languageCode ?? project.languages[0]?.languageCode ?? "en",
+        defaultLanguageDisplayName: project.languages.find((language) => language.isDefault)?.displayName ?? project.languages[0]?.displayName ?? "English",
+      };
         savedForm = { ...form };
         initializedProjectId = project.id;
       }
@@ -340,6 +366,32 @@
         }
       }
 
+      if (!isDraft) {
+        const baselineById = new Map(baselineLanguages.map((language) => [language.id, language]));
+        const languageChanges = languageSections
+          .map((language) => ({ current: language, baseline: baselineById.get(language.id) }))
+          .filter((entry): entry is { current: ProjectLanguageVariant; baseline: ProjectLanguageVariant } => Boolean(entry.baseline))
+          .filter((entry) => entry.current.languageCode !== entry.baseline.languageCode || entry.current.displayName !== entry.baseline.displayName)
+          .sort((a, b) => Number(b.current.isDefault) - Number(a.current.isDefault));
+
+        for (const change of languageChanges) {
+          const response = await apiFetch(`/api/projects/${savedProject.id}/languages/${encodeURIComponent(change.baseline.languageCode)}`, {
+            method: "PUT",
+            body: JSON.stringify({
+              languageCode: change.current.languageCode,
+              displayName: change.current.displayName,
+            }),
+          });
+
+          if (!response.ok) {
+            const body = (await response.json()) as { message?: string };
+            showSnackbar(body.message ?? "Project settings saved, but a language could not be updated.", "error");
+            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
+        }
+      }
+
       if (!isDraft && hasAssetOrderChanges) {
         for (const language of languageSections) {
           const remainingAssetIds = savedAssetOrderIds.filter((assetId) => {
@@ -399,6 +451,8 @@
         name: savedProject.name,
         slug: savedProject.slug,
         backgroundColor: savedProject.backgroundColor || defaultBackgroundColor,
+        defaultLanguageCode: savedProject.languages.find((language) => language.isDefault)?.languageCode ?? savedProject.languages[0]?.languageCode ?? "en",
+        defaultLanguageDisplayName: savedProject.languages.find((language) => language.isDefault)?.displayName ?? savedProject.languages[0]?.displayName ?? "English",
       };
       savedForm = { ...form };
       draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
@@ -406,6 +460,7 @@
       removedSavedAssetIds = new Set<string>();
       removedLanguageCodes = new Set<string>();
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
+      baselineLanguages = savedProject.languages.map((language) => ({ ...language }));
       isDraft = false;
       slugMessage = "";
       await gotoWithoutUnsavedWarning("/dashboard");
@@ -498,12 +553,52 @@
     };
   }
 
-  async function addLanguage() {
-    if (!project || !selectedNewLanguageCode) {
+  function languageOptionsFor(language: ProjectLanguageVariant) {
+    const selectedCodes = new Set((project?.languages ?? [])
+      .filter((item) => !removedLanguageCodes.has(item.languageCode) && item.id !== language.id)
+      .map((item) => item.languageCode));
+
+    return availableLanguageOptions.filter((option) => !selectedCodes.has(option.code) || option.code === language.languageCode);
+  }
+
+  function getFirstAvailableLanguageOption() {
+    return availableLanguageOptions.find((option) => !languageSections.some((language) => language.languageCode === option.code));
+  }
+
+  function updateLanguageSelection(language: ProjectLanguageVariant, nextLanguageCode: string) {
+    if (!project) {
       return;
     }
 
-    const option = languageMeta(selectedNewLanguageCode);
+    const previousLanguageCode = language.languageCode;
+    if (previousLanguageCode === nextLanguageCode) {
+      return;
+    }
+
+    const meta = languageMeta(nextLanguageCode);
+    project = {
+      ...project,
+      languages: project.languages.map((item) => item.id === language.id
+        ? { ...item, languageCode: nextLanguageCode, displayName: meta.name }
+        : item),
+      assets: project.assets.map((asset) => asset.languageCode === previousLanguageCode
+        ? { ...asset, languageCode: nextLanguageCode }
+        : asset),
+    };
+    resetMessages();
+  }
+
+  async function addLanguage() {
+    if (!project) {
+      return;
+    }
+
+    const option = getFirstAvailableLanguageOption();
+    if (!option) {
+      showSnackbar("No more languages are available to add.", "error");
+      return;
+    }
+
     addingLanguage = true;
     try {
       const response = await apiFetch(`/api/projects/${project.id}/languages`, {
@@ -520,7 +615,7 @@
       project = (await response.json()) as ProjectDetail;
       savedAssetOrderIds = project.assets.map((asset) => asset.id);
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
-      selectedNewLanguageCode = "";
+      baselineLanguages = project.languages.map((language) => ({ ...language }));
       showSnackbar("Language added.", "success");
     } catch {
       showSnackbar("Unable to add language.", "error");
@@ -635,10 +730,13 @@
     .map((assetId) => (project?.assets ?? []).find((asset: Asset) => asset.id === assetId))
     .filter((asset): asset is Asset => Boolean(asset));
   $: visibleSavedAssets = orderedSavedAssets.filter((asset: Asset) => !removedSavedAssetIds.has(asset.id) && !removedLanguageCodes.has(asset.languageCode));
-  $: languageSections = (project?.languages ?? [{ id: "draft-default", languageCode: "en", displayName: "English", isDefault: true, sortOrder: 0 }])
+  $: languageSections = (project?.languages ?? [{ id: "draft-default", languageCode: form.defaultLanguageCode, displayName: form.defaultLanguageDisplayName, isDefault: true, sortOrder: 0 }])
     .filter((language) => !removedLanguageCodes.has(language.languageCode))
     .sort((a, b) => a.sortOrder - b.sortOrder);
-  $: addableLanguageOptions = availableLanguageOptions.filter((option) => !languageSections.some((language) => language.languageCode === option.code));
+  $: if (languageSections.length > 0) {
+    form.defaultLanguageCode = languageSections[0].languageCode;
+    form.defaultLanguageDisplayName = languageSections[0].displayName;
+  }
 
   onMount(async () => {
     projectId = window.location.pathname.split("/").at(-1) ?? "";
@@ -652,6 +750,8 @@
         name: "",
         slug: "",
         backgroundColor: defaultBackgroundColor,
+        defaultLanguageCode: "en",
+        defaultLanguageDisplayName: "English",
       };
       savedForm = { ...form };
       originalSlug = "";
@@ -719,7 +819,23 @@
           <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p class="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Project settings</p>
-              <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">{project?.name || form.name || "New project"}</h1>
+              <div class="mt-1 flex flex-wrap items-center gap-3">
+                <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">{project?.name || form.name || "New project"}</h1>
+                {#if project?.slug}
+                  <a
+                    href={`/${project.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 transition-all duration-200 hover:border-stone-400 hover:bg-stone-100 hover:text-stone-900"
+                    aria-label={`View public page for ${project.name || form.name || 'project'}`}
+                  >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </a>
+                {/if}
+              </div>
               <div class="mt-4 flex flex-wrap items-center gap-3">
                 <p class="text-base leading-7 text-stone-600">Update the core identity for this hosted page now. Uploads, language variants, preview, and publish flow can follow on top of these settings.</p>
               </div>
@@ -819,31 +935,34 @@
                   <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Content languages</p>
                   <p class="mt-2 text-sm leading-7 text-stone-600">Upload images per language, then drag them into the order visitors should see.</p>
                 </div>
-                {#if !isDraft && addableLanguageOptions.length > 0}
-                  <div class="flex flex-col gap-2 sm:flex-row">
-                    <select bind:value={selectedNewLanguageCode} class="rounded-full border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 outline-none">
-                      <option value="">Add language...</option>
-                      {#each addableLanguageOptions as option}
-                        <option value={option.code}>{option.flag} {option.name}</option>
-                      {/each}
-                    </select>
-                    <button type="button" class="btn-secondary text-sm" on:click={addLanguage} disabled={!selectedNewLanguageCode || addingLanguage}>
-                      {addingLanguage ? "Adding..." : "+ Add"}
-                    </button>
-                  </div>
-                {/if}
+                <button type="button" class="btn-secondary text-sm" on:click={addLanguage} disabled={addingLanguage}>
+                  {addingLanguage ? "Adding..." : "+ Add"}
+                </button>
               </div>
 
               <div class="mt-5 grid gap-5">
                 {#each languageSections as language}
-                  {@const meta = languageMeta(language.languageCode)}
+                  {@const choices = languageOptionsFor(language)}
                   {@const sectionSavedAssets = visibleSavedAssets.filter((asset) => asset.languageCode === language.languageCode)}
                   {@const sectionDraftAssets = draftAssets.filter((asset) => asset.languageCode === language.languageCode)}
                   <section class="rounded-[1.25rem] border border-stone-200 bg-white px-4 py-4 shadow-sm">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <div class="flex flex-wrap items-center gap-2">
-                          <p class="text-lg font-semibold text-stone-900">{meta.flag} {language.displayName}</p>
+                          <select
+                            value={language.languageCode}
+                            on:change={(event) => updateLanguageSelection(language, (event.currentTarget as HTMLSelectElement).value)}
+                            class="min-w-56 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-900 outline-none transition-all focus:border-stone-400"
+                            aria-label={`Language for ${language.displayName}`}
+                          >
+                            {#each choices as option}
+                              <option value={option.code}>{option.flag} {option.name}</option>
+                            {/each}
+                            {#if !choices.some((option) => option.code === language.languageCode)}
+                              {@const currentMeta = languageMeta(language.languageCode)}
+                              <option value={currentMeta.code}>{currentMeta.flag} {currentMeta.name}</option>
+                            {/if}
+                          </select>
                           <span class="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-medium uppercase text-stone-500">{language.languageCode}</span>
                           {#if language.isDefault}
                             <span class="rounded-full border border-[rgba(77,106,83,0.14)] bg-[rgba(236,245,238,0.7)] px-2.5 py-1 text-xs font-medium text-[color:var(--success-strong)]">Default</span>

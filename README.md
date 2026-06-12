@@ -209,7 +209,7 @@ Status markers for tasks:
 3.2.c Add user-facing validation messages before submit.
 [PARTIAL] 3.3 Add language-aware content management to onboarding/dashboard.
 [DONE] 3.3.a Let user assign files to language variants.
-3.3.b Let user set default language.
+[DONE] 3.3.b Let user set default language.
 3.4 Add slug setup UX.
 3.4.a Validate slug format in UI.
 3.4.b Check slug availability.
@@ -268,7 +268,10 @@ Status markers for tasks:
 [DONE] 6.2.g Manage languages
 [DONE] 6.2.g.1 Add/remove language sections in the project editor.
 [DONE] 6.2.g.2 Upload images into a selected language section.
-6.2.h Preview project changes before final save
+[DONE] 6.2.g.3 Make each language box editable with a collision-safe selector and remove the separate default-language card.
+[DONE] 6.2.g.4 Persist non-default language section edits by loading the project language baseline on open.
+[DONE] 6.2.h Preview project changes before final save
+[DONE] 6.2.h.1 Add an eye preview button beside the project title in the editor.
 [PARTIAL] 6.2.i View/download QR code
 6.2.j If the user has no projects yet, show a clear empty state instead of a generic load/error message.
 [DONE] 6.2.k Choose a public page background color from project settings.
