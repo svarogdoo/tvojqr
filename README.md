@@ -176,6 +176,7 @@ Status markers for tasks:
 1.5 Front-page polish/fixes.
 1.5.a Review mobile spacing/overflow on hero image crop.
 1.5.b Check accessibility (button labels, focus states, heading order).
+[DONE] 1.5.c Simplify the homepage by removing examples and contact, then add a short story section.
 
 ### 2. UI Redesign / Visual System
 

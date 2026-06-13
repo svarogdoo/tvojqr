@@ -1,19 +1,15 @@
 <script lang="ts">
-  import Contact from "$lib/components/Contact.svelte";
-  import Examples from "$lib/components/Examples.svelte";
   import Footer from "$lib/components/Footer.svelte";
   import Hero from "$lib/components/Hero.svelte";
-  import HowItWorks from "$lib/components/HowItWorks.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
   import Services from "$lib/components/Services.svelte";
+  import WhoAreWe from "$lib/components/WhoAreWe.svelte";
 </script>
 
 <Navigation />
 <Hero />
 <Services />
-<Examples />
-<HowItWorks />
-<Contact />
+<WhoAreWe />
 <Footer />
 
 <svelte:head>
