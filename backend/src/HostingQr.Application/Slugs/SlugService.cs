@@ -7,6 +7,19 @@ public sealed class SlugService : ISlugService
 {
     private const string AllowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789";
     private const int GeneratedSlugLength = 8;
+    private static readonly HashSet<string> ReservedSlugs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "admin",
+        "api",
+        "auth",
+        "contact",
+        "create-new",
+        "dashboard",
+        "login",
+        "logout",
+        "pricing",
+        "signup",
+    };
     private readonly ISlugRepository _slugRepository;
 
     public SlugService(ISlugRepository slugRepository)
@@ -57,6 +70,11 @@ public sealed class SlugService : ISlugService
         if (normalized.StartsWith('-') || normalized.EndsWith('-') || normalized.Contains("--", StringComparison.Ordinal))
         {
             throw new ArgumentException("Slug format is invalid.", nameof(slug));
+        }
+
+        if (ReservedSlugs.Contains(normalized))
+        {
+            throw new ArgumentException("This slug is reserved for HostingQr.", nameof(slug));
         }
 
         return normalized;

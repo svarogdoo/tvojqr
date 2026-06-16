@@ -26,6 +26,20 @@ public sealed class SlugServiceTests
         Assert.False(result.IsAvailable);
     }
 
+    [Theory]
+    [InlineData("dashboard")]
+    [InlineData("pricing")]
+    [InlineData("contact")]
+    [InlineData("api")]
+    public void NormalizeOrThrow_RejectsReservedAppRoutes(string slug)
+    {
+        SlugService service = new(new FakeSlugRepository());
+
+        ArgumentException exception = Assert.Throws<ArgumentException>(() => service.NormalizeOrThrow(slug));
+
+        Assert.Contains("reserved", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class FakeSlugRepository : ISlugRepository
     {
         private readonly HashSet<string> _existing;
