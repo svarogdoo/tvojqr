@@ -15,7 +15,15 @@ public sealed class AuthenticatedUserContext : ICurrentUserContext
 
     public Guid GetCurrentUserId()
     {
-        return GetCurrentUser().Id;
+        ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+        string? rawId = user?.FindFirstValue(AuthConstants.UserIdClaimType);
+
+        if (rawId is null || !Guid.TryParse(rawId, out Guid userId))
+        {
+            throw new InvalidOperationException("Authenticated user id is not available in the current request.");
+        }
+
+        return userId;
     }
 
     public CurrentUser GetCurrentUser()
