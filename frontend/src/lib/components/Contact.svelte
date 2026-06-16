@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { language } from "$lib/stores/language";
+  import { language, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
   import type { FormEventHandler } from "svelte/elements";
 
-  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  let currentLang: LanguageCode = "en";
   let contactForm = { name: "", email: "", message: "" };
   let formSubmitted = false;
 
@@ -20,7 +20,9 @@
     }, 3000);
   };
 
-  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
+  const localizedTranslations = translations as any;
+
+  $: t = localizedTranslations[currentLang];
 </script>
 
 <!-- Contact Section -->

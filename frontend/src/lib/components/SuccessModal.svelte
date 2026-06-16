@@ -1,16 +1,18 @@
 <script lang="ts">
-  import { language } from "$lib/stores/language";
+  import { language, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
   import { fade, scale } from "svelte/transition";
 
   export let show = false;
   export let onClose: () => void;
 
-  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  let currentLang: LanguageCode = "en";
   language.subscribe((value) => {
     currentLang = value;
   });
-  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
+  const localizedTranslations = translations as any;
+
+  $: t = localizedTranslations[currentLang];
 
   function handleBackdropClick() {
     onClose();

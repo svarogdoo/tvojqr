@@ -2,6 +2,8 @@
   import footballBg from "$lib/assets/football-bg.jpg";
   import Footer from "$lib/components/Footer.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import { language, type LanguageCode } from "$lib/stores/language";
+  import { homepageCopy } from "$lib/homepageCopy";
 
   type BillingCycle = "monthly" | "annual";
 
@@ -98,6 +100,26 @@
     },
   ];
 
+  let currentLang: LanguageCode = "en";
+  language.subscribe((value) => {
+    currentLang = value;
+  });
+
+  $: copy = homepageCopy[currentLang].pricing;
+  $: planCopy = {
+    worldCup: copy.plans.worldCup,
+    free: copy.plans.free,
+    standard: copy.plans.standard,
+    plus: copy.plans.plus,
+  };
+  $: detailLabels = [
+    copy.details.projects,
+    copy.details.menus,
+    copy.details.languages,
+    copy.details.uploadedFiles,
+    copy.details.traffic,
+    copy.details.support,
+  ];
   let billingCycle: BillingCycle = "monthly";
 
   function setBillingCycle(nextCycle: BillingCycle) {
@@ -106,10 +128,12 @@
 </script>
 
 <svelte:head>
-  <title>Pricing - HostingQr</title>
+  <title>{copy.title} - HostingQr</title>
   <meta
     name="description"
-    content="Choose a HostingQr plan and preview simple or multilanguage examples before checkout."
+    content={currentLang === "es"
+      ? "Elige un plan de HostingQr y revisa ejemplos simples o multilingües antes de contratar."
+      : "Choose a HostingQr plan and preview simple or multilanguage examples before checkout."}
   />
 </svelte:head>
 
@@ -125,16 +149,15 @@
         <p
           class="text-sm font-medium uppercase tracking-[0.24em] text-stone-500"
         >
-          Pricing
+          {copy.eyebrow}
         </p>
         <h1
           class="mt-4 text-5xl font-semibold tracking-tight text-stone-900 sm:text-6xl"
         >
-          Simple plans, clear choice
+          {copy.title}
         </h1>
         <p class="mt-5 max-w-xl text-base leading-7 text-stone-600 sm:text-lg">
-          Pick the option that fits your page, then we’ll follow up or wire
-          Polar later.
+          {copy.subtitle}
         </p>
       </div>
 
@@ -143,19 +166,19 @@
     <div class="mt-10 flex justify-center">
       <div class="w-full max-w-sm rounded-full border border-stone-200 bg-white p-1 shadow-sm">
         <div class="grid grid-cols-2 gap-1">
-          <button
-            type="button"
-            on:click={() => setBillingCycle("monthly")}
-            class={`rounded-full px-4 py-2 text-sm font-medium transition-all ${billingCycle === "monthly" ? "bg-stone-900 text-white shadow-sm" : "text-stone-600 hover:text-stone-900"}`}
-          >
-            Monthly
+            <button
+              type="button"
+              on:click={() => setBillingCycle("monthly")}
+              class={`rounded-full px-4 py-2 text-sm font-medium transition-all ${billingCycle === "monthly" ? "bg-stone-900 text-white shadow-sm" : "text-stone-600 hover:text-stone-900"}`}
+            >
+            {copy.monthly}
           </button>
           <button
             type="button"
             on:click={() => setBillingCycle("annual")}
             class={`rounded-full px-4 py-2 text-sm font-medium transition-all ${billingCycle === "annual" ? "bg-stone-900 text-white shadow-sm" : "text-stone-600 hover:text-stone-900"}`}
           >
-            Annual
+            {copy.annual}
           </button>
         </div>
       </div>
@@ -175,13 +198,13 @@
             <span
               class={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] ${plan.id === "world-cup" ? "bg-stone-700 text-white" : plan.featured ? "bg-white/10 text-white/85" : "bg-stone-100 text-stone-600"}`}
             >
-              {plan.badge}
+              {copy.badges[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"]}
             </span>
             {#if plan.featured}
               <span
                 class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-white/70"
               >
-                Popular
+                {copy.popular}
               </span>
             {:else if plan.id === "world-cup"}
               <span class="h-8 w-8"></span>
@@ -200,21 +223,21 @@
           <p
             class={`mt-3 text-sm leading-7 ${plan.featured ? "text-white/70" : "text-stone-600"}`}
           >
-            {plan.description}
+              {planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].description}
           </p>
 
           <div
             class={`mt-8 mb-3 border-t pt-5 ${plan.featured ? "border-white/10" : "border-stone-200/80"}`}
           >
             <div class="space-y-2">
-              {#each plan.details as detail}
+              {#each plan.details as detail, idx}
                 <div
                   class={`grid grid-cols-[1fr_auto] items-center gap-4 text-sm ${plan.featured ? "text-white/85" : "text-stone-700"}`}
                 >
-                  <span>{detail.label}</span>
+                  <span>{detailLabels[idx]}</span>
                   <span
                     class={`font-medium ${plan.featured ? "text-white" : "text-stone-900"}`}
-                    >{detail.value}</span
+                    >{detail.label === "Support" ? planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].support : detail.value}</span
                   >
                 </div>
               {/each}
@@ -226,7 +249,7 @@
             class={`mt-auto inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${plan.featured ? "bg-white text-stone-950 hover:bg-stone-100" : plan.id === "world-cup" ? "border border-stone-300 bg-white text-stone-900 hover:-translate-y-0.5 hover:border-stone-400 hover:bg-stone-50" : "border border-stone-200 bg-stone-50 text-stone-900 hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white"}`}
             data-polar-plan={plan.id}
           >
-            {plan.button}
+            {planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].button}
           </button>
         </article>
       {/each}
@@ -234,12 +257,12 @@
 
     <div class="mx-auto mt-10 max-w-3xl text-center">
       <p class="text-sm text-stone-600">
-        <span class="font-medium text-stone-900">Custom plan</span> available if
-        you need something tailored.
+        <span class="font-medium text-stone-900">{copy.customPlan.label}</span>
+        {" "}{copy.customPlan.text}
         <a
           href="/contact"
           class="inline-flex rounded-full bg-stone-200 px-2.5 py-1 font-medium text-stone-800 transition-colors hover:bg-stone-300"
-          >Contact us</a
+          >{copy.customPlan.cta}</a
         >
       </p>
     </div>
@@ -248,10 +271,10 @@
       <p
         class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]"
       >
-        Need the menu translated or redesigned?
+        {copy.quote.title}
       </p>
       <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
-        We can do that too. Just click below!
+        {copy.quote.subtitle}
       </p>
     </blockquote>
 
@@ -259,7 +282,7 @@
       <a
         href="/contact"
         class="inline-flex rounded-full bg-stone-200 px-2.5 py-1 font-medium text-stone-800 transition-colors hover:bg-stone-300"
-        >Contact us</a
+        >{copy.quote.cta}</a
       >
     </div>
   </section>

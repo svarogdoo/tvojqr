@@ -646,13 +646,172 @@ export const translations = {
   },
 };
 
+(translations as any).es = {
+  ...translations.en,
+  nav: {
+    ...translations.en.nav,
+    services: "Servicios",
+    examples: "Ejemplos",
+    pricing: "Precios",
+    contact: "Contacto",
+  },
+  hero: {
+    ...translations.en.hero,
+    title: "Sube tu archivo, comparte tu QR",
+    description:
+      "Crea una página pública simple para menús, documentos e imágenes. HostingQr te ayuda a subir contenido, definir una URL compartible y generar un código QR en minutos.",
+    cta: "Crear tu página",
+    secondary: "Ver cómo funciona",
+  },
+  services: {
+    ...translations.en.services,
+    title: "Esto es lo que puedes hacer",
+    subtitle:
+      "Todo en la página principal ahora apunta al producto central: subir contenido, organizar idiomas, publicar un slug y compartir un código QR.",
+    readMore: "Empezar configuración",
+    cta: "Empezar a subir",
+    list: [
+      {
+        title: "Sube archivos",
+        description:
+          "Añade imágenes del menú, documentos u otros archivos que quieras publicar online",
+        icon: "Upload",
+      },
+      {
+        title: "Elige tu slug",
+        description:
+          "Reserva una URL pública limpia que sea fácil de imprimir y recordar",
+        icon: "Link",
+      },
+      {
+        title: "Añade idiomas",
+        description:
+          "Prepara varias versiones para que los visitantes puedan cambiar al idioma que necesiten",
+        icon: "Globe",
+      },
+      {
+        title: "Publica al instante",
+        description:
+          "Haz que tu página esté disponible online en cuanto tu contenido esté listo",
+        icon: "Rocket",
+      },
+      {
+        title: "Genera códigos QR",
+        description:
+          "Convierte cada página pública en un QR escaneable para mesas, ventanas o folletos",
+        icon: "QR",
+      },
+      {
+        title: "Actualiza cuando quieras",
+        description:
+          "Mantén la misma URL y el mismo QR mientras renuevas el contenido más adelante",
+        icon: "Refresh",
+      },
+    ],
+  },
+  howItWorks: {
+    ...translations.en.howItWorks,
+    title: "Cómo funciona",
+    subtitle:
+      "Un flujo simple de autoservicio desde la carga hasta la página QR activa.",
+    ctaDescription: "¿Listo para crear tu primera página?",
+    cta: "Ir a subir",
+    steps: [
+      {
+        title: "Sube tu contenido",
+        description:
+          "Añade el menú, el documento o las imágenes que los visitantes abrirán después de escanear",
+      },
+      {
+        title: "Elige tu slug público",
+        description:
+          "Selecciona el final de la URL que se convertirá en tu página pública",
+      },
+      {
+        title: "Configura los idiomas",
+        description:
+          "Organiza el contenido para que los invitados puedan cambiar entre los idiomas disponibles",
+      },
+      {
+        title: "Comparte el QR",
+        description:
+          "Genera el código QR para esa página y colócalo donde se necesite acceso instantáneo",
+      },
+    ],
+  },
+  examples: {
+    ...translations.en.examples,
+    title: "Ejemplos de proyectos",
+    list: [
+      { title: "Menús de restaurante", description: "Menús digitales e impresos elegantes" },
+      { title: "Ofertas de cafetería", description: "Diseños minimalistas para promociones de café" },
+      { title: "Tarifas de peluquería", description: "Menús de servicios modernos y precios" },
+      { title: "Catálogos minoristas", description: "Presentación de productos y promociones" },
+    ],
+    viewDetails: "Ver detalles",
+  },
+  contact: {
+    ...translations.en.contact,
+    title: "Ponte en contacto",
+    description:
+      "¿Listo para transformar el diseño de tu negocio? ¡Hablemos!",
+    success: "✓ ¡Gracias! Te contactaremos pronto.",
+    form: {
+      ...translations.en.contact.form,
+      name: "Nombre",
+      email: "Correo electrónico",
+      message: "Mensaje",
+      send: "Enviar mensaje",
+    },
+  },
+  footer: {
+    ...translations.en.footer,
+    copyright: "© 2025 HostingQr. Todos los derechos reservados.",
+    tagline: "Hecho con cuidado para tu marca",
+  },
+  notFound: {
+    ...translations.en.notFound,
+    subtitle: "Página no encontrada",
+    description:
+      "La página que buscas no existe. Revisa la URL o vuelve a la página principal.",
+  },
+  createNew: {
+    ...translations.en.createNew,
+    title: "Sube tu archivo",
+    firstName: "Nombre",
+    lastName: "Apellido",
+    domainEnding: "nombre-del-proyecto",
+    domainEndingTitle: "Extensión de dominio elegida",
+    email: "Correo electrónico",
+    fileUpload: "Elegir archivo",
+    submit: "Enviar",
+    sending: "Enviando...",
+  },
+  modals: {
+    uploadSuccess: {
+      ...translations.en.modals.uploadSuccess,
+      title: "¡Carga exitosa!",
+      description:
+        "Tu solicitud se envió correctamente. La revisaremos y nos pondremos en contacto por correo electrónico.",
+      close: "Cerrar",
+    },
+    uploadError: {
+      ...translations.en.modals.uploadError,
+      title: "Error al cargar",
+      description:
+        "Algo salió mal. Puedes escribirnos directamente a:",
+      close: "Cerrar",
+    },
+  },
+};
+
 export function t(
-  lang: "en" | "sr" | "ru" | "el",
+  lang: "en" | "es",
   key: string,
   defaultValue: string = "",
 ): string {
   const keys = key.split(".");
-  let value: any = translations[lang];
+  let value: any = (translations as any)[lang];
 
   for (const k of keys) {
     value = value?.[k];

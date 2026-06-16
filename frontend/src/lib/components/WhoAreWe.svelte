@@ -1,37 +1,17 @@
 <script lang="ts">
+  import { language } from "$lib/stores/language";
+  import { homepageCopy } from "$lib/homepageCopy";
   import { slide } from "svelte/transition";
 
-  const faqs = [
-    {
-      id: "how-does-it-work",
-      question: "How does this work?",
-      answer: [
-        "You create your account",
-        "You click to start your new project",
-        "Upload your offer, select url, background color",
-        "Add translated offering in the language section, or do it later",
-        "QR is already there, pick your style and download it for printing",
-      ],
-      closing: "You are all ready to go!",
-    },
-    {
-      id: "translate-page",
-      question: "Does the software translate the page?",
-      answerText:
-        "No. But we can help with that as well, just send us over what you need.",
-    },
-    {
-      id: "more-languages",
-      question: "Can I add more languages later?",
-      answerText:
-        "Yes. You can add translations when you need them, without printing a second version of everything.",
-    },
-    {
-      id: "tech-setup",
-      question: "Do I need to understand technical setup?",
-      answerText: "No. Send us what you need and we’ll help you get it ready.",
-    },
-  ];
+  let currentLang: "en" | "es" = "en";
+
+  language.subscribe((value) => {
+    currentLang = value;
+  });
+
+  $: copy = homepageCopy[currentLang].family;
+  let faqs: any = [];
+  $: faqs = copy.faq as any;
 
   let openFaq = "how-does-it-work";
 </script>
@@ -39,25 +19,25 @@
 <section class="border-y border-black/8 bg-[rgba(236,240,234,0.88)] px-4 py-20 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-5xl text-center">
     <p class="text-sm font-medium uppercase tracking-[0.24em] text-stone-500">
-      Who are we?
+      {copy.label}
     </p>
     <h2 class="mt-4 text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-      A small family-run team, built to care.
+      {copy.title}
     </h2>
     <p class="mx-auto mt-5 max-w-3xl text-lg leading-8 text-stone-600">
-      We’re experienced coders and graphic designers working together under one roof. We keep it humble, stay hands-on, and put real care into the details.
+      {copy.body}
     </p>
 
     <a
       href="/contact"
       class="mt-8 inline-flex items-center rounded-full bg-stone-900 px-6 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
     >
-      Get in touch
+      {copy.cta}
     </a>
 
     <div class="mt-16 text-left">
       <p class="text-sm font-medium uppercase tracking-[0.24em] text-stone-500 text-center">
-        FAQ
+        {copy.faqLabel}
       </p>
       <div class="mx-auto mt-6 grid max-w-4xl gap-4">
         {#each faqs as faq}

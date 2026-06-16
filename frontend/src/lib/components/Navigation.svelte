@@ -1,18 +1,18 @@
 <script lang="ts">
   import logo from "$lib/assets/hostinqr-logo-black.svg";
   import { auth, signOut, startGoogleSignIn } from "$lib/stores/auth";
-  import { language, languages } from "$lib/stores/language";
+  import { language, languages, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
 
-  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  let currentLang: LanguageCode = "en";
   let languageMenuOpen = false;
   let userMenuOpen = false;
 
-  language.subscribe((value: "en" | "sr" | "ru" | "el") => {
+  language.subscribe((value: LanguageCode) => {
     currentLang = value;
   });
 
-  function changeLanguage(lang: "en" | "sr" | "ru" | "el") {
+  function changeLanguage(lang: LanguageCode) {
     language.set(lang);
     languageMenuOpen = false;
   }
@@ -36,7 +36,9 @@
     await signOut();
   }
 
-  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
+  const localizedTranslations = translations as any;
+
+  $: t = localizedTranslations[currentLang];
   $: currentLanguage =
     languages.find((lang) => lang.code === currentLang) ?? languages[0];
 </script>
@@ -110,8 +112,7 @@
             {#each languages as lang (lang.code)}
               <button
                 type="button"
-                on:click={() =>
-                  changeLanguage(lang.code as "en" | "sr" | "ru" | "el")}
+                  on:click={() => changeLanguage(lang.code as LanguageCode)}
                 class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors hover:bg-stone-50 {currentLang ===
                 lang.code
                   ? 'text-stone-900'

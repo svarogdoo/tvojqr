@@ -1,15 +1,17 @@
 <script lang="ts">
   import heroImage from "$lib/assets/hero-image.jpg";
-  import { language } from "$lib/stores/language";
+  import { language, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
 
-  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  let currentLang: LanguageCode = "en";
 
   language.subscribe((value) => {
     currentLang = value;
   });
 
-  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
+  const localizedTranslations = translations as any;
+
+  $: t = localizedTranslations[currentLang];
 </script>
 
 <!-- Hero Section -->

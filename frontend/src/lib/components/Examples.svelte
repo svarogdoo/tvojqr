@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { language } from "$lib/stores/language";
+  import { language, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
 
-  let currentLang: "en" | "sr" | "ru" | "el" = "en";
+  let currentLang: LanguageCode = "en";
 
   language.subscribe((value) => {
     currentLang = value;
   });
 
-  $: t = translations[currentLang as "en" | "sr" | "ru" | "el"];
+  const localizedTranslations = translations as any;
+
+  $: t = localizedTranslations[currentLang];
 </script>
 
 <section id="examples" class="border-y border-black/8 bg-[rgba(220,228,216,0.92)] px-4 py-20 sm:px-6 lg:px-8">
