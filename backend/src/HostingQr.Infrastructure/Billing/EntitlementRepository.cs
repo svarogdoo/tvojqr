@@ -31,7 +31,24 @@ public sealed class EntitlementRepository : IEntitlementRepository
             """;
 
         using var connection = _connectionFactory.CreateConnection();
-        EntitlementResponse? entitlement = await connection.QuerySingleOrDefaultAsync<EntitlementResponse>(new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
-        return entitlement ?? new EntitlementResponse(BillingTier.None, false, false, null);
+        EntitlementRow? entitlement = await connection.QuerySingleOrDefaultAsync<EntitlementRow>(new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
+        return entitlement is null
+            ? new EntitlementResponse(BillingTier.None, false, false, null)
+            : new EntitlementResponse(
+                entitlement.Tier,
+                entitlement.IsActive,
+                entitlement.GrantedManually,
+                entitlement.EndsAt is null ? null : new DateTimeOffset(DateTime.SpecifyKind(entitlement.EndsAt.Value, DateTimeKind.Utc)));
+    }
+
+    private sealed class EntitlementRow
+    {
+        public string Tier { get; init; } = BillingTier.None;
+
+        public bool IsActive { get; init; }
+
+        public bool GrantedManually { get; init; }
+
+        public DateTime? EndsAt { get; init; }
     }
 }
