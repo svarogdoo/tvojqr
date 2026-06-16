@@ -113,11 +113,10 @@
   />
 </svelte:head>
 
+<div class="flex min-h-screen flex-col bg-[rgba(243,244,246,0.98)]">
 <Navigation />
 
-<main
-  class="min-h-screen bg-[rgba(243,244,246,0.98)] px-4 pb-16 pt-28 sm:px-6 lg:px-8"
->
+<main class="flex-1 px-4 pb-16 pt-28 sm:px-6 lg:px-8">
   <section class="mx-auto max-w-6xl">
     <div
       class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between"
@@ -267,3 +266,4 @@
 </main>
 
 <Footer />
+</div>

@@ -18,9 +18,10 @@
   />
 </svelte:head>
 
+<div class="flex min-h-screen flex-col bg-[rgba(243,244,246,0.98)]">
 <Navigation />
 
-<main class="min-h-screen bg-[rgba(243,244,246,0.98)] px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+<main class="flex-1 px-4 pb-16 pt-28 sm:px-6 lg:px-8">
   <section class="mx-auto max-w-6xl">
     <div class="mx-auto max-w-3xl rounded-[2rem] border border-stone-200 bg-white p-8 shadow-[0_18px_50px_rgba(45,53,46,0.08)] sm:p-10">
       <div class="text-center">
@@ -140,3 +141,4 @@
 </main>
 
 <Footer />
+</div>

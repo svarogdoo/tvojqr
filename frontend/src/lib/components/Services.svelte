@@ -3,12 +3,14 @@
     "Print new menus every time prices or items change",
     "Replace stickers, table tents, or cards again and again",
     "Keep paying for new print runs",
+    "Extra prints for special short term offering",
   ];
 
   const ourSteps = [
     "Update the offer in seconds",
     "Keep the same QR code forever",
     "Add translations without reprinting",
+    "Add and remove special offers in few clicks",
   ];
 </script>
 

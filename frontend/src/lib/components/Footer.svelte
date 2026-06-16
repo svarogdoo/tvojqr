@@ -15,7 +15,7 @@
 </script>
 
 <!-- Footer -->
-<footer class="px-4 py-10 sm:px-6 lg:px-8">
+<footer class="bg-[rgba(243,244,246,0.98)] px-4 py-10 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-6xl pt-8 text-center text-stone-500">
     <p class="font-medium text-stone-700">{copyright}</p>
   </div>

@@ -6,11 +6,15 @@
   import WhoAreWe from "$lib/components/WhoAreWe.svelte";
 </script>
 
-<Navigation />
-<Hero />
-<Services />
-<WhoAreWe />
-<Footer />
+<div class="flex min-h-screen flex-col">
+  <Navigation />
+  <main class="flex-1">
+    <Hero />
+    <Services />
+    <WhoAreWe />
+  </main>
+  <Footer />
+</div>
 
 <svelte:head>
   <title>HostingQr</title>
