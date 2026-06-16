@@ -23,6 +23,14 @@
   const availableLanguageOptions = [
     { code: "en", name: "English", flag: "🇬🇧" },
     { code: "es", name: "Spanish", flag: "🇪🇸" },
+    { code: "pt", name: "Portuguese", flag: "🇵🇹" },
+    { code: "it", name: "Italian", flag: "🇮🇹" },
+    { code: "ar", name: "Arabic", flag: "🇸🇦" },
+    { code: "fr", name: "French", flag: "🇫🇷" },
+    { code: "bs", name: "Bosnian", flag: "🇧🇦" },
+    { code: "ja", name: "Japanese", flag: "🇯🇵" },
+    { code: "hr", name: "Croatian", flag: "🇭🇷" },
+    { code: "sr", name: "Serbian", flag: "🇷🇸" },
   ];
 
   type DraftAsset = {
