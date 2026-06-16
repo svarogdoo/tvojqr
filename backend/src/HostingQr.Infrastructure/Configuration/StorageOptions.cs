@@ -4,13 +4,14 @@ public sealed class StorageOptions
 {
     public const string SectionName = "Storage";
 
-    public string Provider { get; init; } = "Local";
+    public string Provider { get; init; } = string.Empty;
 
     public string? UploadsRootPath { get; init; }
 
     public R2StorageOptions R2 { get; init; } = new();
 
-    public bool UsesR2() => string.Equals(Provider, "R2", StringComparison.OrdinalIgnoreCase);
+    public bool UsesR2() => string.Equals(Provider, "R2", StringComparison.OrdinalIgnoreCase) ||
+        (string.IsNullOrWhiteSpace(Provider) && R2.IsConfigured());
 }
 
 public sealed class R2StorageOptions
