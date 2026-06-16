@@ -80,7 +80,8 @@ When R2 is enabled, the backend stores the R2 object key in Postgres and returns
 
 Pricing entitlement tiers:
 
-- supported tiers are `free`, `standard`, `world_cup`, and `plus`
+- supported customer tiers are `free`, `standard`, `world_cup`, and `plus`
+- internal `admin` tier is available for unrestricted owner/admin access and should not be shown publicly
 - users without an active row in `user_entitlements` receive tier `none` and cannot use project tools
 - until checkout/admin tooling exists, a tier can be assigned manually in SQL:
 
@@ -95,6 +96,8 @@ on conflict (user_id) do update set
 ```
 
 To remove access, set `is_active = false` for that user's entitlement row.
+
+To grant unrestricted internal access, use tier `admin` instead of `free`.
 
 Recommended local setup:
 
