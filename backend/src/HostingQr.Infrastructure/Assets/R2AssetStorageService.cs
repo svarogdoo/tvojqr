@@ -63,6 +63,11 @@ public sealed class R2AssetStorageService : IAssetStorageService
 
     public string GetPublicUrl(string storedFileName)
     {
+        if (Uri.TryCreate(storedFileName, UriKind.Absolute, out _))
+        {
+            return storedFileName;
+        }
+
         string publicBaseUrl = _r2Options.PublicBaseUrl!.TrimEnd('/');
         return $"{publicBaseUrl}/{storedFileName}";
     }

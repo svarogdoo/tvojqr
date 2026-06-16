@@ -290,6 +290,7 @@ Status markers for tasks:
 [PARTIAL] 7.1.c Save metadata (file type, size, language, order).
 [DONE] 7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
 [DONE] 7.1.e Prefer R2 automatically when configured so production uploads resolve from durable object storage.
+[DONE] 7.1.f Store R2 object keys in Postgres while returning direct R2 public URLs to the frontend.
 7.2 Add file lifecycle management.
 [PARTIAL] 7.2.a Delete/replace uploads
 7.2.b Versioning strategy (optional later)

@@ -3,6 +3,7 @@
 Scope:
 - Prefer R2 storage automatically when valid R2 settings are present.
 - Keep local storage as the development fallback.
+- Store R2 object keys, not full public URLs, in asset metadata.
 - Avoid changing public page rendering unless needed for the URL shape.
 
 Affected areas:

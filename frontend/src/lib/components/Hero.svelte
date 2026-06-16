@@ -19,7 +19,9 @@
   class="relative overflow-hidden border-b border-black/5 px-4 pt-24 sm:px-6 lg:px-8"
 >
   <div class="max-w-7xl mx-auto">
-    <div class="grid items-center gap-14 pb-12 lg:grid-cols-[1.05fr_0.95fr] lg:pb-20">
+    <div
+      class="grid items-center gap-14 pb-12 lg:grid-cols-[1.05fr_0.95fr] lg:pb-20"
+    >
       <div class="max-w-2xl">
         <h1
           class="max-w-3xl text-5xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-6xl lg:text-7xl animate-fade-in"
@@ -37,7 +39,8 @@
             {t.hero.cta}
           </a>
           <a
-            href="/#how-it-works"
+            href="/example"
+            target="_blank"
             class="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white/85 px-6 py-3.5 text-base font-medium text-stone-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-stone-300 hover:text-stone-900"
           >
             {t.hero.secondary}
@@ -50,7 +53,9 @@
           class="absolute inset-x-10 top-8 h-64 rounded-full bg-[rgba(204,212,201,0.55)] blur-3xl"
         ></div>
 
-        <div class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-3 shadow-[0_24px_60px_rgba(45,53,46,0.12)] backdrop-blur-sm">
+        <div
+          class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-3 shadow-[0_24px_60px_rgba(45,53,46,0.12)] backdrop-blur-sm"
+        >
           <div class="mb-3 flex items-center gap-2 px-2 py-1">
             <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
             <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>

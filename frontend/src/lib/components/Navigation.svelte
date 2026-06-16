@@ -64,7 +64,8 @@
         {t.nav.services}
       </a>
       <a
-        href="/restoran"
+        href="/example"
+        target="_blank"
         class="text-sm font-medium text-stone-600 transition-colors hover:text-stone-900"
       >
         {t.nav.examples}
@@ -112,7 +113,7 @@
             {#each languages as lang (lang.code)}
               <button
                 type="button"
-                  on:click={() => changeLanguage(lang.code as LanguageCode)}
+                on:click={() => changeLanguage(lang.code as LanguageCode)}
                 class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors hover:bg-stone-50 {currentLang ===
                 lang.code
                   ? 'text-stone-900'
