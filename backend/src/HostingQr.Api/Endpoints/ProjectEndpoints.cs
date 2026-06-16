@@ -13,6 +13,20 @@ public static class ProjectEndpoints
             .WithTags("Projects")
             .RequireAuthorization();
 
+        group.AddEndpointFilter(async (context, next) =>
+        {
+            IEntitlementService entitlementService = context.HttpContext.RequestServices.GetRequiredService<IEntitlementService>();
+            bool hasToolAccess = await entitlementService.CurrentUserHasToolAccessAsync(context.HttpContext.RequestAborted);
+            if (!hasToolAccess)
+            {
+                return Results.Json(
+                    new { message = "Choose a pricing tier to use project tools." },
+                    statusCode: StatusCodes.Status402PaymentRequired);
+            }
+
+            return await next(context);
+        });
+
         group.MapGet("/", async (IProjectService projectService, CancellationToken cancellationToken) =>
             Results.Ok(await projectService.ListProjectsAsync(cancellationToken)))
             .WithName("ListProjects")

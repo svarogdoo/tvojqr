@@ -14,6 +14,7 @@ export type AuthState =
   | { status: "authenticated"; user: AuthUser };
 
 export const auth = writable<AuthState>({ status: "loading", user: null });
+export const authNavigationStartedEvent = "hostingqr:auth-navigation-started";
 
 export async function refreshSession() {
   auth.set({ status: "loading", user: null });
@@ -37,6 +38,7 @@ export async function refreshSession() {
 }
 
 export function startGoogleSignIn() {
+  window.dispatchEvent(new CustomEvent(authNavigationStartedEvent));
   window.location.href = toApiUrl("/api/auth/google");
 }
 

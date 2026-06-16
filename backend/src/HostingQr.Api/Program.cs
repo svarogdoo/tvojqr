@@ -56,6 +56,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapAuthEndpoints();
+app.MapBillingEndpoints();
 app.MapSystemEndpoints();
 app.MapProjectEndpoints();
 app.MapSlugEndpoints();

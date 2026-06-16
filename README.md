@@ -317,19 +317,19 @@ Status markers for tasks:
 ### 9. Billing, Pricing & Payments (Deferred Until Core Product Flow Is Stable)
 
 [PARTIAL] 9.1 Define plan structure before pricing amounts.
-9.1.a Tier names
+[DONE] 9.1.a Tier names
 9.1.b Feature limits (projects, languages, storage, traffic, file types)
-9.1.c Free tier and/or free trial policy
+[PARTIAL] 9.1.c Free tier and/or free trial policy
 9.2 Integrate recurring payments provider.
 9.2.a Subscription checkout
 9.2.b Customer billing portal
 9.2.c Webhook handling for subscription events
-9.3 Add billing status to dashboard.
-9.3.a Current plan
+[PARTIAL] 9.3 Add billing status to dashboard.
+[DONE] 9.3.a Current plan
 9.3.b Renewal date
 9.3.c Payment status / failed payment warnings
-9.4 Implement plan enforcement.
-9.4.a Block/limit actions when user exceeds tier
+[PARTIAL] 9.4 Implement plan enforcement.
+[DONE] 9.4.a Block/limit actions when user exceeds tier
 9.4.b Grace period behavior after failed payment
 9.4.c Downgrade handling when usage exceeds new tier
 [DONE] 9.5 Add a pricing contact form that emails inbound requests.

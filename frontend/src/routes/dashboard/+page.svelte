@@ -4,13 +4,15 @@ import Navigation from "$lib/components/Navigation.svelte";
 import { apiFetch } from "$lib/api";
 import { auth, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
 import { showSnackbar } from "$lib/stores/snackbar";
-import type { ProjectListItem } from "$lib/types/projects";
+import type { Entitlement, ProjectListItem } from "$lib/types/projects";
   import { onMount } from "svelte";
 
   let projects: ProjectListItem[] = [];
   let loadingProjects = true;
   let projectError = "";
   let creatingProject = false;
+  let entitlement: Entitlement | null = null;
+  let loadingEntitlement = true;
 
   function statusLabel(status: ProjectListItem["status"]) {
     return status === "disabled" ? "Disabled" : "Active";
@@ -23,6 +25,11 @@ import type { ProjectListItem } from "$lib/types/projects";
     try {
       const response = await apiFetch("/api/projects");
       if (response.status === 401) {
+        projects = [];
+        return;
+      }
+
+      if (response.status === 402) {
         projects = [];
         return;
       }
@@ -41,8 +48,41 @@ import type { ProjectListItem } from "$lib/types/projects";
 
   onMount(async () => {
     await refreshSession();
+    await loadEntitlement();
+    if ($auth.status !== "authenticated" || !entitlement?.hasToolAccess) {
+      loadingProjects = false;
+      return;
+    }
+
     await loadProjects();
   });
+
+  async function loadEntitlement() {
+    loadingEntitlement = true;
+    entitlement = null;
+
+    if ($auth.status !== "authenticated") {
+      loadingEntitlement = false;
+      return;
+    }
+
+    try {
+      const response = await apiFetch("/api/billing/entitlement");
+      if (response.status === 401) {
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Entitlement request failed with status ${response.status}`);
+      }
+
+      entitlement = (await response.json()) as Entitlement;
+    } catch {
+      projectError = "Unable to load your plan status right now.";
+    } finally {
+      loadingEntitlement = false;
+    }
+  }
 
   async function createProject() {
     if ($auth.status === "loading") {
@@ -51,6 +91,11 @@ import type { ProjectListItem } from "$lib/types/projects";
 
     if ($auth.status !== "authenticated") {
       startGoogleSignIn();
+      return;
+    }
+
+    if (!entitlement?.hasToolAccess) {
+      await goto("/pricing");
       return;
     }
 
@@ -88,13 +133,19 @@ import type { ProjectListItem } from "$lib/types/projects";
           <div class="mt-8 rounded-[1.5rem] border border-stone-200 bg-stone-50 px-6 py-8 text-sm leading-7 text-stone-600">
             Sign in first to load your project list.
           </div>
-        {:else if loadingProjects}
+        {:else if loadingEntitlement || loadingProjects}
           <div class="mt-8 rounded-[1.5rem] border border-stone-200 bg-stone-50 px-6 py-8 text-sm leading-7 text-stone-600">
             Loading your projects...
           </div>
         {:else if projectError}
           <div class="mt-8 rounded-[1.5rem] border border-[color:var(--error-soft)] bg-[color:var(--error-soft)] px-6 py-8 text-sm leading-7 text-[color:var(--error-strong)]">
             {projectError}
+          </div>
+        {:else if !entitlement?.hasToolAccess}
+          <div class="mt-8 rounded-[1.5rem] border border-stone-200 bg-stone-50 px-6 py-8 text-sm leading-7 text-stone-600">
+            <p class="text-base font-semibold text-stone-900">Pick a plan to unlock project tools.</p>
+            <p class="mt-2 max-w-xl">Your account is ready, but you need an active tier before you can create, edit, or upload hosted QR pages.</p>
+            <a href="/pricing" class="mt-5 inline-flex rounded-full bg-stone-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-800">See pricing</a>
           </div>
         {:else if projects.length === 0}
           <div class="mt-8 rounded-[1.5rem] border border-stone-200 bg-stone-50 px-6 py-8 text-sm leading-7 text-stone-600">

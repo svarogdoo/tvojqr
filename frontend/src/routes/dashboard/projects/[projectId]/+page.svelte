@@ -5,7 +5,7 @@
   import ProjectQrBuilder from "$lib/components/ProjectQrBuilder.svelte";
   import { apiFetch } from "$lib/api";
   import { toApiUrl } from "$lib/config";
-  import { auth, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
+  import { auth, authNavigationStartedEvent, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
   import { showSnackbar } from "$lib/stores/snackbar";
   import type {
     Asset,
@@ -771,6 +771,10 @@
   });
 
   onMount(() => {
+    const allowAuthNavigation = () => {
+      allowNavigation = true;
+    };
+
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!hasUnsavedChanges || allowNavigation) {
         return;
@@ -780,8 +784,12 @@
       event.returnValue = "";
     };
 
+    window.addEventListener(authNavigationStartedEvent, allowAuthNavigation);
     window.addEventListener("beforeunload", warnBeforeUnload);
-    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+    return () => {
+      window.removeEventListener(authNavigationStartedEvent, allowAuthNavigation);
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+    };
   });
 </script>
 

@@ -78,6 +78,24 @@ Storage__R2__PublicBaseUrl=https://your-public-r2-url-or-custom-domain
 
 When R2 is enabled, the backend stores the R2 object key in Postgres and returns public image URLs built from `Storage__R2__PublicBaseUrl`. For example, the database stores `projects/.../image.webp`, while API responses return `https://assets.hostingqr.com/projects/.../image.webp`.
 
+Pricing entitlement tiers:
+
+- supported tiers are `free`, `standard`, `world_cup`, and `plus`
+- users without an active row in `user_entitlements` receive tier `none` and cannot use project tools
+- until checkout/admin tooling exists, a tier can be assigned manually in SQL:
+
+```sql
+insert into user_entitlements (user_id, tier, is_active, granted_manually)
+values ('user-id-here', 'free', true, true)
+on conflict (user_id) do update set
+    tier = excluded.tier,
+    is_active = excluded.is_active,
+    granted_manually = excluded.granted_manually,
+    updated_at = now();
+```
+
+To remove access, set `is_active = false` for that user's entitlement row.
+
 Recommended local setup:
 
 ```bash

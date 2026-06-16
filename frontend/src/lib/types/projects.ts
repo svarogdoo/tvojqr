@@ -55,3 +55,11 @@ export type SlugAvailabilityResponse = {
 export type GeneratedSlugResponse = {
   slug: string;
 };
+
+export type Entitlement = {
+  tier: "none" | "free" | "standard" | "world_cup" | "plus";
+  isActive: boolean;
+  grantedManually: boolean;
+  endsAt: string | null;
+  hasToolAccess: boolean;
+};

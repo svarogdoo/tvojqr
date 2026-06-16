@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using HostingQr.Application.Abstractions;
 using HostingQr.Application.Assets;
 using HostingQr.Application.Auth;
+using HostingQr.Application.Billing;
 using HostingQr.Application.Projects;
 using HostingQr.Application.Slugs;
 using Microsoft.AspNetCore.Http;
@@ -157,10 +158,12 @@ public sealed class ProjectEndpointTests
                 services.RemoveAll<ISlugService>();
                 services.RemoveAll<IUserRepository>();
                 services.RemoveAll<IAssetService>();
+                services.RemoveAll<IEntitlementService>();
                 services.AddScoped<IProjectService, FakeProjectService>();
                 services.AddScoped<ISlugService, FakeSlugService>();
                 services.AddScoped<IUserRepository, FakeUserRepository>();
                 services.AddScoped<IAssetService, FakeAssetService>();
+                services.AddScoped<IEntitlementService, FakeEntitlementService>();
 
                 if (_authenticated)
                 {
@@ -192,6 +195,19 @@ public sealed class ProjectEndpointTests
         public Task<AuthUserResponse> UpsertAsync(Guid id, string email, string displayName, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(new AuthUserResponse(id, email, displayName));
+        }
+    }
+
+    private sealed class FakeEntitlementService : IEntitlementService
+    {
+        public Task<EntitlementResponse> GetCurrentEntitlementAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new EntitlementResponse(BillingTier.Standard, true, false, null));
+        }
+
+        public Task<bool> CurrentUserHasToolAccessAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(true);
         }
     }
 
