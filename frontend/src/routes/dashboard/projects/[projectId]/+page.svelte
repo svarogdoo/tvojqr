@@ -70,6 +70,7 @@
   let baselineSavedAssetOrderIds: string[] = [];
   let baselineLanguages: ProjectLanguageVariant[] = [];
   let draggedSavedAssetId = "";
+  let draggedDraftAssetId = "";
   let addingLanguage = false;
 
   $: hasFormChanges = form.name !== savedForm.name
@@ -719,6 +720,43 @@
     draggedSavedAssetId = "";
   }
 
+  function moveDraftAsset(targetAssetId: string) {
+    if (!draggedDraftAssetId || draggedDraftAssetId === targetAssetId) {
+      return;
+    }
+
+    const draggedAsset = draftAssets.find((asset) => asset.id === draggedDraftAssetId);
+    const targetAsset = draftAssets.find((asset) => asset.id === targetAssetId);
+    if (!draggedAsset || !targetAsset || draggedAsset.languageCode !== targetAsset.languageCode) {
+      return;
+    }
+
+    const nextAssets = [...draftAssets];
+    const fromIndex = nextAssets.findIndex((asset) => asset.id === draggedDraftAssetId);
+    const toIndex = nextAssets.findIndex((asset) => asset.id === targetAssetId);
+    if (fromIndex === -1 || toIndex === -1) {
+      return;
+    }
+
+    const [asset] = nextAssets.splice(fromIndex, 1);
+    nextAssets.splice(toIndex, 0, asset);
+    draftAssets = nextAssets;
+  }
+
+  function dragDraftAsset(event: DragEvent, assetId: string) {
+    draggedDraftAssetId = assetId;
+    event.dataTransfer?.setData("text/plain", assetId);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+    }
+  }
+
+  function dropDraftAsset(event: DragEvent, targetAssetId: string) {
+    event.preventDefault();
+    moveDraftAsset(targetAssetId);
+    draggedDraftAssetId = "";
+  }
+
   $: orderedSavedAssets = savedAssetOrderIds
     .map((assetId) => (project?.assets ?? []).find((asset: Asset) => asset.id === assetId))
     .filter((asset): asset is Asset => Boolean(asset));
@@ -999,8 +1037,9 @@
                           </div>
                         {/each}
                         {#each sectionDraftAssets as asset}
-                          <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white shadow-sm">
+                          <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedDraftAssetId === asset.id ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragDraftAsset(event, asset.id)} on:dragend={() => draggedDraftAssetId = ""} on:dragover|preventDefault on:drop={(event) => dropDraftAsset(event, asset.id)} role="group" aria-label={`Drag to reorder pending ${asset.originalFileName}`}>
                             <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                            <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">Drag</div>
                             <button type="button" on:click={() => removeDraftAsset(asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${asset.originalFileName}`}>
                               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
                             </button>
