@@ -3,7 +3,7 @@ import { env } from "$env/dynamic/private";
 import nodemailer from "nodemailer";
 import type { Actions } from "./$types";
 
-const recipientEmail = "svarog.doo@gmail.com";
+const supportEmail = "support@hostingqr.com";
 
 export const actions: Actions = {
   default: async ({ request }) => {
@@ -57,8 +57,8 @@ export const actions: Actions = {
 
     try {
       await transporter.sendMail({
-        from: `"HostingQr Contact" <${env.EMAIL_USER}>`,
-        to: recipientEmail,
+        from: `"HostingQr Support" <${env.EMAIL_USER}>`,
+        to: supportEmail,
         replyTo: email,
         subject: `HostingQr request from ${name}`,
         text: [

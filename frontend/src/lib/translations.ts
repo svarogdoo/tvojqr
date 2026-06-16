@@ -119,7 +119,7 @@ export const translations = {
         send: "Send Message",
       },
       info: {
-        email: "info@hostingqr.com",
+        email: "support@hostingqr.com",
         phone: "+1 (555) 123-4567",
         website: "www.hostingqr.com",
       },
@@ -281,7 +281,7 @@ export const translations = {
         send: "Pošalji poruku",
       },
       info: {
-        email: "info@hostingqr.com",
+        email: "support@hostingqr.com",
         phone: "+1 (555) 123-4567",
         website: "www.hostingqr.com",
       },
@@ -442,7 +442,7 @@ export const translations = {
         send: "Отправить сообщение",
       },
       info: {
-        email: "info@hostingqr.com",
+        email: "support@hostingqr.com",
         phone: "+1 (555) 123-4567",
         website: "www.hostingqr.com",
       },
@@ -604,7 +604,7 @@ export const translations = {
         send: "Αποστολή μηνύματος",
       },
       info: {
-        email: "info@hostingqr.com",
+        email: "support@hostingqr.com",
         phone: "+1 (555) 123-4567",
         website: "www.hostingqr.com",
       },

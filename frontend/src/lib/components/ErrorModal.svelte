@@ -5,7 +5,7 @@
 
   export let show = false;
   export let onClose: () => void;
-  export let emailAddress = "myemail@gmail.com";
+  export let emailAddress = "support@hostingqr.com";
 
   let currentLang: LanguageCode = "en";
   language.subscribe((value) => {
