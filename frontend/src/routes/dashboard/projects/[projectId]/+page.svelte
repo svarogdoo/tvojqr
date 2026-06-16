@@ -67,17 +67,20 @@
   let slugCheckTimeout: ReturnType<typeof setTimeout> | null = null;
   let slugCheckRequestId = 0;
   let savedAssetOrderIds: string[] = [];
+  let mixedAssetOrderIds: string[] = [];
   let baselineSavedAssetOrderIds: string[] = [];
   let baselineLanguages: ProjectLanguageVariant[] = [];
-  let draggedSavedAssetId = "";
-  let draggedDraftAssetId = "";
+  let draggedAssetOrderId = "";
   let addingLanguage = false;
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
     || form.backgroundColor !== savedForm.backgroundColor;
-  $: hasAssetOrderChanges = savedAssetOrderIds.length === baselineSavedAssetOrderIds.length
-    && savedAssetOrderIds.some((assetId, index) => assetId !== baselineSavedAssetOrderIds[index]);
+  $: currentSavedAssetOrderIds = mixedAssetItems
+    .filter((item) => item.kind === "saved")
+    .map((item) => item.asset.id);
+  $: hasAssetOrderChanges = currentSavedAssetOrderIds.length === baselineSavedAssetOrderIds.length
+    && currentSavedAssetOrderIds.some((assetId, index) => assetId !== baselineSavedAssetOrderIds[index]);
   $: hasLanguageChanges = (() => {
     const current = languageSections.map((language) => ({
       id: language.id,
@@ -141,6 +144,7 @@
       project = (await response.json()) as ProjectDetail;
       originalSlug = project.slug;
       savedAssetOrderIds = project.assets.map((asset) => asset.id);
+      mixedAssetOrderIds = project.assets.map((asset) => savedOrderId(asset.id));
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
       baselineLanguages = project.languages.map((language) => ({ ...language }));
       if (!preserveForm || initializedProjectId !== project.id) {
@@ -386,34 +390,12 @@
         }
       }
 
-      if (!isDraft && hasAssetOrderChanges) {
-        for (const language of languageSections) {
-          const remainingAssetIds = savedAssetOrderIds.filter((assetId) => {
-            const asset = project?.assets.find((item) => item.id === assetId);
-            return asset?.languageCode === language.languageCode && !removedSavedAssetIds.has(assetId);
-          });
-
-          if (remainingAssetIds.length === 0) {
-            continue;
-          }
-
-          const reorderResponse = await apiFetch(`/api/projects/${savedProject.id}/assets/order`, {
-            method: "PUT",
-            body: JSON.stringify({ assetIds: remainingAssetIds }),
-          });
-
-          if (!reorderResponse.ok) {
-            const body = (await reorderResponse.json()) as { message?: string };
-            showSnackbar(body.message ?? "Project settings saved, but image order could not be updated.", "error");
-            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
-            return;
-          }
-        }
-      }
-
+      const uploadedDraftAssetIds = new Map<string, string>();
       if (draftAssets.length > 0) {
         for (const language of languageSections) {
-          const languageDraftAssets = draftAssets.filter((asset) => asset.languageCode === language.languageCode);
+          const languageDraftAssets = mixedAssetItems
+            .filter((item) => item.kind === "draft" && item.languageCode === language.languageCode)
+            .map((item) => item.asset as DraftAsset);
           if (languageDraftAssets.length === 0) {
             continue;
           }
@@ -436,6 +418,53 @@
             await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
             return;
           }
+
+          const assetsAfterUpload = (await uploadResponse.json()) as Asset[];
+          const newestAssets = assetsAfterUpload
+            .filter((asset) => asset.languageCode === language.languageCode)
+            .slice(-languageDraftAssets.length);
+          languageDraftAssets.forEach((draftAsset, index) => {
+            const uploadedAsset = newestAssets[index];
+            if (uploadedAsset) {
+              uploadedDraftAssetIds.set(draftOrderId(draftAsset.id), uploadedAsset.id);
+            }
+          });
+        }
+      }
+
+      const finalAssetOrderIds = mixedAssetOrderIds
+        .map((orderId) => orderId.startsWith("saved:") ? orderId.slice("saved:".length) : uploadedDraftAssetIds.get(orderId))
+        .filter((assetId): assetId is string => Boolean(assetId))
+        .filter((assetId) => !removedSavedAssetIds.has(assetId));
+
+      if (!isDraft && (hasAssetOrderChanges || uploadedDraftAssetIds.size > 0 || removedSavedAssetIds.size > 0)) {
+        for (const language of languageSections) {
+          const orderedLanguageAssetIds = finalAssetOrderIds.filter((assetId) => {
+            const savedAsset = project?.assets.find((asset) => asset.id === assetId);
+            if (savedAsset) {
+              return savedAsset.languageCode === language.languageCode;
+            }
+
+            const draftEntry = [...uploadedDraftAssetIds.entries()].find(([, uploadedAssetId]) => uploadedAssetId === assetId);
+            const draftAsset = draftEntry ? draftAssets.find((asset) => draftOrderId(asset.id) === draftEntry[0]) : null;
+            return draftAsset?.languageCode === language.languageCode;
+          });
+
+          if (orderedLanguageAssetIds.length === 0) {
+            continue;
+          }
+
+          const reorderResponse = await apiFetch(`/api/projects/${savedProject.id}/assets/order`, {
+            method: "PUT",
+            body: JSON.stringify({ assetIds: orderedLanguageAssetIds }),
+          });
+
+          if (!reorderResponse.ok) {
+            const body = (await reorderResponse.json()) as { message?: string };
+            showSnackbar(body.message ?? "Project settings saved, but image order could not be updated.", "error");
+            await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+            return;
+          }
         }
       }
 
@@ -451,6 +480,8 @@
       savedForm = { ...form };
       draftAssets.forEach((asset) => URL.revokeObjectURL(asset.previewUrl));
       draftAssets = [];
+      savedAssetOrderIds = finalAssetOrderIds;
+      mixedAssetOrderIds = finalAssetOrderIds.map((assetId) => savedOrderId(assetId));
       removedSavedAssetIds = new Set<string>();
       removedLanguageCodes = new Set<string>();
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
@@ -608,6 +639,7 @@
 
       project = (await response.json()) as ProjectDetail;
       savedAssetOrderIds = project.assets.map((asset) => asset.id);
+      mixedAssetOrderIds = project.assets.map((asset) => savedOrderId(asset.id));
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
       baselineLanguages = project.languages.map((language) => ({ ...language }));
       showSnackbar("Language added.", "success");
@@ -652,6 +684,7 @@
       }));
 
       draftAssets = [...draftAssets, ...nextAssets];
+      mixedAssetOrderIds = [...mixedAssetOrderIds, ...nextAssets.map((asset) => draftOrderId(asset.id))];
       showSnackbar("Images added. Save to apply changes.", "success");
     } finally {
       uploading = false;
@@ -666,6 +699,7 @@
     }
 
     draftAssets = draftAssets.filter((item) => item.id !== assetId);
+    mixedAssetOrderIds = mixedAssetOrderIds.filter((orderId) => orderId !== draftOrderId(assetId));
     showSnackbar("Image removed from draft. Save to apply changes.", "success");
   }
 
@@ -689,78 +723,64 @@
     showSnackbar("Image restored.", "info");
   }
 
-  function moveSavedAsset(targetAssetId: string) {
-    if (!draggedSavedAssetId || draggedSavedAssetId === targetAssetId) {
+  function savedOrderId(assetId: string) {
+    return `saved:${assetId}`;
+  }
+
+  function draftOrderId(assetId: string) {
+    return `draft:${assetId}`;
+  }
+
+  function moveMixedAsset(targetOrderId: string) {
+    if (!draggedAssetOrderId || draggedAssetOrderId === targetOrderId) {
       return;
     }
 
-    const nextOrder = [...savedAssetOrderIds];
-    const fromIndex = nextOrder.indexOf(draggedSavedAssetId);
-    const toIndex = nextOrder.indexOf(targetAssetId);
-    if (fromIndex === -1 || toIndex === -1) {
-      return;
-    }
-
-    const [assetId] = nextOrder.splice(fromIndex, 1);
-    nextOrder.splice(toIndex, 0, assetId);
-    savedAssetOrderIds = nextOrder;
-  }
-
-  function dragSavedAsset(event: DragEvent, assetId: string) {
-    draggedSavedAssetId = assetId;
-    event.dataTransfer?.setData("text/plain", assetId);
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-    }
-  }
-
-  function dropSavedAsset(event: DragEvent, targetAssetId: string) {
-    event.preventDefault();
-    moveSavedAsset(targetAssetId);
-    draggedSavedAssetId = "";
-  }
-
-  function moveDraftAsset(targetAssetId: string) {
-    if (!draggedDraftAssetId || draggedDraftAssetId === targetAssetId) {
-      return;
-    }
-
-    const draggedAsset = draftAssets.find((asset) => asset.id === draggedDraftAssetId);
-    const targetAsset = draftAssets.find((asset) => asset.id === targetAssetId);
+    const draggedAsset = mixedAssetItems.find((item) => item.orderId === draggedAssetOrderId);
+    const targetAsset = mixedAssetItems.find((item) => item.orderId === targetOrderId);
     if (!draggedAsset || !targetAsset || draggedAsset.languageCode !== targetAsset.languageCode) {
       return;
     }
 
-    const nextAssets = [...draftAssets];
-    const fromIndex = nextAssets.findIndex((asset) => asset.id === draggedDraftAssetId);
-    const toIndex = nextAssets.findIndex((asset) => asset.id === targetAssetId);
+    const nextOrder = [...mixedAssetOrderIds];
+    const fromIndex = nextOrder.indexOf(draggedAssetOrderId);
+    const toIndex = nextOrder.indexOf(targetOrderId);
     if (fromIndex === -1 || toIndex === -1) {
       return;
     }
 
-    const [asset] = nextAssets.splice(fromIndex, 1);
-    nextAssets.splice(toIndex, 0, asset);
-    draftAssets = nextAssets;
+    const [orderId] = nextOrder.splice(fromIndex, 1);
+    nextOrder.splice(toIndex, 0, orderId);
+    mixedAssetOrderIds = nextOrder;
   }
 
-  function dragDraftAsset(event: DragEvent, assetId: string) {
-    draggedDraftAssetId = assetId;
-    event.dataTransfer?.setData("text/plain", assetId);
+  function dragMixedAsset(event: DragEvent, orderId: string) {
+    draggedAssetOrderId = orderId;
+    event.dataTransfer?.setData("text/plain", orderId);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = "move";
     }
   }
 
-  function dropDraftAsset(event: DragEvent, targetAssetId: string) {
+  function dropMixedAsset(event: DragEvent, targetOrderId: string) {
     event.preventDefault();
-    moveDraftAsset(targetAssetId);
-    draggedDraftAssetId = "";
+    moveMixedAsset(targetOrderId);
+    draggedAssetOrderId = "";
   }
 
-  $: orderedSavedAssets = savedAssetOrderIds
-    .map((assetId) => (project?.assets ?? []).find((asset: Asset) => asset.id === assetId))
-    .filter((asset): asset is Asset => Boolean(asset));
-  $: visibleSavedAssets = orderedSavedAssets.filter((asset: Asset) => !removedSavedAssetIds.has(asset.id) && !removedLanguageCodes.has(asset.languageCode));
+  $: mixedAssetItems = mixedAssetOrderIds
+    .map((orderId) => {
+      if (orderId.startsWith("saved:")) {
+        const asset = (project?.assets ?? []).find((item) => item.id === orderId.slice("saved:".length));
+        return asset ? { kind: "saved" as const, orderId, languageCode: asset.languageCode, asset } : null;
+      }
+
+      const asset = draftAssets.find((item) => item.id === orderId.slice("draft:".length));
+      return asset ? { kind: "draft" as const, orderId, languageCode: asset.languageCode, asset } : null;
+    })
+    .filter((item): item is ({ kind: "saved"; orderId: string; languageCode: string; asset: Asset } | { kind: "draft"; orderId: string; languageCode: string; asset: DraftAsset }) => Boolean(item))
+    .filter((item) => item.kind === "draft" || !removedSavedAssetIds.has(item.asset.id))
+    .filter((item) => !removedLanguageCodes.has(item.languageCode));
   $: languageSections = (project?.languages ?? [{ id: "draft-default", languageCode: form.defaultLanguageCode, displayName: form.defaultLanguageDisplayName, isDefault: true, sortOrder: 0 }])
     .filter((language) => !removedLanguageCodes.has(language.languageCode))
     .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -982,8 +1002,7 @@
               <div class="mt-5 grid gap-5">
                 {#each languageSections as language}
                   {@const choices = languageOptionsFor(language)}
-                  {@const sectionSavedAssets = visibleSavedAssets.filter((asset) => asset.languageCode === language.languageCode)}
-                  {@const sectionDraftAssets = draftAssets.filter((asset) => asset.languageCode === language.languageCode)}
+                  {@const sectionAssets = mixedAssetItems.filter((item) => item.languageCode === language.languageCode)}
                   <section class="rounded-[1.25rem] border border-stone-200 bg-white px-4 py-4 shadow-sm">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
@@ -1020,30 +1039,20 @@
                       </div>
                     </div>
 
-                    {#if sectionSavedAssets.length === 0 && sectionDraftAssets.length === 0}
+                    {#if sectionAssets.length === 0}
                       <div class="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
                         No images uploaded for {language.displayName} yet.
                       </div>
                     {:else}
                       <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {#each sectionSavedAssets as asset}
-                          <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedSavedAssetId === asset.id ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragSavedAsset(event, asset.id)} on:dragend={() => draggedSavedAssetId = ""} on:dragover|preventDefault on:drop={(event) => dropSavedAsset(event, asset.id)} role="group" aria-label={`Drag to reorder ${asset.originalFileName}`}>
-                            <img src={toApiUrl(asset.url)} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
+                        {#each sectionAssets as item}
+                          <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedAssetOrderId === item.orderId ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragMixedAsset(event, item.orderId)} on:dragend={() => draggedAssetOrderId = ""} on:dragover|preventDefault on:drop={(event) => dropMixedAsset(event, item.orderId)} role="group" aria-label={`Drag to reorder ${item.asset.originalFileName}`}>
+                            <img src={item.kind === "saved" ? toApiUrl(item.asset.url) : item.asset.previewUrl} alt={item.asset.originalFileName} class="aspect-square w-full object-cover" />
                             <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">Drag</div>
-                            <button type="button" on:click={() => deleteSavedAsset(asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${asset.originalFileName}`}>
+                            <button type="button" on:click={() => item.kind === "saved" ? deleteSavedAsset(item.asset.id) : removeDraftAsset(item.asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${item.asset.originalFileName}`}>
                               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
                             </button>
-                            <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p></div>
-                          </div>
-                        {/each}
-                        {#each sectionDraftAssets as asset}
-                          <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedDraftAssetId === asset.id ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragDraftAsset(event, asset.id)} on:dragend={() => draggedDraftAssetId = ""} on:dragover|preventDefault on:drop={(event) => dropDraftAsset(event, asset.id)} role="group" aria-label={`Drag to reorder pending ${asset.originalFileName}`}>
-                            <img src={asset.previewUrl} alt={asset.originalFileName} class="aspect-square w-full object-cover" />
-                            <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">Drag</div>
-                            <button type="button" on:click={() => removeDraftAsset(asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${asset.originalFileName}`}>
-                              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
-                            </button>
-                            <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{asset.originalFileName}</p><p class="mt-1 text-xs text-stone-500">Pending upload</p></div>
+                            <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{item.asset.originalFileName}</p>{#if item.kind === "draft"}<p class="mt-1 text-xs text-stone-500">Pending upload</p>{/if}</div>
                           </div>
                         {/each}
                       </div>
