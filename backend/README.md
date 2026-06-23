@@ -31,6 +31,8 @@ Current endpoint:
 - `GET /api/slugs/{slug}/availability`
 - `POST /api/slugs/generate`
 - `GET /api/public/{slug}`
+- `GET /api/billing/entitlement`
+- `POST /api/billing/checkout`
 
 Current notes:
 
@@ -98,6 +100,32 @@ on conflict (user_id) do update set
 To remove access, set `is_active = false` for that user's entitlement row.
 
 To grant unrestricted internal access, use tier `admin` instead of `free`.
+
+Polar checkout config:
+
+- keep the Polar access token and product IDs only in backend env/user-secrets/Railway variables, never in frontend env
+- `Polar__AccessToken` should be an API key with `checkouts:write`; `checkouts:read` is optional
+- `Polar__SuccessUrl` is where Polar redirects after successful checkout
+- `Polar__CancelUrl` is used as Polar's checkout return URL/back destination
+- checkout creates Polar sessions only; webhook handling is still required before purchases automatically update `user_entitlements`
+
+```bash
+Polar__AccessToken=your-polar-api-key
+Polar__SuccessUrl=https://hostingqr.com/dashboard
+Polar__CancelUrl=https://hostingqr.com/pricing
+Polar__Products__StandardMonthly=b0e6fd14-2373-4a77-99aa-ee9dc4b8bc92
+Polar__Products__StandardAnnual=0f0ea548-09da-4eea-95ad-38423b1184ab
+Polar__Products__WorldCupMonthly=8c2551a2-5048-41e5-a6b2-5823e3b20351
+Polar__Products__WorldCupAnnual=a90aa5ae-e458-4df8-952c-3266607bc4d5
+Polar__Products__PlusMonthly=817a9d13-84c2-4d8-9cf5-1a3caaf7e627
+Polar__Products__PlusAnnual=387c57c1-abde-44f3-1b511d27c34b
+```
+
+For local development, use user-secrets instead of committing real values:
+
+```bash
+dotnet user-secrets --project src/HostingQr.Api set "Polar:AccessToken" "your-polar-api-key"
+```
 
 Recommended local setup:
 

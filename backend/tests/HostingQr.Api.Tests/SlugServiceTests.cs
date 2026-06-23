@@ -30,6 +30,8 @@ public sealed class SlugServiceTests
     [InlineData("dashboard")]
     [InlineData("pricing")]
     [InlineData("contact")]
+    [InlineData("privacy")]
+    [InlineData("terms")]
     [InlineData("api")]
     public void NormalizeOrThrow_RejectsReservedAppRoutes(string slug)
     {

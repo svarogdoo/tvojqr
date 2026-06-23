@@ -1,9 +1,12 @@
 <script lang="ts">
   import footballBg from "$lib/assets/football-bg.jpg";
+  import { apiFetch } from "$lib/api";
   import Footer from "$lib/components/Footer.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import { auth, startGoogleSignIn } from "$lib/stores/auth";
   import { language, type LanguageCode } from "$lib/stores/language";
   import { homepageCopy } from "$lib/homepageCopy";
+  import { get } from "svelte/store";
 
   type BillingCycle = "monthly" | "annual";
 
@@ -23,8 +26,8 @@
       badge: "World Cup",
       featured: false,
       price: {
-        monthly: "$15 / month",
-        annual: "$150 / year",
+        monthly: "$9 / month",
+        annual: "$90 / year",
       },
       description:
         "Need your menu in many languages or to change prices quickly?",
@@ -63,8 +66,8 @@
       badge: "Standard",
       featured: true,
       price: {
-        monthly: "$9 / month",
-        annual: "$90 / year",
+        monthly: "$6 / month",
+        annual: "$60 / year",
       },
       description:
         "Great for small restaurants with simple needs. You can always upgrade later.",
@@ -83,8 +86,8 @@
       badge: "Plus",
       featured: false,
       price: {
-        monthly: "$19 / month",
-        annual: "$190 / year",
+        monthly: "$13 / month",
+        annual: "$130 / year",
       },
       description:
         "You need more? This plan is for you. Want to go even bigger? Contact us!",
@@ -121,9 +124,47 @@
     copy.details.support,
   ];
   let billingCycle: BillingCycle = "monthly";
+  let checkoutPlanId: string | null = null;
+  let checkoutError = "";
 
   function setBillingCycle(nextCycle: BillingCycle) {
     billingCycle = nextCycle;
+  }
+
+  async function startCheckout(planId: string) {
+    checkoutError = "";
+
+    if (planId === "free") {
+      window.location.href = "/contact";
+      return;
+    }
+
+    if (get(auth).status !== "authenticated") {
+      startGoogleSignIn();
+      return;
+    }
+
+    checkoutPlanId = planId;
+
+    try {
+      const response = await apiFetch("/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({
+          tier: planId,
+          billingCycle,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Checkout failed with status ${response.status}`);
+      }
+
+      const checkout = (await response.json()) as { checkoutUrl: string };
+      window.location.href = checkout.checkoutUrl;
+    } catch {
+      checkoutError = "Checkout is not available right now. Please try again or contact support.";
+      checkoutPlanId = null;
+    }
   }
 </script>
 
@@ -246,14 +287,22 @@
 
           <button
             type="button"
+            on:click={() => startCheckout(plan.id)}
+            disabled={checkoutPlanId === plan.id}
             class={`mt-auto inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${plan.featured ? "bg-white text-stone-950 hover:bg-stone-100" : plan.id === "world-cup" ? "border border-stone-300 bg-white text-stone-900 hover:-translate-y-0.5 hover:border-stone-400 hover:bg-stone-50" : "border border-stone-200 bg-stone-50 text-stone-900 hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white"}`}
             data-polar-plan={plan.id}
           >
-            {planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].button}
+            {checkoutPlanId === plan.id ? "Opening checkout..." : planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].button}
           </button>
         </article>
       {/each}
     </div>
+
+    {#if checkoutError}
+      <p class="mx-auto mt-5 max-w-2xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">
+        {checkoutError}
+      </p>
+    {/if}
 
     <div class="mx-auto mt-10 max-w-3xl text-center">
       <p class="text-sm text-stone-600">

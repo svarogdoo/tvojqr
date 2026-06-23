@@ -18,7 +18,9 @@ public sealed class SlugService : ISlugService
         "login",
         "logout",
         "pricing",
+        "privacy",
         "signup",
+        "terms",
     };
     private readonly ISlugRepository _slugRepository;
 

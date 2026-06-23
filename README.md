@@ -320,8 +320,8 @@ Status markers for tasks:
 [DONE] 9.1.a Tier names
 9.1.b Feature limits (projects, languages, storage, traffic, file types)
 [PARTIAL] 9.1.c Free tier and/or free trial policy
-9.2 Integrate recurring payments provider.
-9.2.a Subscription checkout
+9.2 [PARTIAL] Integrate recurring payments provider.
+9.2.a [PARTIAL] Subscription checkout
 9.2.b Customer billing portal
 9.2.c Webhook handling for subscription events
 [PARTIAL] 9.3 Add billing status to dashboard.
@@ -403,7 +403,7 @@ Status markers for tasks:
 [PARTIAL] 12.4.a Auth env vars
 [DONE] 12.4.a.1 Backend Google auth supports user-secrets / env-based local configuration.
 12.4.b [DONE] Storage env vars
-12.4.c Billing env vars
+12.4.c [DONE] Billing env vars
 12.4.d Email env vars (if temporary flow remains)
 12.5 Add monitoring/error tracking for production.
 

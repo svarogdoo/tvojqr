@@ -48,6 +48,11 @@ public static class DependencyInjection
             .AddOptions<StorageOptions>()
             .Bind(configuration.GetSection(StorageOptions.SectionName));
 
+        services
+            .AddOptions<PolarOptions>()
+            .Bind(configuration.GetSection(PolarOptions.SectionName));
+
+        services.AddHttpClient();
         services.AddHttpContextAccessor();
         services.AddCors(options =>
         {
