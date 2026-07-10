@@ -33,6 +33,7 @@ Current endpoint:
 - `GET /api/public/{slug}`
 - `GET /api/billing/entitlement`
 - `POST /api/billing/checkout`
+- `POST /api/billing/polar/webhook`
 
 Current notes:
 
@@ -107,10 +108,12 @@ Polar checkout config:
 - `Polar__AccessToken` should be an API key with `checkouts:write`; `checkouts:read` is optional
 - `Polar__SuccessUrl` is where Polar redirects after successful checkout
 - `Polar__CancelUrl` is used as Polar's checkout return URL/back destination
-- checkout creates Polar sessions only; webhook handling is still required before purchases automatically update `user_entitlements`
+- checkout creates Polar sessions; the basic webhook updates `user_entitlements` after trusted Polar payment/subscription events
+- `Polar__WebhookSecret` is required for the Polar Raw webhook endpoint and must match the endpoint secret in Polar
 
 ```bash
 Polar__AccessToken=your-polar-api-key
+Polar__WebhookSecret=your-polar-webhook-secret
 Polar__SuccessUrl=https://hostingqr.com/dashboard
 Polar__CancelUrl=https://hostingqr.com/pricing
 Polar__Products__StandardMonthly=b0e6fd14-2373-4a77-99aa-ee9dc4b8bc92
@@ -125,7 +128,17 @@ For local development, use user-secrets instead of committing real values:
 
 ```bash
 dotnet user-secrets --project src/HostingQr.Api set "Polar:AccessToken" "your-polar-api-key"
+dotnet user-secrets --project src/HostingQr.Api set "Polar:WebhookSecret" "your-polar-webhook-secret"
 ```
+
+Polar webhook setup:
+
+- endpoint URL: `https://api.hostingqr.com/api/billing/polar/webhook`
+- format: `Raw`
+- selected events for the basic integration: `order.paid`, `subscription.active`, `subscription.created`, `subscription.updated`, `subscription.canceled`, and `subscription.revoked`
+- webhook requests are verified using Standard Webhooks headers before entitlement changes are applied
+- activation events update `user_entitlements` for `standard` and `plus` tiers from checkout metadata
+- cancellation events only change access when Polar includes a clear period end or immediate revocation event
 
 Recommended local setup:
 

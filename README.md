@@ -323,7 +323,7 @@ Status markers for tasks:
 9.2 [PARTIAL] Integrate recurring payments provider.
 9.2.a [PARTIAL] Subscription checkout
 9.2.b Customer billing portal
-9.2.c Webhook handling for subscription events
+9.2.c [PARTIAL] Webhook handling for subscription events
 [PARTIAL] 9.3 Add billing status to dashboard.
 [DONE] 9.3.a Current plan
 9.3.b Renewal date
@@ -398,7 +398,7 @@ Status markers for tasks:
 12.3.a Slug validation
 12.3.b Upload validation
 12.3.c Public page rendering by slug
-12.3.d Billing webhook handling
+12.3.d [PARTIAL] Billing webhook handling
 12.4 Add environment setup documentation.
 [PARTIAL] 12.4.a Auth env vars
 [DONE] 12.4.a.1 Backend Google auth supports user-secrets / env-based local configuration.

@@ -1,5 +1,8 @@
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.Json;
 using HostingQr.Application.Abstractions;
 using HostingQr.Application.Billing;
 using HostingQr.Infrastructure.Configuration;
@@ -82,6 +85,58 @@ public static class BillingEndpoints
             .WithName("CreateBillingCheckout")
             .WithSummary("Creates a Polar checkout session for the current user.");
 
+        group.MapPost("/polar/webhook", async (
+            HttpRequest request,
+            IEntitlementRepository entitlementRepository,
+            IOptions<PolarOptions> polarOptions,
+            CancellationToken cancellationToken) =>
+        {
+            string webhookSecret = polarOptions.Value.WebhookSecret;
+            if (string.IsNullOrWhiteSpace(webhookSecret))
+            {
+                return Results.Problem(
+                    "Polar webhook is not configured.",
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
+            using StreamReader reader = new(request.Body, Encoding.UTF8);
+            string payload = await reader.ReadToEndAsync(cancellationToken);
+
+            if (!VerifyStandardWebhookSignature(request.Headers, payload, webhookSecret))
+            {
+                return Results.StatusCode(StatusCodes.Status403Forbidden);
+            }
+
+            PolarWebhookEvent? webhookEvent = ParsePolarWebhook(payload);
+            if (webhookEvent is null)
+            {
+                return Results.Accepted();
+            }
+
+            if (webhookEvent.Action is PolarWebhookAction.Ignore)
+            {
+                return Results.Accepted();
+            }
+
+            if (!Guid.TryParse(webhookEvent.UserId, out Guid userId) || !IsCustomerTier(webhookEvent.Tier))
+            {
+                return Results.Accepted();
+            }
+
+            if (webhookEvent.Action is PolarWebhookAction.EndAtPeriodEnd && webhookEvent.EndsAt is null)
+            {
+                return Results.Accepted();
+            }
+
+            bool isActive = webhookEvent.Action is PolarWebhookAction.Activate
+                || (webhookEvent.EndsAt is not null && webhookEvent.EndsAt > DateTimeOffset.UtcNow);
+
+            await entitlementRepository.UpsertAsync(userId, webhookEvent.Tier, isActive, webhookEvent.EndsAt, cancellationToken: cancellationToken);
+            return Results.Accepted();
+        })
+            .WithName("HandlePolarWebhook")
+            .WithSummary("Handles Polar billing webhooks.");
+
         return endpoints;
     }
 
@@ -100,6 +155,148 @@ public static class BillingEndpoints
         _ => null
     };
 
+    private static bool IsCustomerTier(string tier) => tier is BillingTier.Standard or BillingTier.Plus;
+
+    private static bool VerifyStandardWebhookSignature(IHeaderDictionary headers, string payload, string secret)
+    {
+        string? webhookId = headers["webhook-id"].FirstOrDefault();
+        string? webhookTimestamp = headers["webhook-timestamp"].FirstOrDefault();
+        string? webhookSignature = headers["webhook-signature"].FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(webhookId)
+            || string.IsNullOrWhiteSpace(webhookTimestamp)
+            || string.IsNullOrWhiteSpace(webhookSignature))
+        {
+            return false;
+        }
+
+        if (!long.TryParse(webhookTimestamp, out long timestampSeconds))
+        {
+            return false;
+        }
+
+        DateTimeOffset timestamp = DateTimeOffset.FromUnixTimeSeconds(timestampSeconds);
+        if (timestamp < DateTimeOffset.UtcNow.AddMinutes(-5) || timestamp > DateTimeOffset.UtcNow.AddMinutes(5))
+        {
+            return false;
+        }
+
+        byte[] secretBytes = DecodeWebhookSecret(secret);
+        string signedContent = $"{webhookId}.{webhookTimestamp}.{payload}";
+        byte[] signatureBytes = HMACSHA256.HashData(secretBytes, Encoding.UTF8.GetBytes(signedContent));
+        string expectedSignature = Convert.ToBase64String(signatureBytes);
+
+        foreach (string candidate in webhookSignature.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            string signature = candidate.StartsWith("v1,", StringComparison.OrdinalIgnoreCase)
+                ? candidate[3..]
+                : candidate;
+
+            if (CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(expectedSignature), Encoding.UTF8.GetBytes(signature)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static byte[] DecodeWebhookSecret(string secret)
+    {
+        string normalized = secret.Trim();
+        if (normalized.StartsWith("whsec_", StringComparison.OrdinalIgnoreCase))
+        {
+            normalized = normalized[6..];
+        }
+
+        try
+        {
+            return Convert.FromBase64String(normalized);
+        }
+        catch (FormatException)
+        {
+            return Encoding.UTF8.GetBytes(secret);
+        }
+    }
+
+    private static PolarWebhookEvent? ParsePolarWebhook(string payload)
+    {
+        using JsonDocument document = JsonDocument.Parse(payload);
+        JsonElement root = document.RootElement;
+        if (!root.TryGetProperty("type", out JsonElement typeElement) || typeElement.ValueKind != JsonValueKind.String)
+        {
+            return null;
+        }
+
+        string eventType = typeElement.GetString() ?? string.Empty;
+        PolarWebhookAction action = GetWebhookAction(eventType);
+        if (action is PolarWebhookAction.Ignore)
+        {
+            return new PolarWebhookEvent(eventType, action, string.Empty, string.Empty, null);
+        }
+
+        if (!root.TryGetProperty("data", out JsonElement data) || data.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        JsonElement? metadata = GetObjectProperty(data, "metadata") ?? GetObjectProperty(data, "customer_metadata");
+        string? userId = GetStringProperty(metadata, "userId");
+        string? tier = NormalizeWebhookTier(GetStringProperty(metadata, "tier"));
+        DateTimeOffset? endsAt = GetDateTimeOffsetProperty(data, "current_period_end")
+            ?? GetDateTimeOffsetProperty(data, "ends_at")
+            ?? GetDateTimeOffsetProperty(data, "ended_at");
+
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(tier))
+        {
+            return null;
+        }
+
+        return new PolarWebhookEvent(eventType, action, userId, tier, endsAt);
+    }
+
+    private static PolarWebhookAction GetWebhookAction(string eventType) => eventType switch
+    {
+        "order.paid" => PolarWebhookAction.Activate,
+        "subscription.active" => PolarWebhookAction.Activate,
+        "subscription.created" => PolarWebhookAction.Activate,
+        "subscription.updated" => PolarWebhookAction.Activate,
+        "subscription.canceled" => PolarWebhookAction.EndAtPeriodEnd,
+        "subscription.revoked" => PolarWebhookAction.Deactivate,
+        _ => PolarWebhookAction.Ignore,
+    };
+
+    private static JsonElement? GetObjectProperty(JsonElement element, string propertyName)
+    {
+        return element.TryGetProperty(propertyName, out JsonElement property) && property.ValueKind == JsonValueKind.Object
+            ? property
+            : null;
+    }
+
+    private static string? GetStringProperty(JsonElement? element, string propertyName)
+    {
+        if (element is null || !element.Value.TryGetProperty(propertyName, out JsonElement property))
+        {
+            return null;
+        }
+
+        return property.ValueKind is JsonValueKind.String ? property.GetString() : null;
+    }
+
+    private static DateTimeOffset? GetDateTimeOffsetProperty(JsonElement element, string propertyName)
+    {
+        if (!element.TryGetProperty(propertyName, out JsonElement property) || property.ValueKind != JsonValueKind.String)
+        {
+            return null;
+        }
+
+        return DateTimeOffset.TryParse(property.GetString(), out DateTimeOffset value) ? value : null;
+    }
+
+    private static string? NormalizeWebhookTier(string? tier) => string.IsNullOrWhiteSpace(tier)
+        ? null
+        : NormalizeTier(tier);
+
     private sealed record CheckoutRequest(string Tier, string BillingCycle);
 
     private sealed record CheckoutResponse(string CheckoutUrl);
@@ -114,4 +311,14 @@ public static class BillingEndpoints
         [property: JsonPropertyName("metadata")] Dictionary<string, string> Metadata);
 
     private sealed record PolarCheckoutResponse([property: JsonPropertyName("url")] string Url);
+
+    private sealed record PolarWebhookEvent(string Type, PolarWebhookAction Action, string UserId, string Tier, DateTimeOffset? EndsAt);
+
+    private enum PolarWebhookAction
+    {
+        Ignore,
+        Activate,
+        EndAtPeriodEnd,
+        Deactivate,
+    }
 }

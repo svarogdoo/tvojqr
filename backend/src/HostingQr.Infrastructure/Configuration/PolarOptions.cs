@@ -12,6 +12,8 @@ public sealed class PolarOptions
 
     public string CancelUrl { get; set; } = string.Empty;
 
+    public string WebhookSecret { get; set; } = string.Empty;
+
     public PolarProductOptions Products { get; set; } = new();
 
     public bool IsConfigured() =>

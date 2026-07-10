@@ -41,6 +41,30 @@ public sealed class EntitlementRepository : IEntitlementRepository
                 entitlement.EndsAt is null ? null : new DateTimeOffset(DateTime.SpecifyKind(entitlement.EndsAt.Value, DateTimeKind.Utc)));
     }
 
+    public async Task UpsertAsync(Guid userId, string tier, bool isActive, DateTimeOffset? endsAt, bool grantedManually = false, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            insert into user_entitlements (user_id, tier, is_active, granted_manually, ends_at, updated_at)
+            values (@UserId, @Tier, @IsActive, @GrantedManually, @EndsAt, now())
+            on conflict (user_id) do update set
+                tier = excluded.tier,
+                is_active = excluded.is_active,
+                granted_manually = excluded.granted_manually,
+                ends_at = excluded.ends_at,
+                updated_at = now();
+            """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(new CommandDefinition(sql, new
+        {
+            UserId = userId,
+            Tier = tier,
+            IsActive = isActive,
+            GrantedManually = grantedManually,
+            EndsAt = endsAt?.UtcDateTime,
+        }, cancellationToken: cancellationToken));
+    }
+
     private sealed class EntitlementRow
     {
         public string Tier { get; init; } = BillingTier.None;
