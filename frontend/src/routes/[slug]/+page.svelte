@@ -136,10 +136,12 @@
   style={`background-color: ${project?.backgroundColor ?? "#f8f7f3"};`}
 >
   {#if state === "loading"}
-    <div
-      class="mx-auto max-w-3xl rounded-4xl border border-black/6 bg-white/86 p-10 text-center shadow-[0_24px_60px_rgba(45,53,46,0.08)]"
-    >
-      <p class="text-lg text-stone-600">Loading page...</p>
+    <div class="flex min-h-[70vh] items-center justify-center">
+      <div class="flex items-center gap-2" aria-label="Loading page">
+        <span class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-stone-500/50"></span>
+        <span class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_0.18s_infinite] rounded-full bg-stone-500/50"></span>
+        <span class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_0.36s_infinite] rounded-full bg-stone-500/50"></span>
+      </div>
     </div>
   {:else if state === "active" && project}
     <main class="mx-auto max-w-5xl">

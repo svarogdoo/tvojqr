@@ -106,7 +106,6 @@
 <div class="min-h-screen bg-[rgba(243,244,246,0.98)] px-4 pb-16 pt-28 sm:px-6 lg:px-8">
   <main class="mx-auto max-w-5xl">
     <div class="mb-8 max-w-2xl">
-      <p class="text-sm font-medium uppercase tracking-[0.24em] text-stone-500">Account</p>
       <h1 class="mt-4 text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">Account & billing</h1>
       <p class="mt-4 text-base leading-7 text-stone-600">
         Manage your HostingQr account details and open your secure Polar billing portal.
