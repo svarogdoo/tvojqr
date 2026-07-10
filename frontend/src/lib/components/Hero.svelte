@@ -1,5 +1,5 @@
 <script lang="ts">
-  import heroImage from "$lib/assets/hero-image.jpg";
+  import heroImage from "$lib/assets/hero-image.webp";
   import { language, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
 
@@ -54,7 +54,7 @@
         ></div>
 
         <div
-          class="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 p-3 shadow-[0_24px_60px_rgba(45,53,46,0.12)] backdrop-blur-sm"
+          class="relative overflow-hidden rounded-4xl border border-white/60 bg-white/70 p-3 shadow-[0_24px_60px_rgba(45,53,46,0.12)] backdrop-blur-sm"
         >
           <div class="mb-3 flex items-center gap-2 px-2 py-1">
             <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
@@ -64,7 +64,7 @@
           <img
             src={heroImage}
             alt="Menu Design"
-            class="relative aspect-[4/5] w-full rounded-[1.5rem] object-cover object-center"
+            class="relative aspect-4/5 w-full rounded-3xl object-cover object-top"
           />
         </div>
       </div>

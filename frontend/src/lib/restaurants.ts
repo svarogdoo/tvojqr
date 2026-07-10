@@ -1,4 +1,4 @@
-import exampleMenu from "$lib/assets/hero-image.jpg";
+import exampleMenu from "$lib/assets/hero-image.webp";
 
 export const restaurants = {
   restoran: {
