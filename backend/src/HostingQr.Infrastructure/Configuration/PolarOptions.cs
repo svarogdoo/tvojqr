@@ -29,10 +29,6 @@ public sealed class PolarProductOptions
 
     public string StandardAnnual { get; set; } = string.Empty;
 
-    public string WorldCupMonthly { get; set; } = string.Empty;
-
-    public string WorldCupAnnual { get; set; } = string.Empty;
-
     public string PlusMonthly { get; set; } = string.Empty;
 
     public string PlusAnnual { get; set; } = string.Empty;
@@ -40,8 +36,6 @@ public sealed class PolarProductOptions
     public bool IsConfigured() =>
         !string.IsNullOrWhiteSpace(StandardMonthly)
         && !string.IsNullOrWhiteSpace(StandardAnnual)
-        && !string.IsNullOrWhiteSpace(WorldCupMonthly)
-        && !string.IsNullOrWhiteSpace(WorldCupAnnual)
         && !string.IsNullOrWhiteSpace(PlusMonthly)
         && !string.IsNullOrWhiteSpace(PlusAnnual);
 }

@@ -29,6 +29,7 @@ public sealed class BillingWebhookEndpointTests
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         Assert.Null(factory.EntitlementRepository.LastUpsert);
+        Assert.Empty(factory.BillingEventRepository.Events);
     }
 
     [Fact]
@@ -57,6 +58,40 @@ public sealed class BillingWebhookEndpointTests
         Assert.Equal(Guid.Parse("11111111-1111-1111-1111-111111111111"), factory.EntitlementRepository.LastUpsert.UserId);
         Assert.Equal(BillingTier.Standard, factory.EntitlementRepository.LastUpsert.Tier);
         Assert.True(factory.EntitlementRepository.LastUpsert.IsActive);
+        BillingEventRecord billingEvent = Assert.Single(factory.BillingEventRepository.Events);
+        Assert.Equal("polar", billingEvent.Provider);
+        Assert.Equal("evt_test", billingEvent.ProviderEventId);
+        Assert.Equal("order.paid", billingEvent.EventType);
+        Assert.Equal(Guid.Parse("11111111-1111-1111-1111-111111111111"), billingEvent.UserId);
+        Assert.Equal(BillingTier.Standard, billingEvent.Tier);
+        Assert.Equal("activate", billingEvent.ProcessedAction);
+        Assert.True(billingEvent.EntitlementActive);
+        Assert.Contains("order.paid", billingEvent.RawPayload, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task PolarWebhook_RecordsIgnoredSignedEvent()
+    {
+        await using TestApplicationFactory factory = new();
+        HttpClient client = factory.CreateClient();
+        string payload = """
+            {
+              "type": "customer.updated",
+              "data": {
+                "id": "customer_test"
+              }
+            }
+            """;
+        using StringContent content = CreateSignedContent(payload);
+
+        HttpResponseMessage response = await client.PostAsync("/api/billing/polar/webhook", content);
+
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+        Assert.Null(factory.EntitlementRepository.LastUpsert);
+        BillingEventRecord billingEvent = Assert.Single(factory.BillingEventRepository.Events);
+        Assert.Equal("customer.updated", billingEvent.EventType);
+        Assert.Equal("ignored", billingEvent.ProcessedAction);
+        Assert.Null(billingEvent.EntitlementActive);
     }
 
     private static StringContent CreateSignedContent(string payload)
@@ -77,12 +112,16 @@ public sealed class BillingWebhookEndpointTests
     {
         public FakeEntitlementRepository EntitlementRepository { get; } = new();
 
+        public FakeBillingEventRepository BillingEventRepository { get; } = new();
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
             {
                 services.RemoveAll<IEntitlementRepository>();
+                services.RemoveAll<IBillingEventRepository>();
                 services.AddSingleton<IEntitlementRepository>(EntitlementRepository);
+                services.AddSingleton<IBillingEventRepository>(BillingEventRepository);
             });
 
             builder.ConfigureAppConfiguration((_, config) =>
@@ -108,6 +147,17 @@ public sealed class BillingWebhookEndpointTests
         public Task UpsertAsync(Guid userId, string tier, bool isActive, DateTimeOffset? endsAt, bool grantedManually = false, CancellationToken cancellationToken = default)
         {
             LastUpsert = new EntitlementUpsert(userId, tier, isActive, endsAt, grantedManually);
+            return Task.CompletedTask;
+        }
+    }
+
+    public sealed class FakeBillingEventRepository : IBillingEventRepository
+    {
+        public List<BillingEventRecord> Events { get; } = [];
+
+        public Task InsertAsync(BillingEventRecord billingEvent, CancellationToken cancellationToken = default)
+        {
+            Events.Add(billingEvent);
             return Task.CompletedTask;
         }
     }

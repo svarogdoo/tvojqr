@@ -15,6 +15,5 @@ public static class BillingTier
     public const string Admin = "admin";
     public const string Free = "free";
     public const string Standard = "standard";
-    public const string WorldCup = "world_cup";
     public const string Plus = "plus";
 }

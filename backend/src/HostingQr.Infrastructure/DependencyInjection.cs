@@ -125,6 +125,7 @@ public static class DependencyInjection
         services.AddSingleton<R2AssetStorageService>();
         services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IBillingEventRepository, BillingEventRepository>();
         services.AddScoped<IEntitlementRepository, EntitlementRepository>();
         services.AddScoped<IEntitlementService, EntitlementService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();

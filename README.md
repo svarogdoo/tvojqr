@@ -352,7 +352,7 @@ Status markers for tasks:
 [DONE] 10.1.d Language variants
 [PARTIAL] 10.1.e Assets/files
 10.1.f Subscriptions/plans
-10.1.g Billing events
+[DONE] 10.1.g Billing events
 [PARTIAL] 10.2 Build server-side CRUD endpoints/actions for dashboard operations.
 [DONE] 10.2.a List projects for the current user dashboard
 [DONE] 10.2.b Create a new project
@@ -398,7 +398,7 @@ Status markers for tasks:
 12.3.a Slug validation
 12.3.b Upload validation
 12.3.c Public page rendering by slug
-12.3.d [PARTIAL] Billing webhook handling
+[DONE] 12.3.d Billing webhook handling
 12.4 Add environment setup documentation.
 [PARTIAL] 12.4.a Auth env vars
 [DONE] 12.4.a.1 Backend Google auth supports user-secrets / env-based local configuration.

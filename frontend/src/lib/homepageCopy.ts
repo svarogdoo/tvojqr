@@ -68,7 +68,6 @@ export const homepageCopy = {
       annual: "Annual",
       popular: "Popular",
       badges: {
-        worldCup: "World Cup",
         free: "Trial",
         standard: "Standard",
         plus: "Plus",
@@ -82,11 +81,6 @@ export const homepageCopy = {
         support: "Support",
       },
       plans: {
-        worldCup: {
-          description: "Need your menu in many languages or to change prices quickly?",
-          button: "Choose World Cup",
-          support: "Priority",
-        },
         free: {
           description: "Not sure how it works? Send us your files and we'll send you your preview.",
           button: "Start test",
@@ -215,7 +209,6 @@ export const homepageCopy = {
       annual: "Anual",
       popular: "Popular",
       badges: {
-        worldCup: "World Cup",
         free: "Prueba",
         standard: "Estándar",
         plus: "Plus",
@@ -229,12 +222,6 @@ export const homepageCopy = {
         support: "Soporte",
       },
       plans: {
-        worldCup: {
-          description:
-            "¿Necesitas tu menú en muchos idiomas o cambiar precios rápidamente?",
-          button: "Elegir World Cup",
-          support: "Prioridad",
-        },
         free: {
           description:
             "¿No estás seguro de cómo funciona? Envíanos tus archivos y te mandaremos una vista previa.",

@@ -88,6 +88,7 @@ public static class BillingEndpoints
         group.MapPost("/polar/webhook", async (
             HttpRequest request,
             IEntitlementRepository entitlementRepository,
+            IBillingEventRepository billingEventRepository,
             IOptions<PolarOptions> polarOptions,
             CancellationToken cancellationToken) =>
         {
@@ -107,24 +108,66 @@ public static class BillingEndpoints
                 return Results.StatusCode(StatusCodes.Status403Forbidden);
             }
 
+            string providerEventId = request.Headers["webhook-id"].FirstOrDefault() ?? string.Empty;
+
             PolarWebhookEvent? webhookEvent = ParsePolarWebhook(payload);
             if (webhookEvent is null)
             {
+                await RecordBillingEventAsync(
+                    billingEventRepository,
+                    providerEventId,
+                    ExtractWebhookType(payload),
+                    null,
+                    "ignored",
+                    null,
+                    null,
+                    payload,
+                    cancellationToken);
                 return Results.Accepted();
             }
 
             if (webhookEvent.Action is PolarWebhookAction.Ignore)
             {
+                await RecordBillingEventAsync(
+                    billingEventRepository,
+                    providerEventId,
+                    webhookEvent.Type,
+                    webhookEvent,
+                    "ignored",
+                    null,
+                    null,
+                    payload,
+                    cancellationToken);
                 return Results.Accepted();
             }
 
             if (!Guid.TryParse(webhookEvent.UserId, out Guid userId) || !IsCustomerTier(webhookEvent.Tier))
             {
+                await RecordBillingEventAsync(
+                    billingEventRepository,
+                    providerEventId,
+                    webhookEvent.Type,
+                    webhookEvent,
+                    "ignored",
+                    null,
+                    null,
+                    payload,
+                    cancellationToken);
                 return Results.Accepted();
             }
 
             if (webhookEvent.Action is PolarWebhookAction.EndAtPeriodEnd && webhookEvent.EndsAt is null)
             {
+                await RecordBillingEventAsync(
+                    billingEventRepository,
+                    providerEventId,
+                    webhookEvent.Type,
+                    webhookEvent,
+                    "ignored",
+                    null,
+                    null,
+                    payload,
+                    cancellationToken);
                 return Results.Accepted();
             }
 
@@ -132,6 +175,16 @@ public static class BillingEndpoints
                 || (webhookEvent.EndsAt is not null && webhookEvent.EndsAt > DateTimeOffset.UtcNow);
 
             await entitlementRepository.UpsertAsync(userId, webhookEvent.Tier, isActive, webhookEvent.EndsAt, cancellationToken: cancellationToken);
+            await RecordBillingEventAsync(
+                billingEventRepository,
+                providerEventId,
+                webhookEvent.Type,
+                webhookEvent,
+                GetProcessedAction(webhookEvent.Action),
+                isActive,
+                webhookEvent.EndsAt,
+                payload,
+                cancellationToken);
             return Results.Accepted();
         })
             .WithName("HandlePolarWebhook")
@@ -148,8 +201,6 @@ public static class BillingEndpoints
     {
         (BillingTier.Standard, "monthly") => products.StandardMonthly,
         (BillingTier.Standard, "annual") => products.StandardAnnual,
-        (BillingTier.WorldCup, "monthly") => products.WorldCupMonthly,
-        (BillingTier.WorldCup, "annual") => products.WorldCupAnnual,
         (BillingTier.Plus, "monthly") => products.PlusMonthly,
         (BillingTier.Plus, "annual") => products.PlusAnnual,
         _ => null
@@ -232,7 +283,7 @@ public static class BillingEndpoints
         PolarWebhookAction action = GetWebhookAction(eventType);
         if (action is PolarWebhookAction.Ignore)
         {
-            return new PolarWebhookEvent(eventType, action, string.Empty, string.Empty, null);
+            return new PolarWebhookEvent(eventType, action, string.Empty, string.Empty, null, null, null, null);
         }
 
         if (!root.TryGetProperty("data", out JsonElement data) || data.ValueKind != JsonValueKind.Object)
@@ -246,13 +297,73 @@ public static class BillingEndpoints
         DateTimeOffset? endsAt = GetDateTimeOffsetProperty(data, "current_period_end")
             ?? GetDateTimeOffsetProperty(data, "ends_at")
             ?? GetDateTimeOffsetProperty(data, "ended_at");
+        string? dataId = GetStringProperty(data, "id");
+        string? subscriptionId = GetStringProperty(data, "subscription_id")
+            ?? (eventType.StartsWith("subscription.", StringComparison.OrdinalIgnoreCase) ? dataId : null);
+        string? orderId = GetStringProperty(data, "order_id")
+            ?? (eventType.StartsWith("order.", StringComparison.OrdinalIgnoreCase) ? dataId : null);
+        string? customerId = GetStringProperty(data, "customer_id")
+            ?? GetStringProperty(GetObjectProperty(data, "customer"), "id");
 
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(tier))
         {
-            return null;
+            return new PolarWebhookEvent(eventType, action, userId ?? string.Empty, tier ?? string.Empty, endsAt, subscriptionId, orderId, customerId);
         }
 
-        return new PolarWebhookEvent(eventType, action, userId, tier, endsAt);
+        return new PolarWebhookEvent(eventType, action, userId, tier, endsAt, subscriptionId, orderId, customerId);
+    }
+
+    private static async Task RecordBillingEventAsync(
+        IBillingEventRepository billingEventRepository,
+        string providerEventId,
+        string eventType,
+        PolarWebhookEvent? webhookEvent,
+        string processedAction,
+        bool? entitlementActive,
+        DateTimeOffset? entitlementEndsAt,
+        string rawPayload,
+        CancellationToken cancellationToken)
+    {
+        Guid? userId = Guid.TryParse(webhookEvent?.UserId, out Guid parsedUserId) ? parsedUserId : null;
+        string? tier = string.IsNullOrWhiteSpace(webhookEvent?.Tier) ? null : webhookEvent.Tier;
+
+        await billingEventRepository.InsertAsync(new BillingEventRecord(
+            "polar",
+            providerEventId,
+            eventType,
+            userId,
+            tier,
+            webhookEvent?.SubscriptionId,
+            webhookEvent?.OrderId,
+            webhookEvent?.CustomerId,
+            processedAction,
+            entitlementActive,
+            entitlementEndsAt,
+            rawPayload), cancellationToken);
+    }
+
+    private static string GetProcessedAction(PolarWebhookAction action) => action switch
+    {
+        PolarWebhookAction.Activate => "activate",
+        PolarWebhookAction.EndAtPeriodEnd => "end_at_period_end",
+        PolarWebhookAction.Deactivate => "deactivate",
+        _ => "ignored",
+    };
+
+    private static string ExtractWebhookType(string payload)
+    {
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(payload);
+            JsonElement root = document.RootElement;
+            return root.TryGetProperty("type", out JsonElement typeElement) && typeElement.ValueKind == JsonValueKind.String
+                ? typeElement.GetString() ?? "unknown"
+                : "unknown";
+        }
+        catch (JsonException)
+        {
+            return "unknown";
+        }
     }
 
     private static PolarWebhookAction GetWebhookAction(string eventType) => eventType switch
@@ -312,7 +423,15 @@ public static class BillingEndpoints
 
     private sealed record PolarCheckoutResponse([property: JsonPropertyName("url")] string Url);
 
-    private sealed record PolarWebhookEvent(string Type, PolarWebhookAction Action, string UserId, string Tier, DateTimeOffset? EndsAt);
+    private sealed record PolarWebhookEvent(
+        string Type,
+        PolarWebhookAction Action,
+        string UserId,
+        string Tier,
+        DateTimeOffset? EndsAt,
+        string? SubscriptionId,
+        string? OrderId,
+        string? CustomerId);
 
     private enum PolarWebhookAction
     {

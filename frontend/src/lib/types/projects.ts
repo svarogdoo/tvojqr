@@ -57,7 +57,7 @@ export type GeneratedSlugResponse = {
 };
 
 export type Entitlement = {
-  tier: "none" | "admin" | "free" | "standard" | "world_cup" | "plus";
+  tier: "none" | "admin" | "free" | "standard" | "plus";
   isActive: boolean;
   grantedManually: boolean;
   endsAt: string | null;

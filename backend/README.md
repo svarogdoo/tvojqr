@@ -83,7 +83,7 @@ When R2 is enabled, the backend stores the R2 object key in Postgres and returns
 
 Pricing entitlement tiers:
 
-- supported customer tiers are `free`, `standard`, `world_cup`, and `plus`
+- supported customer tiers are `free`, `standard`, and `plus`
 - internal `admin` tier is available for unrestricted owner/admin access and should not be shown publicly
 - users without an active row in `user_entitlements` receive tier `none` and cannot use project tools
 - until checkout/admin tooling exists, a tier can be assigned manually in SQL:
@@ -118,8 +118,6 @@ Polar__SuccessUrl=https://hostingqr.com/dashboard
 Polar__CancelUrl=https://hostingqr.com/pricing
 Polar__Products__StandardMonthly=b0e6fd14-2373-4a77-99aa-ee9dc4b8bc92
 Polar__Products__StandardAnnual=0f0ea548-09da-4eea-95ad-38423b1184ab
-Polar__Products__WorldCupMonthly=8c2551a2-5048-41e5-a6b2-5823e3b20351
-Polar__Products__WorldCupAnnual=a90aa5ae-e458-4df8-952c-3266607bc4d5
 Polar__Products__PlusMonthly=817a9d13-84c2-4d8-9cf5-1a3caaf7e627
 Polar__Products__PlusAnnual=387c57c1-abde-44f3-1b511d27c34b
 ```
@@ -139,6 +137,14 @@ Polar webhook setup:
 - webhook requests are verified using Standard Webhooks headers before entitlement changes are applied
 - activation events update `user_entitlements` for `standard` and `plus` tiers from checkout metadata
 - cancellation events only change access when Polar includes a clear period end or immediate revocation event
+- signed webhook deliveries are stored in `billing_events` for debugging and support investigation; Polar remains the source of truth for payment records
+
+Billing event audit storage:
+
+- `billing_events` records the provider, provider event ID, event type, optional user/tier/provider object IDs, processed action, entitlement result, raw payload, and timestamps
+- invalid webhook signatures are rejected before any event is stored
+- duplicate provider event IDs are ignored safely
+- use `user_entitlements` for current access state and `billing_events` for historical webhook investigation
 
 Recommended local setup:
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import footballBg from "$lib/assets/football-bg.jpg";
   import { apiFetch } from "$lib/api";
   import Footer from "$lib/components/Footer.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
@@ -90,7 +89,6 @@
 
   $: copy = homepageCopy[currentLang].pricing;
   $: planCopy = {
-    worldCup: copy.plans.worldCup,
     free: copy.plans.free,
     standard: copy.plans.standard,
     plus: copy.plans.plus,
@@ -209,17 +207,14 @@
       {#each plans as plan}
         <article
           id={plan.id}
-          style={plan.id === "world-cup"
-            ? `background-color: #ffffff; background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url(${footballBg}); background-size: cover; background-position: center;`
-            : undefined}
-          class={`group flex h-full flex-col rounded-[2.25rem] border p-6 shadow-[0_18px_50px_rgba(45,53,46,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(45,53,46,0.12)] sm:p-7 ${plan.featured ? "border-stone-300 bg-stone-700 text-white" : plan.id === "world-cup" ? "border-stone-300 text-stone-900 shadow-[0_18px_50px_rgba(0,0,0,0.08)]" : "border-stone-200 bg-white text-stone-900"}`}
+          class={`group flex h-full flex-col rounded-[2.25rem] border p-6 shadow-[0_18px_50px_rgba(45,53,46,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(45,53,46,0.12)] sm:p-7 ${plan.featured ? "border-stone-300 bg-stone-700 text-white" : "border-stone-200 bg-white text-stone-900"}`}
           data-polar-tier={plan.id}
         >
           <div class="flex items-center justify-between gap-4">
             <span
-              class={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] ${plan.id === "world-cup" ? "bg-stone-700 text-white" : plan.featured ? "bg-white/10 text-white/85" : "bg-stone-100 text-stone-600"}`}
+              class={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] ${plan.featured ? "bg-white/10 text-white/85" : "bg-stone-100 text-stone-600"}`}
             >
-              {copy.badges[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"]}
+              {copy.badges[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"]}
             </span>
             {#if plan.featured}
               <span
@@ -227,13 +222,11 @@
               >
                 {copy.popular}
               </span>
-            {:else if plan.id === "world-cup"}
-              <span class="h-8 w-8"></span>
             {/if}
           </div>
 
           <div
-            class={`mt-6 h-1.5 w-14 rounded-full transition-all duration-300 group-hover:w-20 ${plan.featured ? "bg-white/30" : plan.id === "world-cup" ? "bg-stone-500/70" : "bg-stone-300"}`}
+            class={`mt-6 h-1.5 w-14 rounded-full transition-all duration-300 group-hover:w-20 ${plan.featured ? "bg-white/30" : "bg-stone-300"}`}
           ></div>
 
           <div
@@ -244,7 +237,7 @@
           <p
             class={`mt-3 text-sm leading-7 ${plan.featured ? "text-white/70" : "text-stone-600"}`}
           >
-              {planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].description}
+              {planCopy[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].description}
           </p>
 
           <div
@@ -258,7 +251,7 @@
                   <span>{detailLabels[idx]}</span>
                   <span
                     class={`font-medium ${plan.featured ? "text-white" : "text-stone-900"}`}
-                    >{detail.label === "Support" ? planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].support : detail.value}</span
+                    >{detail.label === "Support" ? planCopy[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].support : detail.value}</span
                   >
                 </div>
               {/each}
@@ -269,10 +262,10 @@
             type="button"
             on:click={() => startCheckout(plan.id)}
             disabled={checkoutPlanId === plan.id}
-            class={`mt-auto inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${plan.featured ? "bg-white text-stone-950 hover:bg-stone-100" : plan.id === "world-cup" ? "border border-stone-300 bg-white text-stone-900 hover:-translate-y-0.5 hover:border-stone-400 hover:bg-stone-50" : "border border-stone-200 bg-stone-50 text-stone-900 hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white"}`}
+            class={`mt-auto inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${plan.featured ? "bg-white text-stone-950 hover:bg-stone-100" : "border border-stone-200 bg-stone-50 text-stone-900 hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white"}`}
             data-polar-plan={plan.id}
           >
-            {checkoutPlanId === plan.id ? "Opening checkout..." : planCopy[plan.id === "world-cup" ? "worldCup" : plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].button}
+            {checkoutPlanId === plan.id ? "Opening checkout..." : planCopy[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].button}
           </button>
         </article>
       {/each}
