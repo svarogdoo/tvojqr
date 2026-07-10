@@ -22,26 +22,6 @@
 
   const plans: Plan[] = [
     {
-      id: "world-cup",
-      badge: "World Cup",
-      featured: false,
-      price: {
-        monthly: "$9 / month",
-        annual: "$90 / year",
-      },
-      description:
-        "Need your menu in many languages or to change prices quickly?",
-      button: "Choose World Cup",
-      details: [
-        { label: "Projects", value: "2" },
-        { label: "Menus", value: "2" },
-        { label: "Languages", value: "5" },
-        { label: "Uploaded files", value: "20 total" },
-        { label: "Traffic", value: "50 GB" },
-        { label: "Support", value: "Priority" },
-      ],
-    },
-    {
       id: "free",
       badge: "Trial",
       featured: false,
@@ -66,8 +46,8 @@
       badge: "Standard",
       featured: true,
       price: {
-        monthly: "$6 / month",
-        annual: "$60 / year",
+        monthly: "€7 / month",
+        annual: "€70 / year",
       },
       description:
         "Great for small restaurants with simple needs. You can always upgrade later.",
@@ -75,7 +55,7 @@
       details: [
         { label: "Projects", value: "1" },
         { label: "Menus", value: "2" },
-        { label: "Languages", value: "2" },
+        { label: "Languages", value: "3" },
         { label: "Uploaded files", value: "10 total" },
         { label: "Traffic", value: "25 GB" },
         { label: "Support", value: "Standard" },
@@ -86,8 +66,8 @@
       badge: "Plus",
       featured: false,
       price: {
-        monthly: "$13 / month",
-        annual: "$130 / year",
+        monthly: "€12 / month",
+        annual: "€120 / year",
       },
       description:
         "You need more? This plan is for you. Want to go even bigger? Contact us!",
@@ -95,7 +75,7 @@
       details: [
         { label: "Projects", value: "5" },
         { label: "Menus", value: "5" },
-        { label: "Languages", value: "5" },
+        { label: "Languages", value: "7" },
         { label: "Uploaded files", value: "25 total" },
         { label: "Traffic", value: "100 GB" },
         { label: "Support", value: "Priority" },
@@ -225,7 +205,7 @@
       </div>
     </div>
 
-    <div class="mt-12 grid gap-6 lg:grid-cols-4 lg:items-stretch">
+    <div class="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-3 lg:items-stretch">
       {#each plans as plan}
         <article
           id={plan.id}
