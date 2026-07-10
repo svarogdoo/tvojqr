@@ -105,10 +105,11 @@ To grant unrestricted internal access, use tier `admin` instead of `free`.
 Polar checkout config:
 
 - keep the Polar access token and product IDs only in backend env/user-secrets/Railway variables, never in frontend env
-- `Polar__AccessToken` should be an API key with `checkouts:write`; `checkouts:read` is optional
+- `Polar__AccessToken` should be an API key with `checkouts:write` and `customer_sessions:write`; `checkouts:read` is optional
 - `Polar__SuccessUrl` is where Polar redirects after successful checkout
 - `Polar__CancelUrl` is used as Polar's checkout return URL/back destination
 - checkout creates Polar sessions; the basic webhook updates `user_entitlements` after trusted Polar payment/subscription events
+- the account billing portal creates Polar customer sessions from the current app user ID as `external_customer_id`
 - `Polar__WebhookSecret` is required for the Polar Raw webhook endpoint and must match the endpoint secret in Polar
 
 ```bash
@@ -145,6 +146,14 @@ Billing event audit storage:
 - invalid webhook signatures are rejected before any event is stored
 - duplicate provider event IDs are ignored safely
 - use `user_entitlements` for current access state and `billing_events` for historical webhook investigation
+
+Customer billing portal:
+
+- frontend route: `/account`
+- backend endpoint: `POST /api/billing/portal`
+- the endpoint requires auth, creates a short-lived Polar customer session, and returns `portalUrl`
+- users can manage billing, payment details, and cancellation through Polar
+- customers must have a Polar customer associated with their app user ID, which is created by checkout via `external_customer_id`
 
 Recommended local setup:
 

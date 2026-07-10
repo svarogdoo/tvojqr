@@ -184,10 +184,16 @@
               >
                 Your projects
               </a>
+              <a
+                href="/account"
+                class="block border-t border-stone-100 px-4 py-3 text-sm text-stone-700 transition-colors hover:bg-stone-50"
+              >
+                Account & billing
+              </a>
               <button
                 type="button"
                 on:click={handleSignOut}
-                class="block w-full px-4 py-3 text-left text-sm text-stone-700 transition-colors hover:bg-stone-50"
+                class="block w-full border-t border-stone-100 px-4 py-3 text-left text-sm text-stone-700 transition-colors hover:bg-stone-50"
               >
                 Log out
               </button>

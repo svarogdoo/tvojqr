@@ -322,7 +322,7 @@ Status markers for tasks:
 [PARTIAL] 9.1.c Free tier and/or free trial policy
 9.2 [PARTIAL] Integrate recurring payments provider.
 9.2.a [PARTIAL] Subscription checkout
-9.2.b Customer billing portal
+[DONE] 9.2.b Customer billing portal
 9.2.c [PARTIAL] Webhook handling for subscription events
 [PARTIAL] 9.3 Add billing status to dashboard.
 [DONE] 9.3.a Current plan

@@ -85,6 +85,49 @@ public static class BillingEndpoints
             .WithName("CreateBillingCheckout")
             .WithSummary("Creates a Polar checkout session for the current user.");
 
+        group.MapPost("/portal", [Authorize] async (
+            ICurrentUserContext currentUserContext,
+            IHttpClientFactory httpClientFactory,
+            IOptions<PolarOptions> polarOptions,
+            IOptions<AuthOptions> authOptions,
+            CancellationToken cancellationToken) =>
+        {
+            PolarOptions options = polarOptions.Value;
+            if (string.IsNullOrWhiteSpace(options.AccessToken))
+            {
+                return Results.Problem(
+                    "Polar customer portal is not configured.",
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
+            CurrentUser currentUser = currentUserContext.GetCurrentUser();
+            string returnUrl = $"{authOptions.Value.FrontendBaseUrl.TrimEnd('/')}/account";
+            using HttpClient httpClient = httpClientFactory.CreateClient();
+            httpClient.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.AccessToken);
+
+            PolarCustomerSessionCreate polarRequest = new(currentUser.Id.ToString(), returnUrl);
+            HttpResponseMessage polarResponse = await httpClient.PostAsJsonAsync("v1/customer-sessions/", polarRequest, cancellationToken);
+            if (!polarResponse.IsSuccessStatusCode)
+            {
+                return Results.Problem(
+                    "Polar customer portal could not be opened.",
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+
+            PolarCustomerSessionResponse? portal = await polarResponse.Content.ReadFromJsonAsync<PolarCustomerSessionResponse>(cancellationToken);
+            if (string.IsNullOrWhiteSpace(portal?.CustomerPortalUrl))
+            {
+                return Results.Problem(
+                    "Polar customer portal response did not include a portal URL.",
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+
+            return Results.Ok(new BillingPortalResponse(portal.CustomerPortalUrl));
+        })
+            .WithName("CreateBillingPortalSession")
+            .WithSummary("Creates a Polar customer portal session for the current user.");
+
         group.MapPost("/polar/webhook", async (
             HttpRequest request,
             IEntitlementRepository entitlementRepository,
@@ -412,6 +455,8 @@ public static class BillingEndpoints
 
     private sealed record CheckoutResponse(string CheckoutUrl);
 
+    private sealed record BillingPortalResponse(string PortalUrl);
+
     private sealed record PolarCheckoutCreate(
         [property: JsonPropertyName("products")] string[] Products,
         [property: JsonPropertyName("success_url")] string SuccessUrl,
@@ -422,6 +467,12 @@ public static class BillingEndpoints
         [property: JsonPropertyName("metadata")] Dictionary<string, string> Metadata);
 
     private sealed record PolarCheckoutResponse([property: JsonPropertyName("url")] string Url);
+
+    private sealed record PolarCustomerSessionCreate(
+        [property: JsonPropertyName("external_customer_id")] string ExternalCustomerId,
+        [property: JsonPropertyName("return_url")] string ReturnUrl);
+
+    private sealed record PolarCustomerSessionResponse([property: JsonPropertyName("customer_portal_url")] string CustomerPortalUrl);
 
     private sealed record PolarWebhookEvent(
         string Type,
