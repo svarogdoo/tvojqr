@@ -81,6 +81,12 @@ Storage__R2__PublicBaseUrl=https://your-public-r2-url-or-custom-domain
 
 When R2 is enabled, the backend stores the R2 object key in Postgres and returns public image URLs built from `Storage__R2__PublicBaseUrl`. For example, the database stores `projects/.../image.webp`, while API responses return `https://assets.hostingqr.com/projects/.../image.webp`.
 
+Image upload compression:
+
+- images under 250 KB are stored as the original file to avoid unnecessary quality loss
+- larger images are encoded as a WebP candidate in memory and compared with the original
+- WebP is stored only when it is at least 15% smaller; otherwise the original file bytes/content type are stored
+
 Pricing entitlement tiers:
 
 - supported customer tiers are `free`, `standard`, and `plus`

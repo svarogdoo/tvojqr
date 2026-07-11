@@ -4,8 +4,6 @@ using Amazon.S3.Model;
 using HostingQr.Application.Abstractions;
 using HostingQr.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
 
 namespace HostingQr.Infrastructure.Assets;
 
@@ -34,31 +32,22 @@ public sealed class R2AssetStorageService : IAssetStorageService
 
     public async Task<StoredAssetFile> SaveImageAsync(Guid projectId, Stream stream, string originalFileName, string contentType, CancellationToken cancellationToken = default)
     {
-        string objectKey = $"projects/{projectId:N}/languages/default/{Guid.NewGuid():N}.webp";
-
-        await using MemoryStream output = new();
-        using Image image = await Image.LoadAsync(stream, cancellationToken);
-        WebpEncoder encoder = new()
-        {
-            Quality = 80,
-            FileFormat = WebpFileFormatType.Lossy,
-        };
-
-        await image.SaveAsWebpAsync(output, encoder, cancellationToken);
-        output.Position = 0;
+        PreparedImageAsset prepared = await ImageCompressionDecision.PrepareAsync(stream, originalFileName, contentType, cancellationToken);
+        string objectKey = $"projects/{projectId:N}/languages/default/{Guid.NewGuid():N}{prepared.Extension}";
+        await using MemoryStream output = new(prepared.Bytes);
 
         PutObjectRequest request = new()
         {
             BucketName = _r2Options.BucketName,
             Key = objectKey,
             InputStream = output,
-            ContentType = "image/webp",
+            ContentType = prepared.ContentType,
             AutoCloseStream = false,
             UseChunkEncoding = false,
         };
 
         await _s3Client.PutObjectAsync(request, cancellationToken);
-        return new StoredAssetFile(objectKey, "image/webp", output.Length);
+        return new StoredAssetFile(objectKey, prepared.ContentType, prepared.Bytes.Length);
     }
 
     public string GetPublicUrl(string storedFileName)

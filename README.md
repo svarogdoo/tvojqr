@@ -289,6 +289,7 @@ Status markers for tasks:
 [DONE] 7.1.b Implement upload pipeline from authenticated users.
 [PARTIAL] 7.1.c Save metadata (file type, size, language, order).
 [DONE] 7.1.d Convert uploaded images to a compressed safe web format (`.webp`) when appropriate.
+[DONE] 7.1.d.1 Skip WebP conversion for images under 250 KB and keep WebP only when it saves at least 15%.
 [DONE] 7.1.e Prefer R2 automatically when configured so production uploads resolve from durable object storage.
 [DONE] 7.1.f Store R2 object keys in Postgres while returning direct R2 public URLs to the frontend.
 7.2 Add file lifecycle management.
@@ -443,7 +444,7 @@ Status markers for tasks:
 - What slug rules should apply (length, allowed characters, uniqueness)?
 - Should QR codes be stored permanently or generated on-demand?
 - What is the max upload size for MVP?
-- How aggressive should image compression be before quality becomes unacceptable?
+- [DECIDED] Image compression MVP skips files under 250 KB and stores WebP only when it saves at least 15%.
 - Should preview changes be a temporary draft view or a fully generated unpublished public page?
 - Which payment provider should be used (for example Stripe)?
 - What limits define each tier (storage, number of pages, traffic, languages)?
