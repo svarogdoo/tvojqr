@@ -19,6 +19,14 @@ public sealed class EntitlementService : IEntitlementService
         return _entitlementRepository.GetByUserIdAsync(userId, cancellationToken);
     }
 
+    public async Task<PlanLimits> GetCurrentPlanLimitsAsync(CancellationToken cancellationToken = default)
+    {
+        EntitlementResponse entitlement = await GetCurrentEntitlementAsync(cancellationToken);
+        return entitlement.HasToolAccess
+            ? PlanLimitCatalog.ForTier(entitlement.Tier)
+            : PlanLimitCatalog.ForTier(BillingTier.None);
+    }
+
     public async Task<bool> CurrentUserHasToolAccessAsync(CancellationToken cancellationToken = default)
     {
         EntitlementResponse entitlement = await GetCurrentEntitlementAsync(cancellationToken);

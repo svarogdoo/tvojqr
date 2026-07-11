@@ -86,6 +86,11 @@ Pricing entitlement tiers:
 - supported customer tiers are `free`, `standard`, and `plus`
 - internal `admin` tier is available for unrestricted owner/admin access and should not be shown publicly
 - users without an active row in `user_entitlements` receive tier `none` and cannot use project tools
+- project and language limits are enforced server-side:
+  - `free`: 1 project, 1 language per project
+  - `standard`: 1 project, 3 languages per project
+  - `plus`: 5 projects, 7 languages per project
+  - `admin`: unrestricted
 - until checkout/admin tooling exists, a tier can be assigned manually in SQL:
 
 ```sql
@@ -154,6 +159,14 @@ Customer billing portal:
 - the endpoint requires auth, creates a short-lived Polar customer session, and returns `portalUrl`
 - users can manage billing, payment details, and cancellation through Polar
 - customers must have a Polar customer associated with their app user ID, which is created by checkout via `external_customer_id`
+
+Public page view counts:
+
+- `project_view_counts` stores one total counter per project plus `last_viewed_at`
+- active `GET /api/public/{slug}` requests increment the project count once per request
+- missing or disabled public pages do not increment the count
+- language switching is client-side and does not increment counts
+- private project list/detail API responses include `viewCount` and `lastViewedAt` for future dashboard display
 
 Recommended local setup:
 

@@ -4,6 +4,8 @@ export type ProjectListItem = {
   slug: string;
   status: "active" | "disabled";
   updatedAt: string;
+  viewCount: number;
+  lastViewedAt: string | null;
 };
 
 export type ProjectDetail = {
@@ -14,6 +16,8 @@ export type ProjectDetail = {
   backgroundColor: string;
   createdAt: string;
   updatedAt: string;
+  viewCount: number;
+  lastViewedAt: string | null;
   languages: ProjectLanguageVariant[];
   assets: Asset[];
 };

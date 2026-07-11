@@ -129,6 +129,7 @@ public static class DependencyInjection
         services.AddScoped<IEntitlementRepository, EntitlementRepository>();
         services.AddScoped<IEntitlementService, EntitlementService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IProjectViewRepository, ProjectViewRepository>();
         services.AddScoped<IProjectLanguageVariantRepository, ProjectLanguageVariantRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<ISlugRepository, SlugRepository>();

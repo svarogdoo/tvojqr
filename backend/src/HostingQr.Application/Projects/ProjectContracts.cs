@@ -2,9 +2,9 @@ using HostingQr.Application.Assets;
 
 namespace HostingQr.Application.Projects;
 
-public sealed record ProjectListItem(Guid Id, string Name, string Slug, string Status, DateTimeOffset UpdatedAt);
+public sealed record ProjectListItem(Guid Id, string Name, string Slug, string Status, DateTimeOffset UpdatedAt, long ViewCount, DateTimeOffset? LastViewedAt);
 
-public sealed record ProjectDetailResponse(Guid Id, string Name, string Slug, string Status, string BackgroundColor, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, IReadOnlyList<ProjectLanguageVariantResponse> Languages, IReadOnlyList<AssetResponse> Assets);
+public sealed record ProjectDetailResponse(Guid Id, string Name, string Slug, string Status, string BackgroundColor, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, long ViewCount, DateTimeOffset? LastViewedAt, IReadOnlyList<ProjectLanguageVariantResponse> Languages, IReadOnlyList<AssetResponse> Assets);
 
 public sealed record CreateProjectRequest(string Name, string Slug, string? BackgroundColor, string DefaultLanguageCode, string? DefaultLanguageDisplayName);
 

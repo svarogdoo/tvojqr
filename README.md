@@ -318,7 +318,7 @@ Status markers for tasks:
 
 [PARTIAL] 9.1 Define plan structure before pricing amounts.
 [DONE] 9.1.a Tier names
-9.1.b Feature limits (projects, languages, storage, traffic, file types)
+[PARTIAL] 9.1.b Feature limits (projects and languages enforced; storage, traffic, file types remain)
 [PARTIAL] 9.1.c Free tier and/or free trial policy
 9.2 [PARTIAL] Integrate recurring payments provider.
 9.2.a [PARTIAL] Subscription checkout
@@ -330,6 +330,8 @@ Status markers for tasks:
 9.3.c Payment status / failed payment warnings
 [PARTIAL] 9.4 Implement plan enforcement.
 [DONE] 9.4.a Block/limit actions when user exceeds tier
+9.4.a.1 [DONE] Enforce project count and language count by tier.
+9.4.a.2 Enforce uploaded file count, storage, traffic, and file-type limits by tier.
 9.4.b Grace period behavior after failed payment
 9.4.c Downgrade handling when usage exceeds new tier
 [DONE] 9.5 Add a pricing contact form that emails inbound requests.
@@ -421,6 +423,13 @@ Status markers for tasks:
 [DONE] 13.2.a Move the Svelte app into `frontend/`.
 [DONE] 13.2.b Keep local developer orchestration under `.github/orchestration/`.
 [DONE] 13.2.c Reserve `backend/` for the future `.NET` product backend.
+
+### 14. Analytics
+
+[PARTIAL] 14.1 Track public page views.
+[DONE] 14.1.a Count active public page loads per project.
+14.1.b Decide where to display view counts in the dashboard/editor.
+14.1.c Add unique visitor, language, and time-window analytics later if needed.
 
 ## Open Questions (To Decide Later)
 
