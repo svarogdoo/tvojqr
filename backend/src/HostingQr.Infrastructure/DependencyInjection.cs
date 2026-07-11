@@ -1,5 +1,6 @@
 using HostingQr.Application.Abstractions;
 using HostingQr.Application.Billing;
+using HostingQr.Infrastructure.Admin;
 using HostingQr.Infrastructure.Auth;
 using HostingQr.Infrastructure.Assets;
 using HostingQr.Infrastructure.Billing;
@@ -125,6 +126,7 @@ public static class DependencyInjection
         services.AddSingleton<R2AssetStorageService>();
         services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAdminOverviewRepository, AdminOverviewRepository>();
         services.AddScoped<IBillingEventRepository, BillingEventRepository>();
         services.AddScoped<IEntitlementRepository, EntitlementRepository>();
         services.AddScoped<IEntitlementService, EntitlementService>();

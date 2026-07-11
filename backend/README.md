@@ -168,6 +168,13 @@ Public page view counts:
 - language switching is client-side and does not increment counts
 - private project list/detail API responses include `viewCount` and `lastViewedAt` for future dashboard display
 
+Admin overview:
+
+- backend endpoint: `GET /api/admin/overview`
+- frontend route: `/admin/overview`
+- only active `admin` entitlement users can access the metrics endpoint
+- metrics include total accounts, total views, and account counts by current tier (`none`, `admin`, `free`, `standard`, `plus`)
+
 Recommended local setup:
 
 ```bash

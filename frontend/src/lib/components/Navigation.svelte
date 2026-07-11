@@ -1,12 +1,17 @@
 <script lang="ts">
+  import { apiFetch } from "$lib/api";
   import logo from "$lib/assets/hostinqr-logo-black.svg";
   import { auth, signOut, startGoogleSignIn } from "$lib/stores/auth";
   import { language, languages, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
+  import type { Entitlement } from "$lib/types/projects";
+  import { onMount } from "svelte";
 
   let currentLang: LanguageCode = "en";
   let languageMenuOpen = false;
   let userMenuOpen = false;
+  let entitlement: Entitlement | null = null;
+  let loadedEntitlementUserId = "";
 
   language.subscribe((value: LanguageCode) => {
     currentLang = value;
@@ -34,13 +39,37 @@
   async function handleSignOut() {
     userMenuOpen = false;
     await signOut();
+    entitlement = null;
   }
+
+  async function loadEntitlement() {
+    if ($auth.status !== "authenticated") {
+      entitlement = null;
+      loadedEntitlementUserId = "";
+      return;
+    }
+
+    loadedEntitlementUserId = $auth.user.id;
+
+    try {
+      const response = await apiFetch("/api/billing/entitlement");
+      entitlement = response.ok ? ((await response.json()) as Entitlement) : null;
+    } catch {
+      entitlement = null;
+    }
+  }
+
+  onMount(loadEntitlement);
 
   const localizedTranslations = translations as any;
 
   $: t = localizedTranslations[currentLang];
   $: currentLanguage =
     languages.find((lang) => lang.code === currentLang) ?? languages[0];
+  $: isAdmin = entitlement?.tier === "admin" && entitlement.isActive;
+  $: if ($auth.status === "authenticated" && loadedEntitlementUserId !== $auth.user.id) {
+    loadEntitlement();
+  }
 </script>
 
 <!-- Navigation -->
@@ -190,6 +219,14 @@
               >
                 Account & billing
               </a>
+              {#if isAdmin}
+                <a
+                  href="/admin/overview"
+                  class="block border-t border-stone-100 px-4 py-3 text-sm text-stone-700 transition-colors hover:bg-stone-50"
+                >
+                  Admin overview
+                </a>
+              {/if}
               <button
                 type="button"
                 on:click={handleSignOut}

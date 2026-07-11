@@ -18,6 +18,10 @@ import type { Entitlement, ProjectListItem } from "$lib/types/projects";
     return status === "disabled" ? "Disabled" : "Active";
   }
 
+  function viewCountLabel(count: number) {
+    return `${count.toLocaleString()} ${count === 1 ? "view" : "views"}`;
+  }
+
   async function loadProjects() {
     loadingProjects = true;
     projectError = "";
@@ -174,6 +178,9 @@ import type { Entitlement, ProjectListItem } from "$lib/types/projects";
                       ? "border-[rgba(77,106,83,0.18)] bg-[rgba(236,245,238,0.96)] text-[color:var(--success-strong)]"
                       : "border-stone-200 bg-stone-100 text-stone-600"}`}>
                       {statusLabel(project.status)}
+                    </span>
+                    <span class="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-xs font-medium text-stone-600">
+                      {viewCountLabel(project.viewCount)}
                     </span>
                   </div>
                 </div>

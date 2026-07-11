@@ -55,6 +55,7 @@ app.UseCors("FrontendClient");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapAdminEndpoints();
 app.MapAuthEndpoints();
 app.MapBillingEndpoints();
 app.MapSystemEndpoints();

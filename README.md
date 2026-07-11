@@ -428,8 +428,13 @@ Status markers for tasks:
 
 [PARTIAL] 14.1 Track public page views.
 [DONE] 14.1.a Count active public page loads per project.
-14.1.b Decide where to display view counts in the dashboard/editor.
+[DONE] 14.1.b Display view counts in the dashboard project list.
 14.1.c Add unique visitor, language, and time-window analytics later if needed.
+
+### 15. Admin
+
+[DONE] 15.1 Add an admin-only overview page.
+[DONE] 15.1.a Show total accounts, total views, and account counts by tier.
 
 ## Open Questions (To Decide Later)
 
