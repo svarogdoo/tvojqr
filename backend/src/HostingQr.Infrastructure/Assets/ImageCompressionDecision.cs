@@ -27,7 +27,7 @@ public static class ImageCompressionDecision
         using Image image = await Image.LoadAsync(original, cancellationToken);
         WebpEncoder encoder = new()
         {
-            Quality = 90,
+            Quality = 100,
             FileFormat = WebpFileFormatType.Lossy,
         };
 

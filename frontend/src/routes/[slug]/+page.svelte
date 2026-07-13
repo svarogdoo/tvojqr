@@ -133,7 +133,7 @@
 
 <div
   class="min-h-screen px-4 py-4 sm:px-6 lg:px-8"
-  style={`background-color: ${project?.backgroundColor ?? "#f8f7f3"};`}
+  style={`--page-bg: ${project?.backgroundColor ?? "#f8f7f3"}; background-color: var(--page-bg);`}
 >
   {#if state === "loading"}
     <div class="flex min-h-[70vh] items-center justify-center">
@@ -156,28 +156,30 @@
           >
             <button
               type="button"
-              class="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-4 py-2 text-sm font-semibold uppercase tracking-[0.12em] text-stone-700 shadow-sm"
+              class="inline-flex items-center gap-2 rounded-2xl border border-black/8 px-4 py-2 text-sm font-semibold uppercase tracking-[0.12em] text-stone-800 shadow-[0_12px_30px_rgba(45,53,46,0.10)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(45,53,46,0.14)]"
+              style="background: color-mix(in srgb, var(--page-bg) 22%, white 78%);"
               on:click={() => (languageMenuOpen = !languageMenuOpen)}
               aria-label="Choose page language"
             >
-              <span>{currentMeta.flag}</span>
+              <span class="text-base leading-none">{currentMeta.flag}</span>
               <span>{selectedLanguage.languageCode}</span>
             </button>
             {#if languageMenuOpen}
               <div
-                class="absolute right-3 z-20 mt-2 min-w-40 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-[0_18px_45px_rgba(45,53,46,0.12)]"
+                class="absolute right-3 z-20 mt-2 min-w-44 overflow-hidden rounded-3xl border border-black/8 p-1 shadow-[0_20px_55px_rgba(45,53,46,0.14)] backdrop-blur-xl"
+                style="background: color-mix(in srgb, var(--page-bg) 18%, white 82%);"
               >
                 {#each languagesWithAssets as language}
                   {@const meta = getLanguageMeta(language.languageCode)}
                   <button
                     type="button"
-                    class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-stone-700 transition-colors hover:bg-stone-50"
+                    class="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-white/55"
                     on:click={() => {
                       selectedLanguageCode = language.languageCode;
                       languageMenuOpen = false;
                     }}
                   >
-                    <span>{meta.flag}</span>
+                    <span class="text-base leading-none">{meta.flag}</span>
                     <span class="font-semibold uppercase"
                       >{language.languageCode}</span
                     >
