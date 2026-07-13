@@ -24,7 +24,7 @@ public sealed class ImageCompressionDecisionTests
     [Fact]
     public async Task PrepareAsync_UsesWebpWhenLargeImageShrinksEnough()
     {
-        byte[] bytes = await CreateJpegAsync(1400, 1400);
+        byte[] bytes = await CreateJpegAsync(2200, 2200);
         using MemoryStream stream = new(bytes);
 
         PreparedImageAsset prepared = await ImageCompressionDecision.PrepareAsync(stream, "large.jpg", "image/jpeg");

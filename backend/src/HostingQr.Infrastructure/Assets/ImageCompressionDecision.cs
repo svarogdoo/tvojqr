@@ -7,7 +7,7 @@ public sealed record PreparedImageAsset(byte[] Bytes, string ContentType, string
 
 public static class ImageCompressionDecision
 {
-    private const long SkipCompressionUnderBytes = 250_000;
+    private const long SkipCompressionUnderBytes = 500_000;
     private const decimal MinimumSavingsRatio = 0.15m;
 
     public static async Task<PreparedImageAsset> PrepareAsync(Stream stream, string originalFileName, string contentType, CancellationToken cancellationToken = default)

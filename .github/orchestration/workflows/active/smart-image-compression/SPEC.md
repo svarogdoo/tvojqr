@@ -14,7 +14,7 @@ Add smart image compression decision logic to asset storage services.
 ## Technical Approach
 
 - Buffer uploaded image once in memory.
-- If original size is below 250 KB, store original bytes with a safe extension and original content type.
+- If original size is below 500 KB, store original bytes with a safe extension and original content type.
 - Otherwise encode a WebP candidate in memory.
 - Store WebP only if candidate size is at least 15% smaller than the original.
 - Store original bytes when WebP is not meaningfully smaller.

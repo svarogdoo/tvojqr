@@ -12,7 +12,7 @@ Uploads should skip WebP compression for small files and only store WebP when it
 
 - Apply to both local and R2 storage.
 - Preserve current image upload behavior otherwise.
-- MVP thresholds: skip under 250 KB, require 15% savings.
+- MVP thresholds: skip under 500 KB, require 15% savings.
 
 ## Open Questions
 
