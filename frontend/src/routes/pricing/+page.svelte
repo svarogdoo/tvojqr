@@ -9,6 +9,8 @@
 
   type BillingCycle = "monthly" | "annual";
 
+  const usePolarCheckout = false;
+
   type Plan = {
     id: string;
     badge: string;
@@ -117,6 +119,11 @@
       return;
     }
 
+    if (!usePolarCheckout) {
+      window.location.href = `/contact?plan=${encodeURIComponent(planId)}&billingCycle=${encodeURIComponent(billingCycle)}`;
+      return;
+    }
+
     if (get(auth).status !== "authenticated") {
       startGoogleSignIn();
       return;
@@ -175,9 +182,6 @@
         >
           {copy.title}
         </h1>
-        <p class="mt-5 max-w-xl text-base leading-7 text-stone-600 sm:text-lg">
-          {copy.subtitle}
-        </p>
       </div>
 
     </div>

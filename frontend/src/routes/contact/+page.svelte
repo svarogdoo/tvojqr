@@ -3,6 +3,7 @@
   import Navigation from "$lib/components/Navigation.svelte";
   import { language, type LanguageCode } from "$lib/stores/language";
   import { homepageCopy } from "$lib/homepageCopy";
+  import { page } from "$app/stores";
 
   export let form: {
     success?: boolean;
@@ -20,6 +21,12 @@
   });
 
   $: copy = homepageCopy[currentLang].contactPage;
+  $: selectedPlan = $page.url.searchParams.get("plan") ?? "";
+  $: selectedBillingCycle = $page.url.searchParams.get("billingCycle") ?? "";
+  $: isPaidPlanRequest = selectedPlan === "standard" || selectedPlan === "plus";
+  $: selectedPlanLabel = selectedPlan
+    ? selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)
+    : "";
 
   function handleFileChange(event: Event) {
     const input = event.currentTarget as HTMLInputElement;
@@ -74,7 +81,19 @@
           </div>
         {/if}
 
+        {#if isPaidPlanRequest}
+          <div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-7 text-amber-950">
+            <span class="font-semibold">Payments are almost ready.</span>
+            We are working on automating payment and it will be ready very soon.
+            For now, fill out this form and we will help you activate the
+            {selectedPlanLabel} plan manually.
+          </div>
+        {/if}
+
         <form method="POST" enctype="multipart/form-data" class="mt-8 space-y-5">
+          <input type="hidden" name="plan" value={selectedPlan} />
+          <input type="hidden" name="billingCycle" value={selectedBillingCycle} />
+
           <div class="grid gap-5 sm:grid-cols-2">
             <div>
               <label for="name" class="mb-2 block text-sm font-medium text-stone-700">{copy.fields.name}</label>

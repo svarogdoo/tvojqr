@@ -12,6 +12,8 @@ export const actions: Actions = {
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const message = String(formData.get("message") ?? "").trim();
+    const plan = String(formData.get("plan") ?? "").trim();
+    const billingCycle = String(formData.get("billingCycle") ?? "").trim();
     const needsLanguages = formData.get("needsLanguages") === "on";
     const languages = String(formData.get("languages") ?? "").trim();
     const files = formData.getAll("files") as File[];
@@ -66,6 +68,8 @@ export const actions: Actions = {
           "",
           `Name: ${name}`,
           `Email: ${email}`,
+          `Selected plan: ${plan || "Not selected"}`,
+          `Billing cycle: ${billingCycle || "Not selected"}`,
           `Needs multiple languages: ${needsLanguages ? "Yes" : "No"}`,
           `Languages: ${needsLanguages ? languages : "Not requested"}`,
           `Uploaded files: ${attachments.length}`,
