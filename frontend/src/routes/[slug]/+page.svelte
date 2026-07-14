@@ -206,7 +206,7 @@
               <img
                 src={toApiUrl(asset.url)}
                 alt={asset.originalFileName}
-                class="block h-auto w-full"
+                class="mx-auto block h-auto max-w-full"
               />
             </div>
           {/each}
