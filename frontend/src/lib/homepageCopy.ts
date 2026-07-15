@@ -104,7 +104,7 @@ export const homepageCopy = {
       },
       quote: {
         title: "Need the menu translated or redesigned?",
-        subtitle: "We can do that too. Just click below!",
+        subtitle: "We will do it for free!",
         cta: "Contact us",
       },
     },

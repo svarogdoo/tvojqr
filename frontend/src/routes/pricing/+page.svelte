@@ -207,6 +207,17 @@
       </div>
     </div>
 
+    <blockquote class="mx-auto mt-10 max-w-3xl text-center">
+      <p
+        class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]"
+      >
+        {copy.quote.title}
+      </p>
+      <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
+        {copy.quote.subtitle}
+      </p>
+    </blockquote>
+
     <div class="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-3 lg:items-stretch">
       {#each plans as plan}
         <article
@@ -293,24 +304,6 @@
       </p>
     </div>
 
-    <blockquote class="mx-auto mt-10 max-w-3xl text-center">
-      <p
-        class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]"
-      >
-        {copy.quote.title}
-      </p>
-      <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
-        {copy.quote.subtitle}
-      </p>
-    </blockquote>
-
-    <div class="mt-6 text-center">
-      <a
-        href="/contact"
-        class="inline-flex rounded-full bg-stone-200 px-2.5 py-1 font-medium text-stone-800 transition-colors hover:bg-stone-300"
-        >{copy.quote.cta}</a
-      >
-    </div>
   </section>
 </main>
 
