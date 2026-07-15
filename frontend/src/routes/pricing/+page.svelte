@@ -207,13 +207,13 @@
       </div>
     </div>
 
-    <blockquote class="mx-auto mt-10 max-w-3xl text-center">
+    <blockquote class="mx-auto mt-10 max-w-3xl rounded-[2rem] border border-emerald-200 bg-emerald-50/80 px-6 py-7 text-center shadow-[0_18px_50px_rgba(45,53,46,0.08)] sm:px-8">
       <p
         class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]"
       >
         {copy.quote.title}
       </p>
-      <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
+      <p class="mt-4 inline-flex rounded-full bg-emerald-600 px-6 py-2.5 text-xl font-semibold text-white shadow-[0_12px_28px_rgba(5,150,105,0.22)] sm:text-2xl">
         {copy.quote.subtitle}
       </p>
     </blockquote>
