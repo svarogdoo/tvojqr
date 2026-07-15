@@ -62,7 +62,7 @@ export const homepageCopy = {
     },
     pricing: {
       eyebrow: "Pricing",
-      title: "Simple plans, clear choice",
+      title: "Pricing",
       subtitle: "Pick the option that fits your page, then we’ll follow up or wire Polar later.",
       monthly: "Monthly",
       annual: "Annual",
@@ -103,8 +103,8 @@ export const homepageCopy = {
         cta: "Contact us",
       },
       quote: {
-        title: "Need the menu translated or redesigned?",
-        subtitle: "We will do it for free!",
+        title: "Need the menu redesigned or translated?",
+        subtitle: "We will do it for",
         cta: "Contact us",
       },
     },

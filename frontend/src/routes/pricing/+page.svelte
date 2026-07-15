@@ -166,7 +166,7 @@
 <div class="flex min-h-screen flex-col bg-[rgba(243,244,246,0.98)]">
 <Navigation />
 
-<main class="flex-1 px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+<main class="flex-1 px-4 pb-16 pt-22 sm:px-6 lg:px-8">
   <section class="mx-auto max-w-6xl">
     <div
       class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between"
@@ -177,16 +177,27 @@
         >
           {copy.eyebrow}
         </p>
-        <h1
-          class="mt-4 text-5xl font-semibold tracking-tight text-stone-900 sm:text-6xl"
-        >
-          {copy.title}
-        </h1>
       </div>
 
     </div>
 
-    <div class="mt-10 flex justify-center">
+    <blockquote class="mx-auto mt-3 max-w-3xl px-6 py-3 text-center sm:px-8">
+      <p class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]">
+        {copy.quote.title}
+        <span class="mt-2 flex flex-wrap items-center justify-center gap-2">
+          <span>We will do it for</span>
+          <span class="inline-flex rounded-full bg-emerald-600 px-3.5 py-1 text-xl font-bold tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(5,150,105,0.22)] sm:text-2xl">
+            FREE
+          </span>
+          <span>!</span>
+        </span>
+      </p>
+      <p class="mt-4 text-sm font-medium text-stone-600 sm:text-base">
+        Pick your plan and reach out!
+      </p>
+    </blockquote>
+
+    <div class="mt-8 flex justify-center">
       <div class="w-full max-w-sm rounded-full border border-stone-200 bg-white p-1 shadow-sm">
         <div class="grid grid-cols-2 gap-1">
             <button
@@ -206,17 +217,6 @@
         </div>
       </div>
     </div>
-
-    <blockquote class="mx-auto mt-10 max-w-3xl rounded-[2rem] border border-emerald-200 bg-emerald-50/80 px-6 py-7 text-center shadow-[0_18px_50px_rgba(45,53,46,0.08)] sm:px-8">
-      <p
-        class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]"
-      >
-        {copy.quote.title}
-      </p>
-      <p class="mt-4 inline-flex rounded-full bg-emerald-600 px-6 py-2.5 text-xl font-semibold text-white shadow-[0_12px_28px_rgba(5,150,105,0.22)] sm:text-2xl">
-        {copy.quote.subtitle}
-      </p>
-    </blockquote>
 
     <div class="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-3 lg:items-stretch">
       {#each plans as plan}
