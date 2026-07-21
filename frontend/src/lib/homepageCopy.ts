@@ -115,6 +115,13 @@ export const homepageCopy = {
         "Share the file you want hosted, any language needs, and anything else you want us to know.",
       success:
         "We received your request and will be contacting you shortly. Watch for an email from us.",
+      directContact: {
+        title: "Prefer WhatsApp or call?",
+        description:
+          "Message us there for the quickest reply, or call the same number if that is easier.",
+        whatsapp: "WhatsApp",
+        call: "Call +357 99 180703",
+      },
       fields: {
         name: "Name",
         email: "Email",
@@ -259,6 +266,13 @@ export const homepageCopy = {
         "Comparte el archivo que quieres alojar, cualquier necesidad de idiomas y cualquier otra cosa que debamos saber.",
       success:
         "Hemos recibido tu solicitud y nos pondremos en contacto contigo pronto. Estate atento al correo.",
+      directContact: {
+        title: "¿Prefieres WhatsApp o llamar?",
+        description:
+          "Escríbenos allí para una respuesta más rápida, o llama al mismo número si te resulta más fácil.",
+        whatsapp: "WhatsApp",
+        call: "Llamar al +357 99 180703",
+      },
       fields: {
         name: "Nombre",
         email: "Correo electrónico",
