@@ -26,7 +26,7 @@
         <section>
           <h2 class="text-xl font-semibold text-stone-900">1. Who We Are</h2>
           <p class="mt-3">
-            HostingQr is operated by Svarog d.o.o., Jovana R. Deretica 61, 89101 Trebinje, Bosnia and Herzegovina. JIB: 4404749190009. You can contact us at <a class="font-medium text-stone-950 underline" href="mailto:support@hostingqr.com">support@hostingqr.com</a>.
+            HostingQr is operated by Svarog d.o.o., Jovana R. Deretica 61, 89101 Trebinje, Bosnia and Herzegovina. JIB: 4404749190009. You can contact us at <a class="font-medium text-stone-950 underline" href="mailto:support@hostingqr.com">support@hostingqr.com</a> or <a class="font-medium text-stone-950 underline" href="tel:+35799180703">+357 99 180703</a>.
           </p>
         </section>
 
@@ -126,10 +126,6 @@
             These Terms are governed by the laws of Bosnia and Herzegovina. Disputes shall be subject to the jurisdiction of the competent court in Trebinje, Bosnia and Herzegovina, including Osnovni sud u Trebinju where applicable.
           </p>
         </section>
-
-        <p class="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-xs leading-6 text-stone-500">
-          This page is provided for practical product use and is not legal advice. You should have these Terms reviewed by a qualified legal professional before a large-scale paid launch.
-        </p>
       </div>
     </article>
   </main>

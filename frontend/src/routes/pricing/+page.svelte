@@ -15,7 +15,7 @@
     id: string;
     badge: string;
     featured: boolean;
-    price: Record<BillingCycle, string>;
+    price: Record<BillingCycle, { amount: string; period: "month" | "year" | "" }>;
     description: string;
     button: string;
     details: Array<{ label: string; value: string }>;
@@ -27,8 +27,8 @@
       badge: "Trial",
       featured: false,
       price: {
-        monthly: "Free",
-        annual: "Free",
+        monthly: { amount: "Free", period: "" },
+        annual: { amount: "Free", period: "" },
       },
       description:
         "Not sure how it works? Send us your files and we'll send you your preview.",
@@ -47,8 +47,8 @@
       badge: "Standard",
       featured: true,
       price: {
-        monthly: "€7 / month",
-        annual: "€70 / year",
+        monthly: { amount: "€7", period: "month" },
+        annual: { amount: "€70", period: "year" },
       },
       description:
         "Great for small restaurants with simple needs. You can always upgrade later.",
@@ -67,8 +67,8 @@
       badge: "Plus",
       featured: false,
       price: {
-        monthly: "€12 / month",
-        annual: "€120 / year",
+        monthly: { amount: "€12", period: "month" },
+        annual: { amount: "€120", period: "year" },
       },
       description:
         "You need more? This plan is for you. Want to go even bigger? Contact us!",
@@ -85,6 +85,13 @@
   ];
 
   let currentLang: LanguageCode = "en";
+  const pricingMetaDescriptions: Record<LanguageCode, string> = {
+    en: "Choose a HostingQr plan and preview simple or multilanguage examples before checkout.",
+    it: "Scegli un piano HostingQr e guarda esempi semplici o multilingua prima del checkout.",
+    es: "Elige un plan de HostingQr y revisa ejemplos simples o multilingües antes de contratar.",
+    hr: "Odaberite HostingQr paket i pregledajte jednostavne ili višejezične primjere prije naplate.",
+  };
+
   language.subscribe((value) => {
     currentLang = value;
   });
@@ -157,9 +164,7 @@
   <title>{copy.title} - HostingQr</title>
   <meta
     name="description"
-    content={currentLang === "es"
-      ? "Elige un plan de HostingQr y revisa ejemplos simples o multilingües antes de contratar."
-      : "Choose a HostingQr plan and preview simple or multilanguage examples before checkout."}
+    content={pricingMetaDescriptions[currentLang]}
   />
 </svelte:head>
 
@@ -185,15 +190,15 @@
       <p class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]">
         {copy.quote.title}
         <span class="mt-2 flex flex-wrap items-center justify-center gap-2">
-          <span>We will do it for</span>
+          <span>{copy.quote.subtitle}</span>
           <span class="inline-flex rounded-full bg-emerald-600 px-3.5 py-1 text-xl font-bold tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(5,150,105,0.22)] sm:text-2xl">
-            FREE
+            {copy.quote.highlight}
           </span>
           <span>!</span>
         </span>
       </p>
       <p class="mt-4 text-sm font-medium text-stone-600 sm:text-base">
-        Pick your plan and reach out!
+        {copy.quote.footer}
       </p>
     </blockquote>
 
@@ -244,10 +249,17 @@
             class={`mt-6 h-1.5 w-14 rounded-full transition-all duration-300 group-hover:w-20 ${plan.featured ? "bg-white/30" : "bg-stone-300"}`}
           ></div>
 
-          <div
-            class={`mt-4 text-4xl font-semibold tracking-tight ${plan.featured ? "text-white" : "text-stone-900"}`}
-          >
-            {plan.price[billingCycle]}
+          <div class="mt-4 flex items-baseline gap-2">
+            <span
+              class={`text-4xl font-semibold tracking-tight ${plan.featured ? "text-white" : "text-stone-900"}`}
+            >
+              {plan.price[billingCycle].amount}
+            </span>
+            {#if plan.price[billingCycle].period}
+              <span class={`text-sm font-medium ${plan.featured ? "text-white/65" : "text-stone-500"}`}>
+                / {plan.price[billingCycle].period === "month" ? copy.periods.month : copy.periods.year}
+              </span>
+            {/if}
           </div>
           <p
             class={`mt-3 text-sm leading-7 ${plan.featured ? "text-white/70" : "text-stone-600"}`}

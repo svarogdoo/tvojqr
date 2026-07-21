@@ -173,7 +173,7 @@ Status markers for tasks:
 1.4 Improve navigation for product app flow.
 1.4.a Add clear links for `Login`, `Dashboard`, `Pricing`.
 [DONE] 1.4.b Keep current multilingual language switch but ensure labels remain consistent.
-[DONE] 1.4.c Limit the language switch to English and Spanish.
+[DONE] 1.4.c Limit the language switch to English, Italian, Spanish, and Croatian.
 1.5 Front-page polish/fixes.
 1.5.a Review mobile spacing/overflow on hero image crop.
 1.5.b Check accessibility (button labels, focus states, heading order).

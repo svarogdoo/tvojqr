@@ -17,6 +17,24 @@
   let currentLang: LanguageCode = "en";
   const phoneHref = "tel:+35799180703";
   const whatsAppUrl = "https://wa.me/35799180703";
+  const contactMetaDescriptions: Record<LanguageCode, string> = {
+    en: "Tell HostingQr what you need and we will email you back shortly.",
+    it: "Racconta a HostingQr cosa ti serve e ti risponderemo presto via email.",
+    es: "Cuéntanos qué necesitas y te responderemos por email pronto.",
+    hr: "Recite HostingQr-u što trebate i uskoro ćemo vam odgovoriti e-poštom.",
+  };
+  const selectedFilesLabels: Record<LanguageCode, string> = {
+    en: "files selected",
+    it: "file selezionati",
+    es: "archivos seleccionados",
+    hr: "odabranih datoteka",
+  };
+  const callLabels: Record<LanguageCode, string> = {
+    en: "Call",
+    it: "Chiama",
+    es: "Llamar al",
+    hr: "Nazovi",
+  };
 
   language.subscribe((value) => {
     currentLang = value;
@@ -38,9 +56,7 @@
         ? ""
         : files.length === 1
           ? files[0].name
-          : currentLang === "es"
-            ? `${files.length} archivos seleccionados`
-            : `${files.length} files selected`;
+          : `${files.length} ${selectedFilesLabels[currentLang]}`;
   }
 </script>
 
@@ -48,9 +64,7 @@
   <title>{copy.title} - HostingQr</title>
   <meta
     name="description"
-    content={currentLang === "es"
-      ? "Cuéntanos qué necesitas y te responderemos por email pronto."
-      : "Tell HostingQr what you need and we will email you back shortly."}
+    content={contactMetaDescriptions[currentLang]}
   />
 </svelte:head>
 
@@ -121,7 +135,7 @@
                 href={phoneHref}
                 class="inline-flex min-h-10 flex-col items-center justify-center rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-medium leading-tight text-stone-800 transition-all hover:border-stone-400 hover:bg-stone-50 sm:flex-row sm:gap-1 sm:text-sm sm:leading-normal"
               >
-                <span>{currentLang === "es" ? "Llamar al" : "Call"}</span>
+                <span>{callLabels[currentLang]}</span>
                 <span>+357 99 180703</span>
               </a>
             </div>

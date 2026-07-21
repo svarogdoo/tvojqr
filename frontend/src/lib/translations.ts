@@ -667,7 +667,7 @@ export const translations = {
     ...translations.en.services,
     title: "Esto es lo que puedes hacer",
     subtitle:
-      "Todo en la página principal ahora apunta al producto central: subir contenido, organizar idiomas, publicar un slug y compartir un código QR.",
+      "Todo en la página principal ahora apunta al producto central: subir contenido, organizar idiomas, publicar una URL pública y compartir un código QR.",
     readMore: "Empezar configuración",
     cta: "Empezar a subir",
     list: [
@@ -805,8 +805,322 @@ export const translations = {
   },
 };
 
+(translations as any).it = {
+  ...translations.en,
+  nav: {
+    ...translations.en.nav,
+    services: "Servizi",
+    examples: "Esempi",
+    pricing: "Prezzi",
+    contact: "Contatto",
+  },
+  hero: {
+    ...translations.en.hero,
+    title: "Carica il tuo file, condividi il tuo QR",
+    description:
+      "Crea una semplice pagina pubblica per menu, documenti e immagini. HostingQr ti aiuta a caricare contenuti, impostare un URL condivisibile e generare un codice QR in pochi minuti.",
+    cta: "Crea la tua pagina",
+    secondary: "Scopri come funziona",
+  },
+  services: {
+    ...translations.en.services,
+    title: "Ecco cosa puoi fare",
+    subtitle:
+      "Tutto nella homepage ora porta al prodotto principale: caricare contenuti, organizzare lingue, pubblicare uno slug e condividere un codice QR.",
+    readMore: "Inizia la configurazione",
+    cta: "Inizia a caricare",
+    list: [
+      {
+        title: "Carica file",
+        description:
+          "Aggiungi immagini del menu, documenti o altri file che vuoi pubblicare online",
+        icon: "Upload",
+      },
+      {
+        title: "Scegli il tuo slug",
+        description:
+          "Riserva un URL pubblico pulito, facile da stampare e ricordare",
+        icon: "Link",
+      },
+      {
+        title: "Aggiungi lingue",
+        description:
+          "Prepara più versioni linguistiche così i visitatori possono scegliere quella giusta",
+        icon: "Globe",
+      },
+      {
+        title: "Pubblica subito",
+        description:
+          "Rendi disponibile online la tua pagina non appena il contenuto è pronto",
+        icon: "Rocket",
+      },
+      {
+        title: "Genera codici QR",
+        description:
+          "Trasforma ogni pagina pubblica in un QR scansionabile per tavoli, vetrine o volantini",
+        icon: "QR",
+      },
+      {
+        title: "Aggiorna quando vuoi",
+        description:
+          "Mantieni lo stesso URL e lo stesso QR mentre aggiorni i contenuti più avanti",
+        icon: "Refresh",
+      },
+    ],
+  },
+  howItWorks: {
+    ...translations.en.howItWorks,
+    title: "Come funziona",
+    subtitle:
+      "Un flusso self-service semplice, dal caricamento alla pagina QR online.",
+    ctaDescription: "Pronto a creare la tua prima pagina?",
+    cta: "Vai al caricamento",
+    steps: [
+      {
+        title: "Carica il tuo contenuto",
+        description:
+          "Aggiungi il menu, il documento o le immagini che i visitatori apriranno dopo la scansione",
+      },
+      {
+        title: "Scegli lo slug pubblico",
+        description:
+          "Scegli la parte finale dell'URL che diventerà la tua pagina pubblica",
+      },
+      {
+        title: "Imposta le lingue",
+        description:
+          "Organizza i contenuti così gli ospiti possono passare tra le lingue disponibili",
+      },
+      {
+        title: "Condividi il QR",
+        description:
+          "Genera il codice QR per quella pagina e posizionalo dove serve accesso immediato",
+      },
+    ],
+  },
+  examples: {
+    ...translations.en.examples,
+    title: "Esempi di progetti",
+    list: [
+      { title: "Menu ristorante", description: "Menu digitali e stampati eleganti" },
+      { title: "Offerte caffetteria", description: "Design minimalisti per promozioni da caffetteria" },
+      { title: "Prezzi parrucchiere", description: "Menu servizi e prezzi moderni" },
+      { title: "Cataloghi retail", description: "Presentazione prodotti e promozioni" },
+    ],
+    viewDetails: "Vedi dettagli",
+  },
+  contact: {
+    ...translations.en.contact,
+    title: "Mettiti in contatto",
+    description: "Pronto a trasformare il design della tua attività? Parliamone!",
+    success: "✓ Grazie! Ti contatteremo presto.",
+    form: {
+      ...translations.en.contact.form,
+      name: "Nome",
+      email: "Email",
+      message: "Messaggio",
+      send: "Invia messaggio",
+    },
+  },
+  footer: {
+    ...translations.en.footer,
+    copyright: "© 2025 HostingQr. Tutti i diritti riservati.",
+    tagline: "Creato con cura per il tuo brand",
+  },
+  notFound: {
+    ...translations.en.notFound,
+    subtitle: "Pagina non trovata",
+    description:
+      "La pagina che stai cercando non esiste. Controlla l'URL o torna alla homepage.",
+  },
+  createNew: {
+    ...translations.en.createNew,
+    title: "Carica il tuo file",
+    firstName: "Nome",
+    lastName: "Cognome",
+    domainEnding: "nome-progetto",
+    domainEndingTitle: "Finale del dominio scelto",
+    email: "Email",
+    fileUpload: "Scegli file",
+    submit: "Invia",
+    sending: "Invio...",
+  },
+  modals: {
+    uploadSuccess: {
+      ...translations.en.modals.uploadSuccess,
+      title: "Caricamento riuscito!",
+      description:
+        "La tua richiesta è stata inviata correttamente. La esamineremo e ti contatteremo via email.",
+      close: "Chiudi",
+    },
+    uploadError: {
+      ...translations.en.modals.uploadError,
+      title: "Caricamento non riuscito",
+      description: "Qualcosa è andato storto. Puoi scriverci direttamente a:",
+      close: "Chiudi",
+    },
+  },
+};
+
+(translations as any).hr = {
+  ...translations.en,
+  nav: {
+    ...translations.en.nav,
+    services: "Usluge",
+    examples: "Primjeri",
+    pricing: "Cijene",
+    contact: "Kontakt",
+  },
+  hero: {
+    ...translations.en.hero,
+    title: "Učitajte datoteku, podijelite svoj QR",
+    description:
+      "Napravite jednostavnu javnu stranicu za jelovnike, dokumente i slike. HostingQr vam pomaže učitati sadržaj, postaviti URL za dijeljenje i generirati QR kod za nekoliko minuta.",
+    cta: "Napravite svoju stranicu",
+    secondary: "Pogledajte kako funkcionira",
+  },
+  services: {
+    ...translations.en.services,
+    title: "Evo što možete napraviti",
+    subtitle:
+      "Sve na početnoj stranici sada vodi prema glavnom proizvodu: učitavanje sadržaja, organiziranje jezika, objava javne poveznice i dijeljenje QR koda.",
+    readMore: "Pokreni postavljanje",
+    cta: "Počni učitavati",
+    list: [
+      {
+        title: "Učitajte datoteke",
+        description:
+          "Dodajte slike jelovnika, dokumente ili druge datoteke koje želite objaviti online",
+        icon: "Upload",
+      },
+      {
+        title: "Odaberite svoj slug",
+        description:
+          "Rezervirajte čist javni URL koji je lako ispisati i zapamtiti",
+        icon: "Link",
+      },
+      {
+        title: "Dodajte jezike",
+        description:
+          "Pripremite više jezičnih verzija kako bi posjetitelji mogli odabrati što im treba",
+        icon: "Globe",
+      },
+      {
+        title: "Objavite odmah",
+        description:
+          "Učinite svoju stranicu dostupnom online čim je sadržaj spreman",
+        icon: "Rocket",
+      },
+      {
+        title: "Generirajte QR kodove",
+        description:
+          "Pretvorite svaku javnu stranicu u QR kod za stolove, izloge ili letke",
+        icon: "QR",
+      },
+      {
+        title: "Ažurirajte kad god želite",
+        description:
+          "Zadržite isti URL i QR kod dok kasnije osvježavate sadržaj",
+        icon: "Refresh",
+      },
+    ],
+  },
+  howItWorks: {
+    ...translations.en.howItWorks,
+    title: "Kako funkcionira",
+    subtitle:
+      "Jednostavan samostalni tijek od učitavanja do aktivne QR stranice.",
+    ctaDescription: "Spremni ste napraviti svoju prvu stranicu?",
+    cta: "Idi na učitavanje",
+    steps: [
+      {
+        title: "Učitajte svoj sadržaj",
+        description:
+          "Dodajte jelovnik, dokument ili slike koje će posjetitelji otvoriti nakon skeniranja",
+      },
+      {
+        title: "Odaberite javni slug",
+        description:
+          "Odaberite završetak URL-a koji će postati vaša javna stranica",
+      },
+      {
+        title: "Postavite jezike",
+        description:
+          "Organizirajte sadržaj tako da gosti mogu prebacivati između dostupnih jezika",
+      },
+      {
+        title: "Podijelite QR",
+        description:
+          "Generirajte QR kod za tu stranicu i postavite ga gdje god je potreban brz pristup",
+      },
+    ],
+  },
+  examples: {
+    ...translations.en.examples,
+    title: "Primjeri projekata",
+    list: [
+      { title: "Restoranski jelovnici", description: "Elegantni digitalni i tiskani jelovnici" },
+      { title: "Ponude kafića", description: "Minimalistički dizajn za promocije kafića" },
+      { title: "Cjenik frizerskog salona", description: "Moderni meniji usluga i cijena" },
+      { title: "Maloprodajni katalozi", description: "Prikaz proizvoda i promocija" },
+    ],
+    viewDetails: "Pogledaj detalje",
+  },
+  contact: {
+    ...translations.en.contact,
+    title: "Kontaktirajte nas",
+    description: "Spremni ste osvježiti vizualni identitet svog poslovanja? Razgovarajmo!",
+    success: "✓ Hvala! Uskoro ćemo vam se javiti.",
+    form: {
+      ...translations.en.contact.form,
+      name: "Ime",
+      email: "E-pošta",
+      message: "Poruka",
+      send: "Pošalji poruku",
+    },
+  },
+  footer: {
+    ...translations.en.footer,
+    copyright: "© 2025 HostingQr. Sva prava pridržana.",
+    tagline: "Napravljeno s pažnjom za vaš brend",
+  },
+  notFound: {
+    ...translations.en.notFound,
+    subtitle: "Stranica nije pronađena",
+    description:
+      "Stranica koju tražite ne postoji. Provjerite URL ili se vratite na početnu stranicu.",
+  },
+  createNew: {
+    ...translations.en.createNew,
+    title: "Učitajte svoju datoteku",
+    firstName: "Ime",
+    lastName: "Prezime",
+    domainEnding: "naziv-projekta",
+    domainEndingTitle: "Odabrani završetak domene",
+    email: "E-pošta",
+    fileUpload: "Odaberi datoteku",
+    submit: "Pošalji",
+    sending: "Slanje...",
+  },
+  modals: {
+    uploadSuccess: {
+      ...translations.en.modals.uploadSuccess,
+      title: "Učitavanje uspješno!",
+      description:
+        "Vaš zahtjev je uspješno poslan. Pregledat ćemo ga i kontaktirati vas e-poštom.",
+      close: "Zatvori",
+    },
+    uploadError: {
+      ...translations.en.modals.uploadError,
+      title: "Učitavanje nije uspjelo",
+      description: "Nešto je pošlo po zlu. Možete nam pisati direktno na:",
+      close: "Zatvori",
+    },
+  },
+};
+
 export function t(
-  lang: "en" | "es",
+  lang: "en" | "it" | "es" | "hr",
   key: string,
   defaultValue: string = "",
 ): string {

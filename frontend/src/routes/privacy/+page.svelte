@@ -26,7 +26,7 @@
         <section>
           <h2 class="text-xl font-semibold text-stone-900">1. Who Controls Your Data</h2>
           <p class="mt-3">
-            HostingQr is operated by Svarog d.o.o., Jovana R. Deretica 61, 89101 Trebinje, Bosnia and Herzegovina. JIB: 4404749190009. For privacy questions, deletion requests, or data requests, contact <a class="font-medium text-stone-950 underline" href="mailto:support@hostingqr.com">support@hostingqr.com</a>.
+            HostingQr is operated by Svarog d.o.o., Jovana R. Deretica 61, 89101 Trebinje, Bosnia and Herzegovina. JIB: 4404749190009. For privacy questions, deletion requests, or data requests, contact <a class="font-medium text-stone-950 underline" href="mailto:support@hostingqr.com">support@hostingqr.com</a> or <a class="font-medium text-stone-950 underline" href="tel:+35799180703">+357 99 180703</a>.
           </p>
         </section>
 
@@ -123,10 +123,6 @@
             We may update this Privacy Policy from time to time. The updated date will show the latest version. Continued use of HostingQr after updates means the revised policy applies.
           </p>
         </section>
-
-        <p class="rounded-2xl border border-stone-200 bg-stone-50 p-4 text-xs leading-6 text-stone-500">
-          This page is written to explain current product data practices and is not legal advice. Have it reviewed by a qualified privacy/legal professional before a large-scale paid launch.
-        </p>
       </div>
     </article>
   </main>

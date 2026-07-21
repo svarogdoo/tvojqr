@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { language } from "$lib/stores/language";
+  import { language, type LanguageCode } from "$lib/stores/language";
   import { homepageCopy } from "$lib/homepageCopy";
 
-  let currentLang: "en" | "es" = "en";
+  let currentLang: LanguageCode = "en";
 
   language.subscribe((value) => {
     currentLang = value;
