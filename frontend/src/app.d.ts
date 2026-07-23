@@ -5,12 +5,8 @@ declare global {
 		interface ProcessEnv {
 			PUBLIC_API_BASE_URL?: string;
 			PUBLIC_SITE_URL?: string;
-			PUBLIC_GA_MEASUREMENT_ID?: string;
+			PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN?: string;
 		}
-	}
-
-	interface Window {
-		dataLayer: unknown[];
 	}
 
 	namespace App {

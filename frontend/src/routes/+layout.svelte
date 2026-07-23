@@ -1,6 +1,6 @@
 <script lang="ts">
   import favicon from "$lib/assets/hostinqr-logo.svg";
-  import AnalyticsConsent from "$lib/components/AnalyticsConsent.svelte";
+  import CloudflareAnalytics from "$lib/components/CloudflareAnalytics.svelte";
   import Snackbar from "$lib/components/Snackbar.svelte";
   import { refreshSession } from "$lib/stores/auth";
   import { onMount } from "svelte";
@@ -19,4 +19,4 @@
 
 {@render children()}
 <Snackbar />
-<AnalyticsConsent />
+<CloudflareAnalytics />

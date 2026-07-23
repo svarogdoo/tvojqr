@@ -431,10 +431,10 @@ Status markers for tasks:
 [DONE] 14.1.a Count active public page loads per project.
 [DONE] 14.1.b Display view counts in the dashboard project list.
 14.1.c Add unique visitor, language, and time-window analytics later if needed.
-[DONE] 14.2 Add consent-aware external acquisition analytics.
-[DONE] 14.2.a Configure Google Analytics 4 only after explicit visitor consent.
-[DONE] 14.2.b Track SvelteKit page navigation and standard referral/campaign sources.
-[DONE] 14.2.c Document analytics configuration and privacy disclosure.
+[DONE] 14.2 Add privacy-first external acquisition analytics.
+[DONE] 14.2.a Configure cookie-free Cloudflare Web Analytics without a consent popup.
+[DONE] 14.2.b Track public landing pages and standard referral sources without measuring private or customer routes.
+[DONE] 14.2.c Document Cloudflare analytics configuration and privacy disclosure.
 
 ### 15. Admin
 
@@ -505,10 +505,18 @@ Production frontend env should set:
 ```text
 PUBLIC_API_BASE_URL=https://api.hostingqr.com
 PUBLIC_SITE_URL=https://hostingqr.com
-PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN=your-32-character-site-token
 ```
 
-`PUBLIC_GA_MEASUREMENT_ID` is optional. When omitted, no Google Analytics script or consent prompt is loaded. When configured, analytics loads only after the visitor accepts optional analytics.
+HostingQr includes its public Cloudflare Web Analytics site token by default. `PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN` is an optional override and is not a secret.
+
+To configure free Cloudflare Web Analytics for the Netlify-hosted frontend:
+
+1. Open Cloudflare Dashboard > Web Analytics and add `hostingqr.com`.
+2. Copy the token from the manual JavaScript snippet Cloudflare provides.
+3. If the token changes later, add the replacement to Netlify as `PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN`.
+4. Remove the obsolete `PUBLIC_GA_MEASUREMENT_ID` variable from Netlify.
+5. Redeploy the frontend.
 
 ## Search Console
 
@@ -520,7 +528,7 @@ After deploying the SEO routes:
 4. Inspect `https://hostingqr.com/` and request indexing.
 5. Use Search Console's Web performance report for queries, impressions, clicks, and traffic that may include Google AI features.
 
-Use UTM parameters when sharing campaign links so GA4 can attribute them, for example `?utm_source=instagram&utm_medium=social&utm_campaign=launch` or `?utm_source=printed_qr&utm_medium=offline&utm_campaign=restaurant_demo`.
+Cloudflare Web Analytics reports referring sites but currently does not report UTM query parameters or custom events. HostingQr disables Cloudflare's automatic SPA measurement and includes the beacon only on public marketing/legal routes, so private dashboard and customer paths are not measured.
 
 ## Build
 
