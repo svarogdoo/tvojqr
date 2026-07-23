@@ -31,11 +31,11 @@ export const homepageCopy = {
       faq: [
         {
           id: "how-does-it-work",
-          question: "How does this work?",
+          question: "How do I create a QR code menu or document page?",
           answer: [
             "You create your account",
             "You click to start your new project",
-            "Upload your offer, select a URL and background color",
+            "Upload your menu, images, or documents, then choose a public URL and background color",
             "Add translated content in the language section, or do it later",
             "QR is already there, pick your style and download it for printing",
           ],
@@ -55,8 +55,9 @@ export const homepageCopy = {
         },
         {
           id: "tech-setup",
-          question: "Do I need to understand technical setup?",
-          answerText: "No. Send us what you need and we’ll help you get it ready.",
+          question: "Do visitors need an app to open the QR code?",
+          answerText:
+            "No. Visitors scan the QR code with their phone camera and open your hosted page in a web browser.",
         },
       ],
     },
@@ -207,9 +208,9 @@ export const homepageCopy = {
         },
         {
           id: "tech-setup",
-          question: "¿Necesito entender la parte técnica?",
+          question: "¿Los visitantes necesitan una aplicación para abrir el código QR?",
           answerText:
-            "No. Envíanos lo que necesitas y te ayudaremos a dejarlo listo.",
+            "No. Los visitantes escanean el código QR con la cámara del teléfono y abren tu página alojada en el navegador.",
         },
       ],
     },
@@ -364,9 +365,9 @@ export const homepageCopy = {
         },
         {
           id: "tech-setup",
-          question: "Devo capire la parte tecnica?",
+          question: "I visitatori devono installare un'app per aprire il codice QR?",
           answerText:
-            "No. Mandaci ciò di cui hai bisogno e ti aiuteremo a prepararlo.",
+            "No. I visitatori scansionano il codice QR con la fotocamera del telefono e aprono la pagina ospitata nel browser.",
         },
       ],
     },
@@ -521,9 +522,9 @@ export const homepageCopy = {
         },
         {
           id: "tech-setup",
-          question: "Moram li razumjeti tehničku postavu?",
+          question: "Trebaju li posjetitelji aplikaciju za otvaranje QR koda?",
           answerText:
-            "Ne. Pošaljite nam što trebate i pomoći ćemo vam da sve bude spremno.",
+            "Ne. Posjetitelji skeniraju QR kod kamerom telefona i otvaraju vašu stranicu u web-pregledniku.",
         },
       ],
     },

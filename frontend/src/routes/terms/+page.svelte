@@ -1,17 +1,16 @@
 <script lang="ts">
   import Footer from "$lib/components/Footer.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import Seo from "$lib/components/Seo.svelte";
 
   const lastUpdated = "23 June 2026";
 </script>
 
-<svelte:head>
-  <title>Terms of Use - HostingQr</title>
-  <meta
-    name="description"
-    content="HostingQr Terms of Use for QR hosted pages, subscriptions, uploaded content, and acceptable use."
-  />
-</svelte:head>
+<Seo
+  title="Terms of Use - HostingQr"
+  description="HostingQr Terms of Use for QR hosted pages, subscriptions, uploaded content, and acceptable use."
+  path="/terms"
+/>
 
 <div class="flex min-h-screen flex-col bg-[rgba(243,244,246,0.98)]">
   <Navigation />

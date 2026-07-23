@@ -77,6 +77,7 @@
 
 <svelte:head>
   <title>Admin overview - HostingQr</title>
+  <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <Navigation />

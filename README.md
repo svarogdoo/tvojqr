@@ -431,11 +431,25 @@ Status markers for tasks:
 [DONE] 14.1.a Count active public page loads per project.
 [DONE] 14.1.b Display view counts in the dashboard project list.
 14.1.c Add unique visitor, language, and time-window analytics later if needed.
+[DONE] 14.2 Add consent-aware external acquisition analytics.
+[DONE] 14.2.a Configure Google Analytics 4 only after explicit visitor consent.
+[DONE] 14.2.b Track SvelteKit page navigation and standard referral/campaign sources.
+[DONE] 14.2.c Document analytics configuration and privacy disclosure.
 
 ### 15. Admin
 
 [DONE] 15.1 Add an admin-only overview page.
 [DONE] 15.1.a Show total accounts, total views, and account counts by tier.
+
+### 16. Search Visibility
+
+[DONE] 16.1 Add technical SEO for the public marketing site.
+[DONE] 16.1.a Add canonical metadata, social previews, robots directives, and a sitemap.
+[DONE] 16.1.b Add accurate `Organization`, `WebSite`, and `SoftwareApplication` structured data.
+[DONE] 16.1.c Keep account, dashboard, admin, and customer slug pages out of search results.
+[DONE] 16.1.d Keep crawlable homepage explanations aligned with Google Search, AI Overviews, and AI Mode guidance.
+16.2 Configure Google Search Console after deployment.
+16.2.a Verify the `hostingqr.com` domain property and submit `/sitemap.xml`.
 
 ## Open Questions (To Decide Later)
 
@@ -490,7 +504,23 @@ Production frontend env should set:
 
 ```text
 PUBLIC_API_BASE_URL=https://api.hostingqr.com
+PUBLIC_SITE_URL=https://hostingqr.com
+PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
+
+`PUBLIC_GA_MEASUREMENT_ID` is optional. When omitted, no Google Analytics script or consent prompt is loaded. When configured, analytics loads only after the visitor accepts optional analytics.
+
+## Search Console
+
+After deploying the SEO routes:
+
+1. Create a domain property for `hostingqr.com` in Google Search Console.
+2. Verify ownership with the DNS record Google provides.
+3. Submit `https://hostingqr.com/sitemap.xml`.
+4. Inspect `https://hostingqr.com/` and request indexing.
+5. Use Search Console's Web performance report for queries, impressions, clicks, and traffic that may include Google AI features.
+
+Use UTM parameters when sharing campaign links so GA4 can attribute them, for example `?utm_source=instagram&utm_medium=social&utm_campaign=launch` or `?utm_source=printed_qr&utm_medium=offline&utm_campaign=restaurant_demo`.
 
 ## Build
 

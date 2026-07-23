@@ -1,17 +1,16 @@
 <script lang="ts">
   import Footer from "$lib/components/Footer.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import Seo from "$lib/components/Seo.svelte";
 
-  const lastUpdated = "23 June 2026";
+  const lastUpdated = "23 July 2026";
 </script>
 
-<svelte:head>
-  <title>Privacy Policy - HostingQr</title>
-  <meta
-    name="description"
-    content="HostingQr Privacy Policy covering account data, uploaded content, payments, hosting providers, and EU/GDPR rights."
-  />
-</svelte:head>
+<Seo
+  title="Privacy Policy - HostingQr"
+  description="HostingQr Privacy Policy covering account data, uploaded content, analytics, payments, hosting providers, and EU/GDPR rights."
+  path="/privacy"
+/>
 
 <div class="flex min-h-screen flex-col bg-[rgba(243,244,246,0.98)]">
   <Navigation />
@@ -37,6 +36,9 @@
           </p>
           <p class="mt-3">
             If you contact us, we collect the information you provide in the form or email, including your name, email address, message, optional language details, and optional uploaded files. If you subscribe to a paid plan, payment and billing details are handled by the checkout provider, such as Polar, and we receive subscription status information needed to unlock access.
+          </p>
+          <p class="mt-3">
+            If you consent to analytics, Google Analytics may collect information about pages viewed, approximate location, device and browser details, referral source, campaign parameters, and interactions needed to measure site usage. We use this information in aggregate to understand traffic and improve HostingQr.
           </p>
         </section>
 
@@ -64,7 +66,7 @@
         <section>
           <h2 class="text-xl font-semibold text-stone-900">6. Service Providers</h2>
           <p class="mt-3">
-            We use third-party providers to run the service. These may include Netlify for frontend hosting and domain/DNS services, Railway for backend/database hosting, Cloudflare R2 for uploaded asset storage, Google for authentication, Polar for checkout/subscription handling where applicable, and our email provider for support and contact-form messages. These providers process data only as needed to provide their services to us.
+            We use third-party providers to run the service. These may include Netlify for frontend hosting and domain/DNS services, Railway for backend/database hosting, Cloudflare R2 for uploaded asset storage, Google for authentication and consent-based Google Analytics, Polar for checkout/subscription handling where applicable, and our email provider for support and contact-form messages. These providers process data only as needed to provide their services to us.
           </p>
         </section>
 
@@ -78,7 +80,7 @@
         <section>
           <h2 class="text-xl font-semibold text-stone-900">8. Cookies And Sessions</h2>
           <p class="mt-3">
-            HostingQr uses essential cookies or similar session mechanisms to keep users signed in and to protect authenticated account areas. These are necessary for the service to work. We may add analytics or marketing cookies later only with appropriate notice or consent where required.
+            HostingQr uses essential cookies or similar session mechanisms to keep users signed in and to protect authenticated account areas. These are necessary for the service to work. With your consent, Google Analytics may set analytics cookies to distinguish visits and measure traffic sources. Analytics does not load before you accept it. You can reject analytics or change your choice later through the Cookie settings link in the site footer.
           </p>
         </section>
 
@@ -106,7 +108,7 @@
         <section>
           <h2 class="text-xl font-semibold text-stone-900">12. Your Rights</h2>
           <p class="mt-3">
-            Depending on where you live, you may have rights to access, correct, delete, restrict, object to processing, or receive a copy of your personal data. You may also have the right to complain to a data protection authority. To make a request, contact <a class="font-medium text-stone-950 underline" href="mailto:support@hostingqr.com">support@hostingqr.com</a>. We may need to verify your identity before responding.
+            Depending on where you live, you may have rights to access, correct, delete, restrict, object to processing, or receive a copy of your personal data. You may withdraw analytics consent at any time through Cookie settings. You may also have the right to complain to a data protection authority. To make a request, contact <a class="font-medium text-stone-950 underline" href="mailto:support@hostingqr.com">support@hostingqr.com</a>. We may need to verify your identity before responding.
           </p>
         </section>
 

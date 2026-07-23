@@ -99,6 +99,7 @@
 
 <svelte:head>
   <title>Account & billing - HostingQr</title>
+  <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <Navigation />

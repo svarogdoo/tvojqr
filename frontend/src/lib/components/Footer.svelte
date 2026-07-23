@@ -1,8 +1,10 @@
 <script lang="ts">
   import { language, type LanguageCode } from "$lib/stores/language";
   import { translations } from "$lib/translations";
+  import { gaMeasurementId } from "$lib/config";
 
   const currentYear = new Date().getFullYear();
+  const analyticsConfigured = /^G-[A-Z0-9]+$/i.test(gaMeasurementId);
 
   let currentLang: LanguageCode = "en";
 
@@ -14,6 +16,10 @@
 
   $: t = localizedTranslations[currentLang];
   $: copyright = t.footer.copyright.replace("2025", String(currentYear));
+
+  function openCookieSettings() {
+    window.dispatchEvent(new Event("hostingqr:open-analytics-consent"));
+  }
 </script>
 
 <!-- Footer -->
@@ -24,6 +30,11 @@
       <a href="/terms" class="transition-colors hover:text-stone-900">Terms</a>
       <a href="/privacy" class="transition-colors hover:text-stone-900">Privacy</a>
       <a href="/contact" class="transition-colors hover:text-stone-900">Contact</a>
+      {#if analyticsConfigured}
+        <button type="button" class="transition-colors hover:text-stone-900" on:click={openCookieSettings}>
+          Cookie settings
+        </button>
+      {/if}
     </nav>
   </div>
 </footer>

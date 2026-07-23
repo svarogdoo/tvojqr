@@ -209,4 +209,5 @@ import type { Entitlement, ProjectListItem } from "$lib/types/projects";
 
 <svelte:head>
   <title>Dashboard - HostingQr</title>
+  <meta name="robots" content="noindex, nofollow" />
 </svelte:head>

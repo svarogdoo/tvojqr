@@ -1,7 +1,6 @@
 <script lang="ts">
   import { language, type LanguageCode } from "$lib/stores/language";
   import { homepageCopy } from "$lib/homepageCopy";
-  import { slide } from "svelte/transition";
 
   let currentLang: LanguageCode = "en";
 
@@ -13,7 +12,6 @@
   let faqs: any = [];
   $: faqs = copy.faq as any;
 
-  let openFaq = "how-does-it-work";
 </script>
 
 <section class="border-y border-black/8 bg-[rgba(236,240,234,0.88)] px-4 py-20 sm:px-6 lg:px-8">
@@ -41,16 +39,11 @@
       </p>
       <div class="mx-auto mt-6 grid max-w-4xl gap-4">
         {#each faqs as faq}
-          <div class="overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white/85 shadow-sm">
-            <button
-              type="button"
-              on:click={() => (openFaq = openFaq === faq.id ? "" : faq.id)}
-              class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-              aria-expanded={openFaq === faq.id}
-            >
+          <details class="group overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white/85 shadow-sm" open={faq.id === "how-does-it-work"}>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left">
               <span class="text-sm font-medium text-stone-900">{faq.question}</span>
               <svg
-                class={`h-4 w-4 shrink-0 text-stone-400 transition-transform duration-300 ${openFaq === faq.id ? "rotate-180" : ""}`}
+                class="h-4 w-4 shrink-0 text-stone-400 transition-transform duration-300 group-open:rotate-180"
                 viewBox="0 0 20 20"
                 fill="none"
                 stroke="currentColor"
@@ -59,25 +52,23 @@
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 8l5 5 5-5" />
               </svg>
-            </button>
+            </summary>
 
-            {#if openFaq === faq.id}
-              <div class="px-5 pb-5" transition:slide>
-                {#if faq.answer}
-                  <ol class="space-y-3 text-sm leading-7 text-stone-600">
-                    {#each faq.answer as step, idx}
-                      <li>
-                        <span class="font-medium text-stone-900">{idx + 1}.</span> {step}
-                      </li>
-                    {/each}
-                  </ol>
-                  <p class="mt-3 text-sm leading-7 text-stone-600">{faq.closing}</p>
-                {:else}
-                  <p class="text-sm leading-7 text-stone-600">{faq.answerText}</p>
-                {/if}
-              </div>
-            {/if}
-          </div>
+            <div class="px-5 pb-5">
+              {#if faq.answer}
+                <ol class="space-y-3 text-sm leading-7 text-stone-600">
+                  {#each faq.answer as step, idx}
+                    <li>
+                      <span class="font-medium text-stone-900">{idx + 1}.</span> {step}
+                    </li>
+                  {/each}
+                </ol>
+                <p class="mt-3 text-sm leading-7 text-stone-600">{faq.closing}</p>
+              {:else}
+                <p class="text-sm leading-7 text-stone-600">{faq.answerText}</p>
+              {/if}
+            </div>
+          </details>
         {/each}
       </div>
     </div>

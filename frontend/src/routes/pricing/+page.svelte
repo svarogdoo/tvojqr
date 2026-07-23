@@ -2,6 +2,7 @@
   import { apiFetch } from "$lib/api";
   import Footer from "$lib/components/Footer.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import Seo from "$lib/components/Seo.svelte";
   import { auth, startGoogleSignIn } from "$lib/stores/auth";
   import { language, type LanguageCode } from "$lib/stores/language";
   import { homepageCopy } from "$lib/homepageCopy";
@@ -160,13 +161,11 @@
   }
 </script>
 
-<svelte:head>
-  <title>{copy.title} - HostingQr</title>
-  <meta
-    name="description"
-    content={pricingMetaDescriptions[currentLang]}
-  />
-</svelte:head>
+<Seo
+  title={`${copy.title} - HostingQr`}
+  description={pricingMetaDescriptions[currentLang]}
+  path="/pricing"
+/>
 
 <div class="flex min-h-screen flex-col bg-[rgba(243,244,246,0.98)]">
 <Navigation />

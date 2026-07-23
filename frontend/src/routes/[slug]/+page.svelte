@@ -118,6 +118,7 @@
 </script>
 
 <svelte:head>
+  <meta name="robots" content="noindex, follow" />
   {#if state === "active" && project}
     <title>{project.name || "Hosted page"} - HostingQr</title>
     <meta
