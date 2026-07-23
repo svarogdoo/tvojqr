@@ -1,0 +1,11 @@
+# HostingQr
+
+> HostingQr helps businesses host menus, images, and documents on public pages that can be shared using QR codes.
+
+## Main Pages
+
+- [Homepage](https://hostingqr.com/): Product overview and how HostingQr works.
+- [Pricing](https://hostingqr.com/pricing): Available plans and features.
+- [Contact](https://hostingqr.com/contact): Contact HostingQr.
+- [Privacy Policy](https://hostingqr.com/privacy): Privacy and analytics information.
+- [Terms of Use](https://hostingqr.com/terms): Service terms.
