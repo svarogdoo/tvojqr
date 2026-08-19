@@ -6,6 +6,19 @@
   import Services from "$lib/components/Services.svelte";
   import WhoAreWe from "$lib/components/WhoAreWe.svelte";
   import { siteUrl } from "$lib/config";
+  import { language, languages, type LanguageCode } from "$lib/stores/language";
+  import { onMount } from "svelte";
+
+  onMount(() => {
+    const requestedLanguage = new URLSearchParams(window.location.search).get(
+      "l",
+    );
+    const selectedLanguage = languages.find(
+      ({ code }) => code === requestedLanguage?.toLowerCase(),
+    );
+
+    language.set((selectedLanguage?.code ?? "en") as LanguageCode);
+  });
 
   const title = "HostingQr - QR Code Menu and File Hosting";
   const description =
