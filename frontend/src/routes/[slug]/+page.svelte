@@ -75,6 +75,47 @@
     );
   }
 
+  function getInitialLanguageCode(publicProject: PublicProject) {
+    const availableLanguageCodes = publicProject.languages
+      .filter((language) =>
+        publicProject.assets.some(
+          (asset) => asset.languageCode === language.languageCode,
+        ),
+      )
+      .map((language) => language.languageCode);
+    const requestedLanguageCode = new URLSearchParams(window.location.search)
+      .get("l")
+      ?.toLowerCase();
+    const requestedAvailableLanguage = availableLanguageCodes.find(
+      (languageCode) => languageCode.toLowerCase() === requestedLanguageCode,
+    );
+
+    return (
+      requestedAvailableLanguage ??
+      publicProject.languages.find(
+        (language) =>
+          language.isDefault &&
+          availableLanguageCodes.includes(language.languageCode),
+      )?.languageCode ??
+      availableLanguageCodes[0] ??
+      publicProject.languages[0]?.languageCode ??
+      ""
+    );
+  }
+
+  function selectLanguage(languageCode: string) {
+    selectedLanguageCode = languageCode;
+    languageMenuOpen = false;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("l", languageCode);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }
+
   onMount(async () => {
     slug = window.location.pathname.replace(/^\//, "");
 
@@ -90,11 +131,7 @@
 
       if (response.status === 410) {
         project = (await response.json()) as PublicProject;
-        selectedLanguageCode =
-          project.languages.find((language) => language.isDefault)
-            ?.languageCode ??
-          project.languages[0]?.languageCode ??
-          "";
+        selectedLanguageCode = getInitialLanguageCode(project);
         state = "disabled";
         return;
       }
@@ -105,11 +142,7 @@
       }
 
       project = (await response.json()) as PublicProject;
-      selectedLanguageCode =
-        project.languages.find((language) => language.isDefault)
-          ?.languageCode ??
-        project.languages[0]?.languageCode ??
-        "";
+      selectedLanguageCode = getInitialLanguageCode(project);
       state = "active";
     } catch {
       state = "error";
@@ -139,9 +172,15 @@
   {#if state === "loading"}
     <div class="flex min-h-[70vh] items-center justify-center">
       <div class="flex items-center gap-2" aria-label="Loading page">
-        <span class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-stone-500/50"></span>
-        <span class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_0.18s_infinite] rounded-full bg-stone-500/50"></span>
-        <span class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_0.36s_infinite] rounded-full bg-stone-500/50"></span>
+        <span
+          class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_infinite] rounded-full bg-stone-500/50"
+        ></span>
+        <span
+          class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_0.18s_infinite] rounded-full bg-stone-500/50"
+        ></span>
+        <span
+          class="h-2 w-2 animate-[pulse_1.4s_ease-in-out_0.36s_infinite] rounded-full bg-stone-500/50"
+        ></span>
       </div>
     </div>
   {:else if state === "active" && project}
@@ -175,10 +214,7 @@
                   <button
                     type="button"
                     class="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-white/55"
-                    on:click={() => {
-                      selectedLanguageCode = language.languageCode;
-                      languageMenuOpen = false;
-                    }}
+                    on:click={() => selectLanguage(language.languageCode)}
                   >
                     <span class="text-base leading-none">{meta.flag}</span>
                     <span class="font-semibold uppercase"

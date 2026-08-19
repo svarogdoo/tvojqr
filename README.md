@@ -236,6 +236,7 @@ Status markers for tasks:
 [DONE] 5.2 Implement real language switching on public pages.
 [DONE] 5.2.a Public page currently reads language store but does not render per-language assets/content yet.
 [DONE] 5.2.b Show only languages available for that page.
+[DONE] 5.2.c Support direct public-page language links with the short `?l=hr` query parameter.
 5.3 Support more than one asset/file per hosted page.
 5.3.a Image gallery / multi-page menu display.
 5.3.b PDF display/download behavior (if included in MVP).
