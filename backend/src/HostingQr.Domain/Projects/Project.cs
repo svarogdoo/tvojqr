@@ -5,5 +5,7 @@ public sealed record Project(
     Guid OwnerUserId,
     string Name,
     string Status,
+    string MenuType,
+    string TimeZone,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);

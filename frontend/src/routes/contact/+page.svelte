@@ -45,9 +45,13 @@
   $: selectedPlan = $page.url.searchParams.get("plan") ?? "";
   $: selectedBillingCycle = $page.url.searchParams.get("billingCycle") ?? "";
   $: isPaidPlanRequest = selectedPlan === "standard" || selectedPlan === "plus";
-  $: selectedPlanLabel = selectedPlan
-    ? selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)
-    : "";
+  $: selectedPlanLabel = selectedPlan === "standard"
+    ? "Image Menu"
+    : selectedPlan === "plus"
+      ? "Digital Menu"
+      : selectedPlan === "free"
+        ? "14-day trial"
+        : "";
 
   function handleFileChange(event: Event) {
     const input = event.currentTarget as HTMLInputElement;

@@ -1,6 +1,7 @@
 using HostingQr.Application.Abstractions;
 using HostingQr.Application.Assets;
 using HostingQr.Application.Projects;
+using HostingQr.Application.Menus;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HostingQr.Api.Endpoints;
@@ -198,6 +199,55 @@ public static class ProjectEndpoints
         })
             .WithName("DeleteProject")
             .WithSummary("Deletes the current project and its dependent data.");
+
+        group.MapGet("/{projectId:guid}/digital-menu", async (Guid projectId, IDigitalMenuService menuService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                DigitalMenuResponse? menu = await menuService.GetForOwnerAsync(projectId, cancellationToken);
+                return menu is null ? Results.NotFound() : Results.Ok(menu);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+        })
+            .WithName("GetDigitalMenu")
+            .WithSummary("Returns editable structured content for a Digital Menu project.");
+
+        group.MapPut("/{projectId:guid}/digital-menu", async (Guid projectId, SaveDigitalMenuRequest request, IDigitalMenuService menuService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                DigitalMenuResponse? menu = await menuService.SaveAsync(projectId, request, cancellationToken);
+                return menu is null ? Results.NotFound() : Results.Ok(menu);
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+        })
+            .WithName("SaveDigitalMenu")
+            .WithSummary("Transactionally replaces structured Digital Menu content.");
+
+        group.MapPatch("/{projectId:guid}/digital-menu/items/{itemId:guid}/availability", async (Guid projectId, Guid itemId, UpdateDigitalMenuItemAvailabilityRequest request, IDigitalMenuService menuService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                bool updated = await menuService.UpdateItemAvailabilityAsync(projectId, itemId, request.IsOutOfStock, cancellationToken);
+                return updated ? Results.NoContent() : Results.NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+        })
+            .WithName("UpdateDigitalMenuItemAvailability")
+            .WithSummary("Quickly marks one Digital Menu item available or out of stock.");
 
         return endpoints;
     }

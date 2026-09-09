@@ -13,75 +13,24 @@
   const usePolarCheckout = false;
 
   type Plan = {
-    id: string;
-    badge: string;
-    featured: boolean;
+    id: "standard" | "plus";
     price: Record<BillingCycle, { amount: string; period: "month" | "year" | "" }>;
-    description: string;
-    button: string;
-    details: Array<{ label: string; value: string }>;
   };
 
   const plans: Plan[] = [
     {
-      id: "free",
-      badge: "Trial",
-      featured: false,
-      price: {
-        monthly: { amount: "Free", period: "" },
-        annual: { amount: "Free", period: "" },
-      },
-      description:
-        "Not sure how it works? Send us your files and we'll send you your preview.",
-      button: "Start test",
-      details: [
-        { label: "Projects", value: "14-day test" },
-        { label: "Menus", value: "—" },
-        { label: "Languages", value: "—" },
-        { label: "Uploaded files", value: "—" },
-        { label: "Traffic", value: "—" },
-        { label: "Support", value: "Direct with me" },
-      ],
-    },
-    {
       id: "standard",
-      badge: "Standard",
-      featured: true,
       price: {
         monthly: { amount: "€7", period: "month" },
         annual: { amount: "€70", period: "year" },
       },
-      description:
-        "Great for small restaurants with simple needs. You can always upgrade later.",
-      button: "Choose standard",
-      details: [
-        { label: "Projects", value: "1" },
-        { label: "Menus", value: "2" },
-        { label: "Languages", value: "3" },
-        { label: "Uploaded files", value: "10 total" },
-        { label: "Traffic", value: "25 GB" },
-        { label: "Support", value: "Standard" },
-      ],
     },
     {
       id: "plus",
-      badge: "Plus",
-      featured: false,
       price: {
-        monthly: { amount: "€12", period: "month" },
-        annual: { amount: "€120", period: "year" },
+        monthly: { amount: "€10", period: "month" },
+        annual: { amount: "€100", period: "year" },
       },
-      description:
-        "You need more? This plan is for you. Want to go even bigger? Contact us!",
-      button: "Choose plus",
-      details: [
-        { label: "Projects", value: "5" },
-        { label: "Menus", value: "5" },
-        { label: "Languages", value: "7" },
-        { label: "Uploaded files", value: "25 total" },
-        { label: "Traffic", value: "100 GB" },
-        { label: "Support", value: "Priority" },
-      ],
     },
   ];
 
@@ -99,18 +48,9 @@
 
   $: copy = homepageCopy[currentLang].pricing;
   $: planCopy = {
-    free: copy.plans.free,
     standard: copy.plans.standard,
     plus: copy.plans.plus,
   };
-  $: detailLabels = [
-    copy.details.projects,
-    copy.details.menus,
-    copy.details.languages,
-    copy.details.uploadedFiles,
-    copy.details.traffic,
-    copy.details.support,
-  ];
   let billingCycle: BillingCycle = "monthly";
   let checkoutPlanId: string | null = null;
   let checkoutError = "";
@@ -121,11 +61,6 @@
 
   async function startCheckout(planId: string) {
     checkoutError = "";
-
-    if (planId === "free") {
-      window.location.href = "/contact";
-      return;
-    }
 
     if (!usePolarCheckout) {
       window.location.href = `/contact?plan=${encodeURIComponent(planId)}&billingCycle=${encodeURIComponent(billingCycle)}`;
@@ -173,33 +108,18 @@
 <main class="flex-1 px-4 pb-16 pt-22 sm:px-6 lg:px-8">
   <section class="mx-auto max-w-6xl">
     <div
-      class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between"
+      class="mx-auto max-w-3xl text-center"
     >
-      <div class="max-w-2xl">
-        <p
-          class="text-sm font-medium uppercase tracking-[0.24em] text-stone-500"
-        >
-          {copy.eyebrow}
-        </p>
-      </div>
-
+      <p class="text-sm font-medium uppercase tracking-[0.24em] text-stone-500">
+        {copy.eyebrow}
+      </p>
+      <h1 class="mt-4 text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
+        {copy.title}
+      </h1>
+      <p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600 sm:text-lg">
+        {copy.subtitle}
+      </p>
     </div>
-
-    <blockquote class="mx-auto mt-3 max-w-3xl px-6 py-3 text-center sm:px-8">
-      <p class="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[2rem]">
-        {copy.quote.title}
-        <span class="mt-2 flex flex-wrap items-center justify-center gap-2">
-          <span>{copy.quote.subtitle}</span>
-          <span class="inline-flex rounded-full bg-emerald-600 px-3.5 py-1 text-xl font-bold tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(5,150,105,0.22)] sm:text-2xl">
-            {copy.quote.highlight}
-          </span>
-          <span>!</span>
-        </span>
-      </p>
-      <p class="mt-4 text-sm font-medium text-stone-600 sm:text-base">
-        {copy.quote.footer}
-      </p>
-    </blockquote>
 
     <div class="mt-8 flex justify-center">
       <div class="w-full max-w-sm rounded-full border border-stone-200 bg-white p-1 shadow-sm">
@@ -221,81 +141,117 @@
         </div>
       </div>
     </div>
+    <p class="mt-3 text-center text-sm font-medium text-emerald-700">{copy.annualNote}</p>
 
-    <div class="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-3 lg:items-stretch">
+    <div class="mx-auto mt-10 grid max-w-4xl gap-6 md:grid-cols-2 md:items-stretch">
       {#each plans as plan}
         <article
           id={plan.id}
-          class={`group flex h-full flex-col rounded-[2.25rem] border p-6 shadow-[0_18px_50px_rgba(45,53,46,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(45,53,46,0.12)] sm:p-7 ${plan.featured ? "border-stone-300 bg-stone-700 text-white" : "border-stone-200 bg-white text-stone-900"}`}
+          class="group flex h-full flex-col rounded-[2.25rem] border border-stone-200 bg-white p-6 text-stone-900 shadow-[0_18px_50px_rgba(45,53,46,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-stone-300 hover:shadow-[0_26px_70px_rgba(45,53,46,0.12)] sm:p-7"
           data-polar-tier={plan.id}
         >
-          <div class="flex items-center justify-between gap-4">
-            <span
-              class={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] ${plan.featured ? "bg-white/10 text-white/85" : "bg-stone-100 text-stone-600"}`}
-            >
-              {copy.badges[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"]}
-            </span>
-            {#if plan.featured}
-              <span
-                class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-white/70"
-              >
-                {copy.popular}
-              </span>
-            {/if}
+          <div class="text-center">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100 text-stone-700">
+              {#if plan.id === "standard"}
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                  <rect x="5" y="4" width="12" height="15" rx="2" />
+                  <path stroke-linecap="round" d="M8 8h6M8 11h6M8 14h4M17 7h2v13a2 2 0 0 1-2 2H8" />
+                </svg>
+              {:else}
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                  <rect x="4" y="3" width="16" height="18" rx="3" />
+                  <path stroke-linecap="round" d="M8 8h8M8 12h5M8 16h7" />
+                  <circle cx="16.5" cy="12" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              {/if}
+            </div>
+            <h2 class="mt-4 text-xl font-semibold tracking-tight text-stone-900">
+              {copy.badges[plan.id]}
+            </h2>
           </div>
 
           <div
-            class={`mt-6 h-1.5 w-14 rounded-full transition-all duration-300 group-hover:w-20 ${plan.featured ? "bg-white/30" : "bg-stone-300"}`}
+            class="mt-6 h-1.5 w-14 rounded-full bg-stone-300 transition-all duration-300 group-hover:w-20"
           ></div>
 
-          <div class="mt-4 flex items-baseline gap-2">
+          <div class="mt-4 flex items-baseline justify-center gap-2">
             <span
-              class={`text-4xl font-semibold tracking-tight ${plan.featured ? "text-white" : "text-stone-900"}`}
+              class="text-4xl font-semibold tracking-tight text-stone-900"
             >
               {plan.price[billingCycle].amount}
             </span>
             {#if plan.price[billingCycle].period}
-              <span class={`text-sm font-medium ${plan.featured ? "text-white/65" : "text-stone-500"}`}>
+              <span class="text-sm font-medium text-stone-500">
                 / {plan.price[billingCycle].period === "month" ? copy.periods.month : copy.periods.year}
               </span>
             {/if}
           </div>
           <p
-            class={`mt-3 text-sm leading-7 ${plan.featured ? "text-white/70" : "text-stone-600"}`}
+            class="mt-3 text-center text-sm leading-7 text-stone-600"
           >
-              {planCopy[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].description}
+              {planCopy[plan.id].description}
+          </p>
+          <p class="mx-auto mt-4 w-fit rounded-full border border-stone-200 bg-stone-100 px-3.5 py-1.5 text-center text-xs font-bold uppercase tracking-[0.08em] text-stone-800">
+            {planCopy[plan.id].included}
           </p>
 
           <div
-            class={`mt-8 mb-3 border-t pt-5 ${plan.featured ? "border-white/10" : "border-stone-200/80"}`}
+            class="mt-8 mb-3 border-t border-stone-200/80 pt-5"
           >
-            <div class="space-y-2">
-              {#each plan.details as detail, idx}
-                <div
-                  class={`grid grid-cols-[1fr_auto] items-center gap-4 text-sm ${plan.featured ? "text-white/85" : "text-stone-700"}`}
-                >
-                  <span>{detailLabels[idx]}</span>
-                  <span
-                    class={`font-medium ${plan.featured ? "text-white" : "text-stone-900"}`}
-                    >{detail.label === "Support" ? planCopy[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].support : detail.value}</span
-                  >
+            <div class="space-y-3">
+              {#each planCopy[plan.id].features as feature}
+                <div class="flex items-start gap-3 text-sm leading-6 text-stone-700">
+                  <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-700" aria-hidden="true">✓</span>
+                  <span>{feature}</span>
                 </div>
               {/each}
             </div>
           </div>
 
-          <button
-            type="button"
-            on:click={() => startCheckout(plan.id)}
-            disabled={checkoutPlanId === plan.id}
-            class={`mt-auto inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-all duration-300 ${plan.featured ? "bg-white text-stone-950 hover:bg-stone-100" : "border border-stone-200 bg-stone-50 text-stone-900 hover:-translate-y-0.5 hover:border-stone-300 hover:bg-white"}`}
-            data-polar-plan={plan.id}
-          >
-            {checkoutPlanId === plan.id ? "Opening checkout..." : planCopy[plan.id === "free" ? "free" : plan.id === "standard" ? "standard" : "plus"].button}
-          </button>
+          <div class="mt-auto space-y-3 pt-4">
+            {#if plan.id === "standard"}
+              <a
+                href="https://hostingqr.com/paname"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex w-full items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-3 text-sm font-medium text-stone-700 transition-all hover:-translate-y-0.5 hover:border-stone-300 hover:text-stone-950"
+              >
+                {copy.examples.image}
+              </a>
+            {:else}
+              <span class="inline-flex w-full cursor-default items-center justify-center rounded-full border border-stone-200 bg-stone-50 px-5 py-3 text-sm font-medium text-stone-400" aria-disabled="true">
+                {copy.examples.digitalSoon}
+              </span>
+            {/if}
+            <button
+              type="button"
+              on:click={() => startCheckout(plan.id)}
+              disabled={checkoutPlanId === plan.id}
+              class="inline-flex w-full items-center justify-center rounded-full bg-stone-900 px-5 py-3 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-800"
+              data-polar-plan={plan.id}
+            >
+              {checkoutPlanId === plan.id ? "Opening checkout..." : planCopy[plan.id].button}
+            </button>
+          </div>
         </article>
       {/each}
     </div>
+
+    <div class="mx-auto mt-7 max-w-3xl rounded-[1.5rem] border border-[rgba(140,157,142,0.22)] bg-[rgba(226,233,224,0.72)] px-5 py-5 shadow-[0_10px_28px_rgba(74,88,76,0.06)] sm:flex sm:items-center sm:justify-between sm:gap-7 sm:px-6">
+      <div>
+        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-stone-600">{copy.trial.eyebrow}</p>
+        <h2 class="mt-1.5 text-xl font-semibold tracking-tight text-stone-900">{copy.trial.title}</h2>
+        <p class="mt-1.5 max-w-xl text-sm leading-6 text-stone-600">{copy.trial.description}</p>
+      </div>
+      <a href="/contact?plan=free&billingCycle=trial" class="mt-4 inline-flex w-full shrink-0 items-center justify-center rounded-full border border-stone-300/80 bg-white/80 px-5 py-2.5 text-sm font-medium text-stone-800 transition-colors hover:bg-white sm:mt-0 sm:w-auto">
+        {copy.trial.button}
+      </a>
+    </div>
+
+    <p class="mx-auto mt-6 max-w-3xl text-center text-sm leading-6 text-stone-600">
+      <span class="font-semibold text-stone-900">{copy.translationNote.label}:</span>
+      {" "}{copy.translationNote.text}
+    </p>
 
     {#if checkoutError}
       <p class="mx-auto mt-5 max-w-2xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">

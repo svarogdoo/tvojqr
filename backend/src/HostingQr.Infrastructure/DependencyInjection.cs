@@ -7,6 +7,7 @@ using HostingQr.Infrastructure.Billing;
 using HostingQr.Infrastructure.Configuration;
 using HostingQr.Infrastructure.Data;
 using HostingQr.Infrastructure.Migrations;
+using HostingQr.Infrastructure.Menus;
 using HostingQr.Infrastructure.Projects;
 using HostingQr.Infrastructure.Services;
 using HostingQr.Infrastructure.Slugs;
@@ -131,6 +132,7 @@ public static class DependencyInjection
         services.AddScoped<IEntitlementRepository, EntitlementRepository>();
         services.AddScoped<IEntitlementService, EntitlementService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IDigitalMenuRepository, DigitalMenuRepository>();
         services.AddScoped<IProjectViewRepository, ProjectViewRepository>();
         services.AddScoped<IProjectLanguageVariantRepository, ProjectLanguageVariantRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();

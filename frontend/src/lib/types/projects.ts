@@ -1,8 +1,11 @@
+export type MenuType = "image" | "digital";
+
 export type ProjectListItem = {
   id: string;
   name: string;
   slug: string;
   status: "active" | "disabled";
+  menuType: MenuType;
   updatedAt: string;
   viewCount: number;
   lastViewedAt: string | null;
@@ -13,6 +16,8 @@ export type ProjectDetail = {
   name: string;
   slug: string;
   status: "active" | "disabled";
+  menuType: MenuType;
+  timeZone: string;
   backgroundColor: string;
   createdAt: string;
   updatedAt: string;
@@ -47,6 +52,12 @@ export type UpdateProjectRequest = {
   backgroundColor: string;
 };
 
+export type CreateProjectRequest = UpdateProjectRequest & {
+  defaultLanguageCode: string;
+  defaultLanguageDisplayName: string;
+  menuType: MenuType;
+};
+
 export type UpdateProjectStatusRequest = {
   status: "active" | "disabled";
 };
@@ -58,6 +69,44 @@ export type SlugAvailabilityResponse = {
 
 export type GeneratedSlugResponse = {
   slug: string;
+};
+
+export type DigitalMenu = {
+  timeZone: string;
+  categories: DigitalMenuCategory[];
+};
+
+export type DigitalMenuCategory = {
+  id: string;
+  sortOrder: number;
+  translations: DigitalMenuCategoryTranslation[];
+  schedules: DigitalMenuSchedule[];
+  items: DigitalMenuItem[];
+};
+
+export type DigitalMenuCategoryTranslation = {
+  languageCode: string;
+  name: string;
+};
+
+export type DigitalMenuSchedule = {
+  dayOfWeek: number;
+  startsAt: string;
+  endsAt: string;
+};
+
+export type DigitalMenuItem = {
+  id: string;
+  priceText: string;
+  isOutOfStock: boolean;
+  sortOrder: number;
+  translations: DigitalMenuItemTranslation[];
+};
+
+export type DigitalMenuItemTranslation = {
+  languageCode: string;
+  name: string;
+  description: string;
 };
 
 export type Entitlement = {

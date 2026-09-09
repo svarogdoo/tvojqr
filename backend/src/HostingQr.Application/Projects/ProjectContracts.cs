@@ -2,11 +2,11 @@ using HostingQr.Application.Assets;
 
 namespace HostingQr.Application.Projects;
 
-public sealed record ProjectListItem(Guid Id, string Name, string Slug, string Status, DateTimeOffset UpdatedAt, long ViewCount, DateTimeOffset? LastViewedAt);
+public sealed record ProjectListItem(Guid Id, string Name, string Slug, string Status, string MenuType, DateTimeOffset UpdatedAt, long ViewCount, DateTimeOffset? LastViewedAt);
 
-public sealed record ProjectDetailResponse(Guid Id, string Name, string Slug, string Status, string BackgroundColor, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, long ViewCount, DateTimeOffset? LastViewedAt, IReadOnlyList<ProjectLanguageVariantResponse> Languages, IReadOnlyList<AssetResponse> Assets);
+public sealed record ProjectDetailResponse(Guid Id, string Name, string Slug, string Status, string MenuType, string TimeZone, string BackgroundColor, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, long ViewCount, DateTimeOffset? LastViewedAt, IReadOnlyList<ProjectLanguageVariantResponse> Languages, IReadOnlyList<AssetResponse> Assets);
 
-public sealed record CreateProjectRequest(string Name, string Slug, string? BackgroundColor, string DefaultLanguageCode, string? DefaultLanguageDisplayName);
+public sealed record CreateProjectRequest(string Name, string Slug, string? BackgroundColor, string DefaultLanguageCode, string? DefaultLanguageDisplayName, string MenuType);
 
 public sealed record UpdateProjectRequest(string Name, string Slug, string? BackgroundColor);
 
@@ -18,4 +18,4 @@ public sealed record CreateProjectLanguageRequest(string LanguageCode, string Di
 
 public sealed record UpdateProjectLanguageRequest(string LanguageCode, string DisplayName);
 
-public sealed record PublicProjectResponse(Guid ProjectId, string Name, string Slug, string OwnerDisplayName, string Status, string BackgroundColor, IReadOnlyList<ProjectLanguageVariantResponse> Languages, IReadOnlyList<AssetResponse> Assets);
+public sealed record PublicProjectResponse(Guid ProjectId, string Name, string Slug, string OwnerDisplayName, string Status, string MenuType, string TimeZone, string BackgroundColor, IReadOnlyList<ProjectLanguageVariantResponse> Languages, IReadOnlyList<AssetResponse> Assets);

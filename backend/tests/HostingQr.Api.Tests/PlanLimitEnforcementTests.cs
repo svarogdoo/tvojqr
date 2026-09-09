@@ -31,9 +31,20 @@ public sealed class PlanLimitEnforcementTests
         ProjectService service = CreateService(projectRepository, new FakeLanguageRepository(), BillingTier.Standard);
 
         InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.CreateProjectAsync(new CreateProjectRequest("Next", "next", "#f8f7f3", "en", "English")));
+            service.CreateProjectAsync(new CreateProjectRequest("Next", "next", "#f8f7f3", "en", "English", ProjectMenuType.Image)));
 
-        Assert.Equal("Your Standard plan includes up to 1 project.", exception.Message);
+        Assert.Equal("Your Image Menu plan includes up to 1 project.", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateProjectAsync_BlocksDigitalMenuForImagePlan()
+    {
+        ProjectService service = CreateService(new FakeProjectRepository(), new FakeLanguageRepository(), BillingTier.Standard);
+
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CreateProjectAsync(new CreateProjectRequest("Digital", "digital", "#f8f7f3", "en", "English", ProjectMenuType.Digital)));
+
+        Assert.Equal("Digital Menu requires the Digital Menu plan.", exception.Message);
     }
 
     [Fact]
@@ -63,7 +74,7 @@ public sealed class PlanLimitEnforcementTests
         InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.AddLanguageAsync(projectId, new CreateProjectLanguageRequest("fr", "French")));
 
-        Assert.Equal("Your Standard plan includes up to 3 languages per project.", exception.Message);
+        Assert.Equal("Your Image Menu plan includes up to 3 languages per project.", exception.Message);
     }
 
     [Fact]
@@ -195,7 +206,7 @@ public sealed class PlanLimitEnforcementTests
         public Task<PublicProject?> GetPublicBySlugAsync(string slug, CancellationToken cancellationToken = default) =>
             Task.FromResult(PublicProject?.Slug == slug ? PublicProject : null);
 
-        public Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, CancellationToken cancellationToken = default)
+        public Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, string menuType, CancellationToken cancellationToken = default)
         {
             ProjectWithSlug project = new()
             {
@@ -204,6 +215,7 @@ public sealed class PlanLimitEnforcementTests
                 Name = name,
                 Slug = slug,
                 Status = ProjectStatus.Active,
+                MenuType = menuType,
                 BackgroundColor = backgroundColor,
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow,

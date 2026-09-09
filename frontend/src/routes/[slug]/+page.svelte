@@ -1,6 +1,7 @@
 <script lang="ts">
   import { apiFetch } from "$lib/api";
   import { toApiUrl } from "$lib/config";
+  import type { DigitalMenu, DigitalMenuCategory, DigitalMenuItem, MenuType } from "$lib/types/projects";
   import { onMount } from "svelte";
 
   type PublicAsset = {
@@ -24,6 +25,8 @@
     slug: string;
     ownerDisplayName: string;
     status: "active" | "disabled";
+    menuType: MenuType;
+    timeZone: string;
     backgroundColor: string;
     languages: PublicLanguage[];
     assets: PublicAsset[];
@@ -48,18 +51,16 @@
   let project: PublicProject | null = null;
   let selectedLanguageCode = "";
   let languageMenuOpen = false;
+  let digitalMenu: DigitalMenu | null = null;
 
-  $: languagesWithAssets = (project?.languages ?? [])
-    .filter((language) =>
-      (project?.assets ?? []).some(
-        (asset) => asset.languageCode === language.languageCode,
-      ),
-    )
+  $: availableLanguages = (project?.languages ?? [])
+    .filter((language) => project?.menuType === "digital" ||
+      (project?.assets ?? []).some((asset) => asset.languageCode === language.languageCode))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   $: selectedLanguage =
-    languagesWithAssets.find(
+    availableLanguages.find(
       (language) => language.languageCode === selectedLanguageCode,
-    ) ?? languagesWithAssets[0];
+    ) ?? availableLanguages[0];
   $: visibleAssets = selectedLanguage
     ? (project?.assets ?? []).filter(
         (asset) => asset.languageCode === selectedLanguage.languageCode,
@@ -73,6 +74,23 @@
         label: languageCode.toUpperCase(),
       }
     );
+  }
+
+  function translatedCategoryName(category: DigitalMenuCategory) {
+    return translatedValue(category.translations, "name");
+  }
+
+  function translatedItem(item: DigitalMenuItem) {
+    const selected = item.translations.find((translation) => translation.languageCode === selectedLanguageCode);
+    const fallbackCode = project?.languages.find((language) => language.isDefault)?.languageCode;
+    return selected ?? item.translations.find((translation) => translation.languageCode === fallbackCode) ?? item.translations[0] ?? { name: "", description: "" };
+  }
+
+  function translatedValue(translations: Array<{ languageCode: string; name: string }>, field: "name") {
+    const fallbackCode = project?.languages.find((language) => language.isDefault)?.languageCode;
+    const selected = translations.find((translation) => translation.languageCode === selectedLanguageCode && translation[field].trim());
+    const fallback = translations.find((translation) => translation.languageCode === fallbackCode && translation[field].trim());
+    return selected?.[field] ?? fallback?.[field] ?? translations.find((translation) => translation[field].trim())?.[field] ?? "Untitled";
   }
 
   onMount(async () => {
@@ -110,6 +128,14 @@
           ?.languageCode ??
         project.languages[0]?.languageCode ??
         "";
+      if (project.menuType === "digital") {
+        const menuResponse = await apiFetch(`/api/public/${encodeURIComponent(slug)}/digital-menu`);
+        if (!menuResponse.ok) {
+          state = "error";
+          return;
+        }
+        digitalMenu = (await menuResponse.json()) as DigitalMenu;
+      }
       state = "active";
     } catch {
       state = "error";
@@ -152,7 +178,7 @@
     </div>
   {:else if state === "active" && project}
     <main class="mx-auto max-w-5xl">
-      {#if languagesWithAssets.length > 1 && selectedLanguage}
+      {#if availableLanguages.length > 1 && selectedLanguage}
         {@const currentMeta = getLanguageMeta(selectedLanguage.languageCode)}
         <div class="mb-4 flex justify-end">
           <div
@@ -176,7 +202,7 @@
                 class="absolute right-3 z-20 mt-2 min-w-44 overflow-hidden rounded-3xl border border-black/8 p-1 shadow-[0_20px_55px_rgba(45,53,46,0.14)] backdrop-blur-xl"
                 style="background: color-mix(in srgb, var(--page-bg) 18%, white 82%);"
               >
-                {#each languagesWithAssets as language}
+                {#each availableLanguages as language}
                   {@const meta = getLanguageMeta(language.languageCode)}
                   <button
                     type="button"
@@ -198,6 +224,65 @@
           </div>
         </div>
       {/if}
+      {#if project.menuType === "digital"}
+        <header class="rounded-[2rem] border border-black/6 bg-white/88 px-5 py-7 text-center shadow-[0_20px_50px_rgba(45,53,46,0.08)] backdrop-blur sm:px-8 sm:py-10">
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Digital menu</p>
+          <h1 class="mt-3 text-3xl font-semibold tracking-tight text-stone-950 sm:text-5xl">{project.name}</h1>
+          {#if project.ownerDisplayName}
+            <p class="mt-3 text-sm text-stone-500">{project.ownerDisplayName}</p>
+          {/if}
+        </header>
+
+        {#if digitalMenu && digitalMenu.categories.length > 1}
+          <nav class="sticky top-2 z-10 -mx-1 mt-4 overflow-x-auto rounded-2xl border border-black/6 bg-white/90 p-2 shadow-[0_12px_30px_rgba(45,53,46,0.1)] backdrop-blur" aria-label="Menu sections">
+            <div class="flex min-w-max gap-2">
+              {#each digitalMenu.categories as category}
+                <a href={`#section-${category.id}`} class="rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-700">{translatedCategoryName(category)}</a>
+              {/each}
+            </div>
+          </nav>
+        {/if}
+
+        <section class="mt-5 space-y-5">
+          {#if !digitalMenu || digitalMenu.categories.length === 0}
+            <div class="rounded-[2rem] border border-black/6 bg-white/90 p-10 text-center shadow-[0_24px_60px_rgba(45,53,46,0.08)]">
+              <p class="text-base text-stone-600">This menu is being prepared. Please check back soon.</p>
+            </div>
+          {:else}
+            {#each digitalMenu.categories as category}
+              <article id={`section-${category.id}`} class="scroll-mt-24 rounded-[2rem] border border-black/6 bg-white/92 p-5 shadow-[0_18px_45px_rgba(45,53,46,0.07)] sm:p-8">
+                <div class="flex items-end justify-between gap-4 border-b border-stone-200 pb-4">
+                  <h2 class="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">{translatedCategoryName(category)}</h2>
+                  <span class="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">{category.items.length} items</span>
+                </div>
+                <div class="divide-y divide-stone-100">
+                  {#each category.items as item}
+                    {@const translation = translatedItem(item)}
+                    <div class={`py-5 ${item.isOutOfStock ? "opacity-55" : ""}`}>
+                      <div class="flex items-start justify-between gap-5">
+                        <div class="min-w-0">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <h3 class="text-base font-semibold text-stone-900 sm:text-lg">{translation.name || "Untitled item"}</h3>
+                            {#if item.isOutOfStock}
+                              <span class="rounded-full bg-amber-100 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-amber-900">Out of stock</span>
+                            {/if}
+                          </div>
+                          {#if translation.description}
+                            <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{translation.description}</p>
+                          {/if}
+                        </div>
+                        {#if item.priceText}
+                          <span class="shrink-0 text-base font-semibold text-stone-900">{item.priceText}</span>
+                        {/if}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              </article>
+            {/each}
+          {/if}
+        </section>
+      {:else}
       <section class="space-y-4">
         {#if visibleAssets.length === 0}
           <div
@@ -219,6 +304,7 @@
           {/each}
         {/if}
       </section>
+      {/if}
     </main>
   {:else if state === "disabled"}
     <div

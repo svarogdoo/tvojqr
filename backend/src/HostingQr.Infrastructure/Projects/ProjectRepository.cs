@@ -22,6 +22,8 @@ public sealed class ProjectRepository : IProjectRepository
                 p.owner_user_id as OwnerUserId,
                 p.name,
                 p.status,
+                p.menu_type as MenuType,
+                p.time_zone as TimeZone,
                 p.background_color as BackgroundColor,
                 s.slug as Slug,
                 p.created_at as CreatedAt,
@@ -46,6 +48,8 @@ public sealed class ProjectRepository : IProjectRepository
                 p.owner_user_id as OwnerUserId,
                 p.name,
                 p.status,
+                p.menu_type as MenuType,
+                p.time_zone as TimeZone,
                 p.background_color as BackgroundColor,
                 s.slug as Slug,
                 p.created_at as CreatedAt,
@@ -69,6 +73,8 @@ public sealed class ProjectRepository : IProjectRepository
                 s.slug as Slug,
                 u.display_name as OwnerDisplayName,
                 p.status,
+                p.menu_type as MenuType,
+                p.time_zone as TimeZone,
                 p.background_color as BackgroundColor
             from slugs s
             inner join projects p on p.id = s.project_id
@@ -81,14 +87,14 @@ public sealed class ProjectRepository : IProjectRepository
         return await connection.QuerySingleOrDefaultAsync<PublicProject>(command);
     }
 
-    public async Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, CancellationToken cancellationToken = default)
+    public async Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, string menuType, CancellationToken cancellationToken = default)
     {
         Guid projectId = Guid.NewGuid();
         Guid slugId = Guid.NewGuid();
 
         const string projectSql = """
-            insert into projects (id, owner_user_id, name, status, background_color)
-            values (@Id, @OwnerUserId, @Name, @Status, @BackgroundColor);
+            insert into projects (id, owner_user_id, name, status, background_color, menu_type)
+            values (@Id, @OwnerUserId, @Name, @Status, @BackgroundColor, @MenuType);
             """;
 
         const string slugSql = """
@@ -100,7 +106,7 @@ public sealed class ProjectRepository : IProjectRepository
         connection.Open();
         using var transaction = connection.BeginTransaction();
 
-        await connection.ExecuteAsync(new CommandDefinition(projectSql, new { Id = projectId, OwnerUserId = ownerUserId, Name = name, Status = ProjectStatus.Active, BackgroundColor = backgroundColor }, transaction, cancellationToken: cancellationToken));
+        await connection.ExecuteAsync(new CommandDefinition(projectSql, new { Id = projectId, OwnerUserId = ownerUserId, Name = name, Status = ProjectStatus.Active, BackgroundColor = backgroundColor, MenuType = menuType }, transaction, cancellationToken: cancellationToken));
         await connection.ExecuteAsync(new CommandDefinition(slugSql, new { Id = slugId, ProjectId = projectId, Slug = slug }, transaction, cancellationToken: cancellationToken));
 
         transaction.Commit();

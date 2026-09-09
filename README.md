@@ -14,6 +14,7 @@ Users should be able to:
 4. Add multiple language versions of the same content.
 5. Generate a QR code that points to their public page.
 6. Print and place the QR code anywhere.
+7. Choose between hosting an existing Image Menu or managing an editable Digital Menu.
 
 Visitors who scan the QR code should land on a simple public page where they can:
 
@@ -47,6 +48,11 @@ The dashboard should let users manage:
 - QR code generation and download/display
 - Preview before publish/save
 
+Projects use one of two formats:
+
+- Image Menu: upload ordered menu images for each language and replace them when the menu changes.
+- Digital Menu: manage translated sections, items, descriptions, prices, availability, and recurring serving times.
+
 The intended control-panel flow is:
 
 1. User signs in and lands on a dashboard listing all their projects.
@@ -68,7 +74,12 @@ To be fully autonomous, HostingQr should include built-in billing:
 - Self-service plan upgrades/downgrades
 - Billing status visible in the user dashboard
 
-Pricing amounts are not decided yet. We will define pricing later, but the product and implementation should be designed to support tiers from the beginning.
+The current product pricing is:
+
+- Image Menu: EUR 7 monthly or EUR 70 annually.
+- Digital Menu: EUR 10 monthly or EUR 100 annually.
+- Annual billing includes two months free.
+- A two-week free trial is available through the current contact-based onboarding flow.
 
 For now, billing and payment work is intentionally deferred until the core control-panel, upload, slug, preview, and public-page flows are working well.
 
@@ -78,6 +89,7 @@ When someone visits the user’s public URL:
 
 - They see the uploaded image/file content in a very simple layout.
 - They can switch between languages if more than one is available.
+- Digital Menus render structured sections and items, clearly show out-of-stock items, and automatically hide sections outside their configured serving times.
 
 ## MVP Scope (Recommended)
 
@@ -170,6 +182,7 @@ Status markers for tasks:
 [DONE] 1.3 Add pricing section on front page (even if prices are "coming soon" initially).
 [DONE] 1.3.a Show planned tiers and key differences.
 [DONE] 1.3.b Add billing/subscription CTA.
+[DONE] 1.3.c Replace generic tiers with Image Menu and Digital Menu pricing plus a separate two-week trial prompt.
 1.4 Improve navigation for product app flow.
 1.4.a Add clear links for `Login`, `Dashboard`, `Pricing`.
 [DONE] 1.4.b Keep current multilingual language switch but ensure labels remain consistent.
@@ -245,6 +258,10 @@ Status markers for tasks:
 [DONE] 5.4.c Optional file title/description display.
 [DONE] 5.4.d Render saved default-language images on the public slug page.
 [DONE] 5.4.e Show a distinct disabled-project state with a path back to HostingQr.
+[DONE] 5.5 Support separate Image Menu and Digital Menu public experiences.
+[DONE] 5.5.a Render translated Digital Menu sections, items, descriptions, and prices.
+[DONE] 5.5.b Show out-of-stock items as unavailable.
+[DONE] 5.5.c Hide timed sections outside recurring serving hours using the restaurant timezone.
 
 ### 6. Authentication & User Dashboard (Core Missing Product Layer)
 
@@ -256,6 +273,7 @@ Status markers for tasks:
 [DONE] 6.2.a List user hosted pages/projects
 [PARTIAL] 6.2.b Create new hosted page/project
 [DONE] 6.2.b.1 Keep new project in frontend draft state until explicit save.
+[DONE] 6.2.b.2 Require an Image Menu or Digital Menu choice before new-project settings.
 [DONE] 6.2.c Open a specific project from the project list
 [DONE] 6.2.d Edit project name
 [DONE] 6.2.e Edit one active slug per project
@@ -268,6 +286,7 @@ Status markers for tasks:
 [DONE] 6.2.f.3 Stage asset add/remove changes in the editor until explicit save.
 [DONE] 6.2.f.4 Warn before leaving the project editor with unsaved changes.
 [DONE] 6.2.f.5 Reorder saved images from the project editor.
+[DONE] 6.2.f.6 Add a mobile-first Digital Menu editor for sections, items, prices, translations, availability, ordering, and schedules.
 [DONE] 6.2.g Manage languages
 [DONE] 6.2.g.1 Add/remove language sections in the project editor.
 [DONE] 6.2.g.2 Upload images into a selected language section.
@@ -317,7 +336,7 @@ Status markers for tasks:
 
 ### 9. Billing, Pricing & Payments (Deferred Until Core Product Flow Is Stable)
 
-[PARTIAL] 9.1 Define plan structure before pricing amounts.
+[DONE] 9.1 Define plan structure and pricing amounts.
 [DONE] 9.1.a Tier names
 [PARTIAL] 9.1.b Feature limits (projects and languages enforced; storage, traffic, file types remain)
 [PARTIAL] 9.1.c Free tier and/or free trial policy
@@ -354,6 +373,7 @@ Status markers for tasks:
 [DONE] 10.1.c.1 Persist per-project public page background color.
 [DONE] 10.1.d Language variants
 [PARTIAL] 10.1.e Assets/files
+[DONE] 10.1.h Project menu type and structured Digital Menu categories, items, translations, and schedules.
 10.1.f Subscriptions/plans
 [DONE] 10.1.g Billing events
 [PARTIAL] 10.2 Build server-side CRUD endpoints/actions for dashboard operations.
@@ -367,6 +387,7 @@ Status markers for tasks:
 [DONE] 10.2.d.4 Update project status and delete a project
 [DONE] 10.2.d.5 Add/remove project language variants and upload assets per language.
 10.2.e Preview project before final save/publish
+[DONE] 10.2.f Add transactional Digital Menu read/save endpoints and a focused item-availability endpoint.
 [PARTIAL] 10.3 Add slug uniqueness checks and conflict handling.
 [DONE] 10.3.a Check custom slug availability
 [DONE] 10.3.b Generate a random unique slug
@@ -398,6 +419,7 @@ Status markers for tasks:
 12.2.a Rate limiting
 12.2.b Spam protection
 12.2.c File scanning policy (if needed)
+12.2.d Scope dependent-data deletion by project owner before removing project assets or slugs.
 12.3 Add tests for core flows.
 12.3.a Slug validation
 12.3.b Upload validation
@@ -462,8 +484,8 @@ Status markers for tasks:
 - [DECIDED] Image compression MVP skips files under 500 KB and stores WebP only when it saves at least 15%.
 - Should preview changes be a temporary draft view or a fully generated unpublished public page?
 - Which payment provider should be used (for example Stripe)?
-- What limits define each tier (storage, number of pages, traffic, languages)?
-- Will there be a free tier and/or free trial?
+- What storage, upload-count, and traffic limits should supplement the current one-project/three-language plan limits?
+- [DECIDED] Offer a two-week free trial through contact-based onboarding initially.
 - How should failed payments affect hosted pages (grace period, soft lock, unpublish)?
 - What happens on downgrade if usage exceeds the lower tier limits?
 

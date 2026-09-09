@@ -12,9 +12,9 @@ public static class PlanLimitCatalog
     public static PlanLimits ForTier(string tier) => tier switch
     {
         BillingTier.Admin => new PlanLimits(BillingTier.Admin, int.MaxValue, int.MaxValue),
-        BillingTier.Plus => new PlanLimits(BillingTier.Plus, 5, 7),
+        BillingTier.Plus => new PlanLimits(BillingTier.Plus, 1, 3),
         BillingTier.Standard => new PlanLimits(BillingTier.Standard, 1, 3),
-        BillingTier.Free => new PlanLimits(BillingTier.Free, 1, 1),
+        BillingTier.Free => new PlanLimits(BillingTier.Free, 1, 3),
         _ => new PlanLimits(BillingTier.None, 0, 0),
     };
 }

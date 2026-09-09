@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using HostingQr.Application.Abstractions;
 using HostingQr.Application.Assets;
 using HostingQr.Application.Projects;
+using HostingQr.Application.Menus;
 using HostingQr.Application.Slugs;
 
 namespace HostingQr.Application;
@@ -13,6 +14,8 @@ public static class DependencyInjection
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<ISlugService, SlugService>();
         services.AddScoped<IAssetService, AssetService>();
+        services.AddScoped<IDigitalMenuService, DigitalMenuService>();
+        services.AddSingleton(TimeProvider.System);
 
         return services;
     }

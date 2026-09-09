@@ -76,11 +76,11 @@
       case "admin":
         return "Admin";
       case "free":
-        return "Free";
+        return "14-day trial";
       case "standard":
-        return "Standard";
+        return "Image Menu";
       case "plus":
-        return "Plus";
+        return "Digital Menu";
       default:
         return "No active plan";
     }

@@ -172,6 +172,7 @@ import type { Entitlement, ProjectListItem } from "$lib/types/projects";
               >
                 <div class="min-w-0">
                   <p class="text-lg font-semibold text-stone-900">{project.name || "Untitled project"}</p>
+                  <span class="mt-2 inline-flex rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-600">{project.menuType === "digital" ? "Digital Menu" : "Image Menu"}</span>
                   <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-stone-500">
                     <span>hostingqr.com/{project.slug}</span>
                     <span class={`rounded-full border px-2.5 py-1 text-xs font-medium ${project.status === "active"

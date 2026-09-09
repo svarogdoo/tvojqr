@@ -1,6 +1,7 @@
 <script lang="ts">
   import { beforeNavigate, goto } from "$app/navigation";
   import ConfirmationModal from "$lib/components/ConfirmationModal.svelte";
+  import DigitalMenuEditor from "$lib/components/DigitalMenuEditor.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
   import ProjectQrBuilder from "$lib/components/ProjectQrBuilder.svelte";
   import { apiFetch } from "$lib/api";
@@ -9,7 +10,10 @@
   import { showSnackbar } from "$lib/stores/snackbar";
   import type {
     Asset,
+    CreateProjectRequest,
+    Entitlement,
     GeneratedSlugResponse,
+    MenuType,
     ProjectDetail,
     ProjectLanguageVariant,
     SlugAvailabilityResponse,
@@ -80,6 +84,9 @@
   let baselineLanguages: ProjectLanguageVariant[] = [];
   let draggedAssetOrderId = "";
   let addingLanguage = false;
+  let selectedMenuType: MenuType | null = null;
+  let currentTier: Entitlement["tier"] | null = null;
+  let hasDigitalMenuChanges = false;
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
@@ -110,7 +117,8 @@
 
     return JSON.stringify(current) !== JSON.stringify(baseline);
   })();
-  $: hasUnsavedChanges = hasFormChanges || hasAssetOrderChanges || hasLanguageChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0 || removedLanguageCodes.size > 0;
+  $: hasProjectChanges = hasFormChanges || hasAssetOrderChanges || hasLanguageChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0 || removedLanguageCodes.size > 0;
+  $: hasUnsavedChanges = hasProjectChanges || hasDigitalMenuChanges;
 
   $: slugCheckToneClasses = slugError
     ? "border-[rgba(165,93,79,0.18)] bg-[rgba(249,238,234,0.9)] text-[color:var(--error-strong)]"
@@ -150,6 +158,7 @@
       }
 
       project = (await response.json()) as ProjectDetail;
+      selectedMenuType = project.menuType;
       originalSlug = project.slug;
       savedAssetOrderIds = project.assets.map((asset) => asset.id);
       mixedAssetOrderIds = project.assets.map((asset) => savedOrderId(asset.id));
@@ -288,11 +297,16 @@
   }
 
   async function saveProject() {
+    if (hasDigitalMenuChanges) {
+      showSnackbar("Save your Digital Menu changes first.", "error");
+      return;
+    }
     if (!form.name.trim()) {
       showSnackbar("Project title is required.", "error");
       return;
     }
 
+    const wasDraft = isDraft;
     saving = true;
     slugError = "";
 
@@ -307,9 +321,20 @@
       let savedProject: ProjectDetail;
 
       if (isDraft) {
+        if (!selectedMenuType) {
+          showSnackbar("Choose a menu type first.", "error");
+          return;
+        }
+
+        const createPayload: CreateProjectRequest = {
+          ...payload,
+          defaultLanguageCode: form.defaultLanguageCode,
+          defaultLanguageDisplayName: form.defaultLanguageDisplayName,
+          menuType: selectedMenuType,
+        };
         response = await apiFetch(`/api/projects`, {
           method: "POST",
-          body: JSON.stringify(payload),
+          body: JSON.stringify(createPayload),
         });
 
         if (!response.ok) {
@@ -369,6 +394,8 @@
             await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
             return;
           }
+
+          savedProject = (await deleteLanguageResponse.json()) as ProjectDetail;
         }
       }
 
@@ -395,6 +422,8 @@
             await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
             return;
           }
+
+          savedProject = (await response.json()) as ProjectDetail;
         }
       }
 
@@ -477,6 +506,7 @@
       }
 
       project = savedProject;
+      selectedMenuType = savedProject.menuType;
       originalSlug = savedProject.slug;
       form = {
         name: savedProject.name,
@@ -496,7 +526,9 @@
       baselineLanguages = savedProject.languages.map((language) => ({ ...language }));
       isDraft = false;
       slugMessage = "";
-      await gotoWithoutUnsavedWarning("/dashboard");
+      if (wasDraft) {
+        await gotoWithoutUnsavedWarning(`/dashboard/projects/${savedProject.id}`);
+      }
       showSnackbar("Project settings saved.", "success");
     } catch {
       showSnackbar("Unable to save project settings right now.", "error");
@@ -663,7 +695,9 @@
       return;
     }
 
-    const confirmed = window.confirm(`Remove ${language.displayName} and its images?`);
+    const confirmed = window.confirm(selectedMenuType === "digital"
+      ? `Remove ${language.displayName}? All menu translations in this language will be permanently deleted.`
+      : `Remove ${language.displayName} and its images?`);
     if (!confirmed) {
       return;
     }
@@ -802,9 +836,18 @@
     isDraft = projectId === "new";
     await refreshSession();
     if (isDraft) {
+      try {
+        const entitlementResponse = await apiFetch("/api/billing/entitlement");
+        if (entitlementResponse.ok) {
+          currentTier = ((await entitlementResponse.json()) as Entitlement).tier;
+        }
+      } catch {
+        currentTier = null;
+      }
       loading = false;
       error = "";
       project = null;
+      selectedMenuType = null;
       form = {
         name: "",
         slug: "",
@@ -881,11 +924,41 @@
       <section class="rounded-[2rem] border border-[color:var(--error-soft)] bg-[color:var(--error-soft)] p-8 text-[color:var(--error-strong)] shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
         {error}
       </section>
+    {:else if isDraft && !selectedMenuType}
+      <section class="rounded-[2rem] border border-black/8 bg-white/96 p-6 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-sm font-medium uppercase tracking-[0.2em] text-stone-500">New project</p>
+          <h1 class="mt-3 text-3xl font-semibold tracking-tight text-stone-900 sm:text-5xl">What kind of menu do you want?</h1>
+          <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-stone-600">Choose how you want to manage and present this menu. This choice is fixed after the project is created.</p>
+        </div>
+
+        <div class="mx-auto mt-8 grid max-w-3xl gap-5 md:grid-cols-2">
+          <button type="button" on:click={() => selectedMenuType = "image"} class="group rounded-[1.75rem] border border-stone-200 bg-stone-50 p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-stone-300 hover:bg-white hover:shadow-lg">
+            <span class="inline-flex rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-700">Image Menu</span>
+            <h2 class="mt-5 text-2xl font-semibold tracking-tight text-stone-900">Use your existing design</h2>
+            <p class="mt-3 text-sm leading-7 text-stone-600">Upload finished menu images for each language. Replace the images whenever your menu changes.</p>
+            <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-stone-900">Choose Image Menu <span aria-hidden="true">→</span></span>
+          </button>
+
+          <button type="button" on:click={() => selectedMenuType = "digital"} disabled={currentTier === "standard"} class="group rounded-[1.75rem] border border-emerald-200 bg-emerald-50/70 p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
+            <span class="inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">Digital Menu</span>
+            <h2 class="mt-5 text-2xl font-semibold tracking-tight text-stone-900">Edit everything anytime</h2>
+            <p class="mt-3 text-sm leading-7 text-stone-600">Manage sections, dishes, prices, translations, stock, and serving times from any device.</p>
+            <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-800">Choose Digital Menu <span aria-hidden="true">→</span></span>
+          </button>
+        </div>
+        {#if currentTier === "standard"}
+          <p class="mx-auto mt-5 max-w-xl text-center text-sm text-stone-600">Digital Menu requires the Digital Menu plan. <a href="/pricing" class="font-semibold text-emerald-800 underline">View pricing</a></p>
+        {/if}
+      </section>
     {:else if project || isDraft}
       <section class="rounded-[2rem] border border-black/8 bg-white/96 p-6 shadow-[0_20px_50px_rgba(45,53,46,0.09)] sm:p-10">
           <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p class="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Project settings</p>
+              <div class="mb-2 flex flex-wrap items-center gap-2">
+                <p class="text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Project settings</p>
+                <span class="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-600">{selectedMenuType === "digital" ? "Digital Menu" : "Image Menu"}</span>
+              </div>
               <div class="mt-1 flex flex-wrap items-center gap-3">
                 <h1 class="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">{project?.name || form.name || "New project"}</h1>
                 {#if project?.slug}
@@ -973,7 +1046,7 @@
             </div>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Public page background</p>
-              <p class="mt-2 text-sm leading-7 text-stone-600">Choose the background color visitors see behind your uploaded images.</p>
+              <p class="mt-2 text-sm leading-7 text-stone-600">Choose the background color visitors see behind your menu.</p>
               <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <label class="flex h-14 w-full cursor-pointer items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 sm:w-auto">
                   <span class="text-sm font-medium text-stone-700">Color</span>
@@ -1000,7 +1073,7 @@
               <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Content languages</p>
-                  <p class="mt-2 text-sm leading-7 text-stone-600">Upload images per language, then drag them into the order visitors should see.</p>
+                  <p class="mt-2 text-sm leading-7 text-stone-600">{selectedMenuType === "digital" ? "Add the languages you use for section names, dishes, and descriptions." : "Upload images per language, then drag them into the order visitors should see."}</p>
                 </div>
                 <button type="button" class="btn-secondary text-sm" on:click={addLanguage} disabled={addingLanguage}>
                   {addingLanguage ? "Adding..." : "+ Add"}
@@ -1015,39 +1088,49 @@
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <div class="flex flex-wrap items-center gap-2">
-                          <select
-                            value={language.languageCode}
-                            on:change={(event) => updateLanguageSelection(language, (event.currentTarget as HTMLSelectElement).value)}
-                            class="min-w-56 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-900 outline-none transition-all focus:border-stone-400"
-                            aria-label={`Language for ${language.displayName}`}
-                          >
-                            {#each choices as option}
-                              <option value={option.code}>{option.flag} {option.name}</option>
-                            {/each}
-                            {#if !choices.some((option) => option.code === language.languageCode)}
-                              {@const currentMeta = languageMeta(language.languageCode)}
-                              <option value={currentMeta.code}>{currentMeta.flag} {currentMeta.name}</option>
-                            {/if}
-                          </select>
+                          {#if selectedMenuType === "digital" && !isDraft}
+                            <span class="min-w-56 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm font-medium text-stone-900">{languageMeta(language.languageCode).flag} {language.displayName}</span>
+                          {:else}
+                            <select
+                              value={language.languageCode}
+                              on:change={(event) => updateLanguageSelection(language, (event.currentTarget as HTMLSelectElement).value)}
+                              class="min-w-56 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-900 outline-none transition-all focus:border-stone-400"
+                              aria-label={`Language for ${language.displayName}`}
+                            >
+                              {#each choices as option}
+                                <option value={option.code}>{option.flag} {option.name}</option>
+                              {/each}
+                              {#if !choices.some((option) => option.code === language.languageCode)}
+                                {@const currentMeta = languageMeta(language.languageCode)}
+                                <option value={currentMeta.code}>{currentMeta.flag} {currentMeta.name}</option>
+                              {/if}
+                            </select>
+                          {/if}
                           <span class="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-medium uppercase text-stone-500">{language.languageCode}</span>
                           {#if language.isDefault}
                             <span class="rounded-full border border-[rgba(77,106,83,0.14)] bg-[rgba(236,245,238,0.7)] px-2.5 py-1 text-xs font-medium text-[color:var(--success-strong)]">Default</span>
                           {/if}
                         </div>
-                        <p class="mt-1 text-sm text-stone-500">Images in this section appear when visitors select this language.</p>
+                        <p class="mt-1 text-sm text-stone-500">{selectedMenuType === "digital" ? "Edit this translation from the digital menu below." : "Images in this section appear when visitors select this language."}</p>
                       </div>
                       <div class="flex flex-col gap-2 sm:flex-row">
                         {#if !language.isDefault && !isDraft}
                           <button type="button" class="btn-secondary text-sm" on:click={() => removeLanguage(language)}>Remove</button>
                         {/if}
-                        <label class="btn-secondary cursor-pointer text-center text-sm">
-                          <span>{uploading ? "Uploading..." : "Add images"}</span>
-                          <input type="file" accept="image/*" multiple class="hidden" on:change={(event) => uploadImages(event, language.languageCode)} disabled={uploading} />
-                        </label>
+                        {#if selectedMenuType === "image"}
+                          <label class="btn-secondary cursor-pointer text-center text-sm">
+                            <span>{uploading ? "Uploading..." : "Add images"}</span>
+                            <input type="file" accept="image/*" multiple class="hidden" on:change={(event) => uploadImages(event, language.languageCode)} disabled={uploading} />
+                          </label>
+                        {/if}
                       </div>
                     </div>
 
-                    {#if sectionAssets.length === 0}
+                    {#if selectedMenuType === "digital"}
+                      <div class="mt-4 rounded-2xl border border-dashed border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-600">
+                        Menu text for {language.displayName} is managed in the Digital Menu editor.
+                      </div>
+                    {:else if sectionAssets.length === 0}
                       <div class="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
                         No images uploaded for {language.displayName} yet.
                       </div>
@@ -1070,13 +1153,21 @@
               </div>
             </div>
 
+            {#if !isDraft && project?.menuType === "digital"}
+              <DigitalMenuEditor projectId={project.id} languages={languageSections} initialTimeZone={project.timeZone} bind:dirty={hasDigitalMenuChanges} />
+            {:else if isDraft && selectedMenuType === "digital"}
+              <div class="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/60 px-6 py-5 text-sm leading-7 text-stone-700 shadow-sm">
+                Save the project settings first. You can then add sections, dishes, translations, stock, and serving times.
+              </div>
+            {/if}
+
             <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />
 
             <div class="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Save settings</p>
                 <p class="mt-2 text-sm leading-7 text-stone-600">
-                  {hasUnsavedChanges ? "You have unsaved changes. Save before leaving this page." : "Your project settings are saved."}
+                   {hasDigitalMenuChanges ? "Save your Digital Menu changes in the menu editor first." : hasProjectChanges ? "You have unsaved project changes. Save before leaving this page." : "Your project settings are saved."}
                 </p>
               </div>
               <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -1096,11 +1187,11 @@
                 {/if}
                 <button
                   type="button"
-                  class={`w-full text-sm sm:w-auto ${hasUnsavedChanges ? "btn-primary shadow-[0_12px_28px_rgba(77,106,83,0.22)] ring-2 ring-[rgba(77,106,83,0.18)]" : "btn-secondary"}`}
+                  class={`w-full text-sm sm:w-auto ${hasProjectChanges && !hasDigitalMenuChanges ? "btn-primary shadow-[0_12px_28px_rgba(77,106,83,0.22)] ring-2 ring-[rgba(77,106,83,0.18)]" : "btn-secondary"}`}
                   on:click={saveProject}
-                  disabled={saving || deletingProject || !hasUnsavedChanges}
+                  disabled={saving || deletingProject || !hasProjectChanges || hasDigitalMenuChanges}
                 >
-                  {saving ? "Saving..." : hasUnsavedChanges ? "Save changes" : "Saved"}
+                  {saving ? "Saving..." : hasProjectChanges ? "Save project" : "Saved"}
                 </button>
               </div>
             </div>

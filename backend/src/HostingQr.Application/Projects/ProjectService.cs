@@ -48,7 +48,7 @@ public sealed class ProjectService : IProjectService
             .Select(project =>
             {
                 ProjectViewStats stats = GetStatsOrDefault(viewStats, project.Id);
-                return new ProjectListItem(project.Id, project.Name, project.Slug, project.Status, project.UpdatedAt, stats.TotalViews, stats.LastViewedAt);
+                return new ProjectListItem(project.Id, project.Name, project.Slug, project.Status, project.MenuType, project.UpdatedAt, stats.TotalViews, stats.LastViewedAt);
             })
             .ToArray();
     }
@@ -84,7 +84,13 @@ public sealed class ProjectService : IProjectService
             throw new InvalidOperationException($"Your {FormatTierName(limits.Tier)} plan includes up to {FormatLimit(limits.MaxProjects)} project{Pluralize(limits.MaxProjects)}.");
         }
 
-        Domain.Projects.ProjectWithSlug project = await _projectRepository.CreateAsync(userId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
+        string menuType = NormalizeMenuType(request.MenuType);
+        if (menuType == Domain.Projects.ProjectMenuType.Digital && limits.Tier is not Billing.BillingTier.Plus and not Billing.BillingTier.Admin and not Billing.BillingTier.Free)
+        {
+            throw new InvalidOperationException("Digital Menu requires the Digital Menu plan.");
+        }
+
+        Domain.Projects.ProjectWithSlug project = await _projectRepository.CreateAsync(userId, request.Name.Trim(), normalizedSlug, backgroundColor, menuType, cancellationToken);
         string defaultLanguageCode = NormalizeLanguageCode(request.DefaultLanguageCode);
         string defaultLanguageDisplayName = NormalizeLanguageDisplayName(request.DefaultLanguageDisplayName, defaultLanguageCode);
         await _languageVariantRepository.CreateAsync(project.Id, defaultLanguageCode, defaultLanguageDisplayName, true, 0, cancellationToken);
@@ -249,6 +255,8 @@ public sealed class ProjectService : IProjectService
             project.Slug,
             project.OwnerDisplayName,
             project.Status,
+            project.MenuType,
+            project.TimeZone,
             project.BackgroundColor,
             await GetLanguagesAsync(project.ProjectId, cancellationToken),
             project.Status == Domain.Projects.ProjectStatus.Active
@@ -264,6 +272,8 @@ public sealed class ProjectService : IProjectService
             project.Name,
             project.Slug,
             project.Status,
+            project.MenuType,
+            project.TimeZone,
             project.BackgroundColor,
             project.CreatedAt,
             project.UpdatedAt,
@@ -304,12 +314,23 @@ public sealed class ProjectService : IProjectService
         };
     }
 
+    private static string NormalizeMenuType(string menuType)
+    {
+        string normalized = menuType.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            Domain.Projects.ProjectMenuType.Image => Domain.Projects.ProjectMenuType.Image,
+            Domain.Projects.ProjectMenuType.Digital => Domain.Projects.ProjectMenuType.Digital,
+            _ => throw new ArgumentException("Menu type must be image or digital.", nameof(menuType)),
+        };
+    }
+
     private static string FormatTierName(string tier) => tier switch
     {
         Billing.BillingTier.Admin => "Admin",
-        Billing.BillingTier.Free => "Free",
-        Billing.BillingTier.Standard => "Standard",
-        Billing.BillingTier.Plus => "Plus",
+        Billing.BillingTier.Free => "14-day trial",
+        Billing.BillingTier.Standard => "Image Menu",
+        Billing.BillingTier.Plus => "Digital Menu",
         _ => "current",
     };
 

@@ -10,7 +10,7 @@ public interface IProjectRepository
 
     Task<PublicProject?> GetPublicBySlugAsync(string slug, CancellationToken cancellationToken = default);
 
-    Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, CancellationToken cancellationToken = default);
+    Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, string menuType, CancellationToken cancellationToken = default);
 
     Task<ProjectWithSlug?> UpdateAsync(Guid ownerUserId, Guid projectId, string name, string slug, string backgroundColor, CancellationToken cancellationToken = default);
 
