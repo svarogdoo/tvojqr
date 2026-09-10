@@ -22,3 +22,4 @@ Approved by the user for pricing, project-type selection, and the Digital Menu f
 - Pricing, project type selection, Digital Menu editing, translations, stock controls, timed sections, and public rendering are implemented.
 - Verification completed on 2026-09-09.
 - User approved a pricing-card visual refinement on 2026-09-09; implementation and reverification are complete.
+- User approved Digital Menu editor tabs and a stale-backend restart on 2026-09-10.

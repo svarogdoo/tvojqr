@@ -22,6 +22,7 @@ Restaurants should immediately understand whether they want to host their existi
 - Use language tabs and visible missing-translation cues.
 - Pricing refinement: center each product name with a distinct icon, remove the popularity tag, link the Image Menu example, show a Digital Menu example placeholder, and keep the trial prompt compact and pastel.
 - Pricing refinement: present both paid products with equal monochrome white-card styling and call out the included free redesign/setup and translation service.
+- Digital Menu project pages use separate General Settings and Menu Editor tabs so mobile owners only see the controls relevant to the current task.
 
 ## Risks Or Tradeoffs
 

@@ -50,7 +50,16 @@
     try {
       const response = await apiFetch(`/api/projects/${projectId}/digital-menu`);
       if (!response.ok) {
-        throw new Error(`Digital menu request failed with status ${response.status}`);
+        let message = response.status === 404
+          ? "The Digital Menu service or project could not be found. Refresh after restarting the backend."
+          : `Digital Menu could not be loaded (${response.status}).`;
+        try {
+          const body = (await response.json()) as { message?: string };
+          message = body.message ?? message;
+        } catch {
+          // Empty API responses still get the status-specific message above.
+        }
+        throw new Error(message);
       }
 
       menu = (await response.json()) as DigitalMenu;
@@ -58,8 +67,8 @@
       savedItemIds = new Set(menu.categories.flatMap((category) => category.items.map((item) => item.id)));
       expandedCategoryId = menu.categories[0]?.id ?? "";
       loadedSuccessfully = true;
-    } catch {
-      error = "Unable to load the digital menu right now.";
+    } catch (caught) {
+      error = caught instanceof Error ? caught.message : "Unable to load the digital menu right now.";
     } finally {
       loading = false;
     }

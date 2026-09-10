@@ -27,3 +27,5 @@
 - PostgreSQL migration: applied; `menu_type`, `time_zone`, and five Digital Menu tables verified.
 - Pricing refinement frontend check and production build: passed.
 - Monochrome card and included-service refinement frontend check and production build: passed.
+- Digital Menu tabs preserve the mounted editor and its dirty state while switching views.
+- The stale local backend was restarted; the protected Digital Menu endpoint now returns `401` without authentication instead of the previous route-level `404`.

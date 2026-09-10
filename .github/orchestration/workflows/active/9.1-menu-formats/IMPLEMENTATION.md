@@ -34,3 +34,4 @@
 - Digital Menu edits are transactionally saved; availability has a focused immediate endpoint.
 - Pricing follow-up centered both product identities with icons, removed the popularity badge, added the live Image Menu example and Digital Menu placeholder, matched the final QR benefit, and softened the trial panel.
 - Pricing follow-up equalized both cards with monochrome styling and added free redesign/setup plus translations messaging.
+- Digital Menu follow-up split project controls into persistent General Settings and Menu Editor tabs and improved API load diagnostics.

@@ -87,6 +87,7 @@
   let selectedMenuType: MenuType | null = null;
   let currentTier: Entitlement["tier"] | null = null;
   let hasDigitalMenuChanges = false;
+  let activeEditorTab: "general" | "menu" = "general";
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
@@ -993,7 +994,33 @@
             {/if}
           </div>
 
-          <div class="grid gap-5">
+          {#if selectedMenuType === "digital"}
+            <div class="mb-6 rounded-2xl border border-stone-200 bg-stone-100 p-1" role="tablist" aria-label="Digital Menu project sections">
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeEditorTab === "general"}
+                  on:click={() => activeEditorTab = "general"}
+                  class={`rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${activeEditorTab === "general" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-800"}`}
+                >
+                  General Settings
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeEditorTab === "menu"}
+                  on:click={() => activeEditorTab = "menu"}
+                  disabled={isDraft}
+                  class={`rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${activeEditorTab === "menu" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-800"} disabled:cursor-not-allowed disabled:opacity-45`}
+                >
+                  Menu Editor
+                </button>
+              </div>
+            </div>
+          {/if}
+
+          <div class="grid gap-5" class:hidden={selectedMenuType === "digital" && activeEditorTab === "menu"}>
             <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Project name</p>
               <input
@@ -1153,14 +1180,6 @@
               </div>
             </div>
 
-            {#if !isDraft && project?.menuType === "digital"}
-              <DigitalMenuEditor projectId={project.id} languages={languageSections} initialTimeZone={project.timeZone} bind:dirty={hasDigitalMenuChanges} />
-            {:else if isDraft && selectedMenuType === "digital"}
-              <div class="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/60 px-6 py-5 text-sm leading-7 text-stone-700 shadow-sm">
-                Save the project settings first. You can then add sections, dishes, translations, stock, and serving times.
-              </div>
-            {/if}
-
             <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />
 
             <div class="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -1215,6 +1234,12 @@
             </div>
             {/if}
           </div>
+
+          {#if !isDraft && project?.menuType === "digital"}
+            <div class:hidden={activeEditorTab !== "menu"} role="tabpanel" aria-label="Menu Editor">
+              <DigitalMenuEditor projectId={project.id} languages={languageSections} initialTimeZone={project.timeZone} bind:dirty={hasDigitalMenuChanges} />
+            </div>
+          {/if}
       </section>
     {/if}
   </div>

@@ -287,6 +287,7 @@ Status markers for tasks:
 [DONE] 6.2.f.4 Warn before leaving the project editor with unsaved changes.
 [DONE] 6.2.f.5 Reorder saved images from the project editor.
 [DONE] 6.2.f.6 Add a mobile-first Digital Menu editor for sections, items, prices, translations, availability, ordering, and schedules.
+[DONE] 6.2.f.7 Separate Digital Menu general settings and content editing into focused mobile-friendly tabs.
 [DONE] 6.2.g Manage languages
 [DONE] 6.2.g.1 Add/remove language sections in the project editor.
 [DONE] 6.2.g.2 Upload images into a selected language section.
