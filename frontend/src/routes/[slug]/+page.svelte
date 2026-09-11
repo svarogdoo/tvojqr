@@ -305,7 +305,7 @@
         {/if}
 
         {#if visibleDigitalCategories.length > 1}
-          <nav class="sticky left-1/2 top-0 z-10 w-screen -translate-x-1/2 overflow-x-auto border-b border-black/6 bg-white/94 px-4 py-3 shadow-[0_10px_24px_rgba(45,53,46,0.12)] backdrop-blur" aria-label="Menu sections">
+          <nav class="sticky top-0 z-10 w-screen overflow-x-auto border-b border-black/6 bg-white/94 px-4 py-3 shadow-[0_10px_24px_rgba(45,53,46,0.12)] backdrop-blur" style="margin-left: calc(50% - 50vw);" aria-label="Menu sections">
             <div class="mx-auto flex min-w-max max-w-5xl gap-2">
               {#each visibleDigitalCategories as category}
                 <a href={`#section-${category.id}`} class="rounded-full px-4 py-2 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-100">{translatedCategoryName(category, selectedLanguageCode)}</a>

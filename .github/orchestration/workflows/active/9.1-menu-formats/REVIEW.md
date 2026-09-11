@@ -55,3 +55,4 @@
 - Tightened public section cards, headings, inter-section gaps, item rows, and description spacing for a more compact menu scan.
 - Replaced section bubbles with flat content, removed duplicate horizontal padding, and changed category navigation to a full-width strip with a bottom shadow.
 - Restored all sections as a stacked page and kept the category strip as sticky, horizontally scrollable anchor navigation directly below the cover.
+- Fixed the sticky navigation's horizontal offset by replacing transform positioning with a viewport-margin calculation.
