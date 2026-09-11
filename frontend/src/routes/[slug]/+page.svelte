@@ -258,7 +258,7 @@
       {/if}
       {#if project.menuType === "digital"}
         {#if project.coverImage}
-          <header class="relative left-1/2 -mt-4 flex h-64 w-screen -translate-x-1/2 items-center justify-center overflow-hidden px-6 text-center shadow-[0_24px_60px_rgba(45,53,46,0.14)] sm:h-96">
+          <header class="relative left-1/2 -mt-4 flex h-40 w-screen -translate-x-1/2 items-center justify-center overflow-hidden px-6 text-center shadow-[0_16px_36px_rgba(45,53,46,0.12)] sm:h-56">
             <img src={toApiUrl(project.coverImage.url)} alt={`${project.name} restaurant cover`} class="absolute inset-0 h-full w-full object-cover" />
             <div class="absolute inset-0 bg-black/38"></div>
             {#if availableLanguages.length > 1 && selectedLanguage}
@@ -296,7 +296,7 @@
                 </div>
               </div>
             {/if}
-            <h1 class="relative max-w-3xl text-3xl font-semibold tracking-tight text-white drop-shadow-lg sm:text-5xl">{project.name}</h1>
+            <h1 class="relative max-w-3xl text-2xl font-semibold tracking-tight text-white drop-shadow-lg sm:text-3xl">{project.name}</h1>
           </header>
         {:else}
           <header class="rounded-[2rem] border border-black/6 bg-white/88 px-5 py-7 text-center shadow-[0_20px_50px_rgba(45,53,46,0.08)] backdrop-blur sm:px-8 sm:py-10">

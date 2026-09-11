@@ -51,3 +51,4 @@
 - Refined the cover layout so the photo fills the complete header and the restaurant name sits directly over the image.
 - Expanded the cover to the viewport edges and top edge, with the language selector overlaid on the photo while menu content remains constrained.
 - Removed the cover's bottom corner radius so the full-width image has straight edges on every side.
+- Reduced the full-width cover and restaurant title to a compact decorative banner so menu content remains visually primary.
