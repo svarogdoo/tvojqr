@@ -54,4 +54,4 @@
 - Reduced the full-width cover and restaurant title to a compact decorative banner so menu content remains visually primary.
 - Tightened public section cards, headings, inter-section gaps, item rows, and description spacing for a more compact menu scan.
 - Replaced section bubbles with flat content, removed duplicate horizontal padding, and changed category navigation to a full-width strip with a bottom shadow.
-- Made the category strip an actual filter so its active state and displayed products remain consistent.
+- Restored all sections as a stacked page and kept the category strip as sticky, horizontally scrollable anchor navigation directly below the cover.
