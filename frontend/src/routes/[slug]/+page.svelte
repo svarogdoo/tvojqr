@@ -53,9 +53,14 @@
   let selectedLanguageCode = "";
   let languageMenuOpen = false;
   let digitalMenu: DigitalMenu | null = null;
+  let selectedCategoryId = "";
   $: visibleDigitalCategories = (digitalMenu?.categories ?? [])
     .map((category) => ({ ...category, items: category.items.filter((item) => !item.isOutOfStock) }))
     .filter((category) => category.items.length > 0);
+  $: if (visibleDigitalCategories.length > 0 && !visibleDigitalCategories.some((category) => category.id === selectedCategoryId)) {
+    selectedCategoryId = visibleDigitalCategories[0].id;
+  }
+  $: selectedDigitalCategories = visibleDigitalCategories.filter((category) => category.id === selectedCategoryId);
 
   $: availableLanguages = (project?.languages ?? [])
     .filter((language) => project?.menuType === "digital"
@@ -305,10 +310,10 @@
         {/if}
 
         {#if visibleDigitalCategories.length > 1}
-          <nav class="sticky top-2 z-10 -mx-1 mt-4 overflow-x-auto rounded-2xl border border-black/6 bg-white/90 p-2 shadow-[0_12px_30px_rgba(45,53,46,0.1)] backdrop-blur" aria-label="Menu sections">
-            <div class="flex min-w-max gap-2">
+          <nav class="sticky left-1/2 top-0 z-10 mt-4 w-screen -translate-x-1/2 overflow-x-auto border-b border-black/6 bg-white/94 px-4 py-3 shadow-[0_10px_24px_rgba(45,53,46,0.12)] backdrop-blur" aria-label="Menu sections">
+            <div class="mx-auto flex min-w-max max-w-5xl gap-2">
               {#each visibleDigitalCategories as category}
-                <a href={`#section-${category.id}`} class="rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-700">{translatedCategoryName(category, selectedLanguageCode)}</a>
+                <button type="button" on:click={() => selectedCategoryId = category.id} class={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${selectedCategoryId === category.id ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-100"}`}>{translatedCategoryName(category, selectedLanguageCode)}</button>
               {/each}
             </div>
           </nav>
@@ -320,8 +325,8 @@
               <p class="text-base text-stone-600">This menu is being prepared. Please check back soon.</p>
             </div>
           {:else}
-            {#each visibleDigitalCategories as category}
-              <article id={`section-${category.id}`} class="scroll-mt-24 rounded-[1.5rem] border border-black/6 bg-white/92 px-4 py-4 shadow-[0_14px_32px_rgba(45,53,46,0.06)] sm:px-6 sm:py-5">
+            {#each selectedDigitalCategories as category}
+              <article id={`section-${category.id}`} class="scroll-mt-20 py-3 sm:py-4">
                 <div class="border-b border-stone-200 pb-3">
                   <h2 class="text-xl font-semibold tracking-tight text-stone-950 sm:text-2xl">{translatedCategoryName(category, selectedLanguageCode)}</h2>
                 </div>
