@@ -52,3 +52,4 @@
 - Expanded the cover to the viewport edges and top edge, with the language selector overlaid on the photo while menu content remains constrained.
 - Removed the cover's bottom corner radius so the full-width image has straight edges on every side.
 - Reduced the full-width cover and restaurant title to a compact decorative banner so menu content remains visually primary.
+- Tightened public section cards, headings, inter-section gaps, item rows, and description spacing for a more compact menu scan.

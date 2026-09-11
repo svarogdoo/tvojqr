@@ -314,28 +314,28 @@
           </nav>
         {/if}
 
-        <section class="mt-5 space-y-5">
+        <section class="mt-4 space-y-3">
           {#if visibleDigitalCategories.length === 0}
             <div class="rounded-[2rem] border border-black/6 bg-white/90 p-10 text-center shadow-[0_24px_60px_rgba(45,53,46,0.08)]">
               <p class="text-base text-stone-600">This menu is being prepared. Please check back soon.</p>
             </div>
           {:else}
             {#each visibleDigitalCategories as category}
-              <article id={`section-${category.id}`} class="scroll-mt-24 rounded-[2rem] border border-black/6 bg-white/92 p-5 shadow-[0_18px_45px_rgba(45,53,46,0.07)] sm:p-8">
-                <div class="border-b border-stone-200 pb-4">
-                  <h2 class="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">{translatedCategoryName(category, selectedLanguageCode)}</h2>
+              <article id={`section-${category.id}`} class="scroll-mt-24 rounded-[1.5rem] border border-black/6 bg-white/92 px-4 py-4 shadow-[0_14px_32px_rgba(45,53,46,0.06)] sm:px-6 sm:py-5">
+                <div class="border-b border-stone-200 pb-3">
+                  <h2 class="text-xl font-semibold tracking-tight text-stone-950 sm:text-2xl">{translatedCategoryName(category, selectedLanguageCode)}</h2>
                 </div>
                 <div class="divide-y divide-stone-100">
                   {#each category.items as item}
                     {@const translation = translatedItem(item, selectedLanguageCode)}
-                    <div class="py-5">
-                      <div class="flex items-start justify-between gap-5">
+                    <div class="py-3.5">
+                      <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
                           <div class="flex flex-wrap items-center gap-2">
                             <h3 class="text-base font-semibold text-stone-900 sm:text-lg">{translation.name || "Untitled item"}</h3>
                           </div>
                           {#if translation.description}
-                            <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{translation.description}</p>
+                            <p class="mt-1 max-w-2xl text-sm leading-5 text-stone-600">{translation.description}</p>
                           {/if}
                         </div>
                         {#if item.priceText}
