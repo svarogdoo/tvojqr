@@ -12,6 +12,7 @@ Replace the current pricing tiers with Image Menu and Digital Menu, add a two-we
 - Existing projects continue as Image Menus.
 - Digital Menus support translated categories and items, prices, availability, ordering, and scheduled sections.
 - Owners can make common changes quickly from a phone.
+- Digital Menu owners can upload a restaurant cover image for a more distinctive public header.
 
 ## Constraints
 
@@ -19,6 +20,7 @@ Replace the current pricing tiers with Image Menu and Digital Menu, add a two-we
 - Keep internal billing IDs `standard` and `plus` for this pass.
 - Keep the current visual language and make the smallest maintainable structural changes.
 - Initial translations remain manually entered rather than machine generated.
+- The cover image is optional, language-independent, and must reuse the existing image storage pipeline.
 
 ## Open Questions
 

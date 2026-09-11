@@ -30,6 +30,7 @@
     backgroundColor: string;
     languages: PublicLanguage[];
     assets: PublicAsset[];
+    coverImage: PublicAsset | null;
   };
 
   const languageMeta: Record<string, { flag: string; label: string }> = {
@@ -52,11 +53,18 @@
   let selectedLanguageCode = "";
   let languageMenuOpen = false;
   let digitalMenu: DigitalMenu | null = null;
+  $: visibleDigitalCategories = (digitalMenu?.categories ?? [])
+    .map((category) => ({ ...category, items: category.items.filter((item) => !item.isOutOfStock) }))
+    .filter((category) => category.items.length > 0);
 
   $: availableLanguages = (project?.languages ?? [])
-    .filter((language) => project?.menuType === "digital" ||
-      (project?.assets ?? []).some((asset) => asset.languageCode === language.languageCode))
+    .filter((language) => project?.menuType === "digital"
+      ? hasDigitalContentForLanguage(language.languageCode, digitalMenu?.categories ?? [])
+      : (project?.assets ?? []).some((asset) => asset.languageCode === language.languageCode))
     .sort((a, b) => a.sortOrder - b.sortOrder);
+  $: if (availableLanguages.length > 0 && !availableLanguages.some((language) => language.languageCode === selectedLanguageCode)) {
+    selectedLanguageCode = availableLanguages.find((language) => language.isDefault)?.languageCode ?? availableLanguages[0].languageCode;
+  }
   $: selectedLanguage =
     availableLanguages.find(
       (language) => language.languageCode === selectedLanguageCode,
@@ -76,21 +84,45 @@
     );
   }
 
-  function translatedCategoryName(category: DigitalMenuCategory) {
-    return translatedValue(category.translations, "name");
+  function hasDigitalContentForLanguage(languageCode: string, categories: DigitalMenuCategory[]) {
+    return categories.some((category) =>
+      category.translations.some((translation) => translation.languageCode === languageCode && translation.name.trim()) ||
+      category.items.some((item) => item.translations.some((translation) =>
+        translation.languageCode === languageCode && translation.name.trim())));
   }
 
-  function translatedItem(item: DigitalMenuItem) {
-    const selected = item.translations.find((translation) => translation.languageCode === selectedLanguageCode);
-    const fallbackCode = project?.languages.find((language) => language.isDefault)?.languageCode;
-    return selected ?? item.translations.find((translation) => translation.languageCode === fallbackCode) ?? item.translations[0] ?? { name: "", description: "" };
+  function translatedCategoryName(category: DigitalMenuCategory, languageCode: string) {
+    return translatedValue(category.translations, "name", languageCode);
   }
 
-  function translatedValue(translations: Array<{ languageCode: string; name: string }>, field: "name") {
+  function translatedItem(item: DigitalMenuItem, languageCode: string) {
+    const selected = item.translations.find((translation) => translation.languageCode === languageCode);
     const fallbackCode = project?.languages.find((language) => language.isDefault)?.languageCode;
-    const selected = translations.find((translation) => translation.languageCode === selectedLanguageCode && translation[field].trim());
+    const fallback = item.translations.find((translation) => translation.languageCode === fallbackCode) ?? item.translations[0];
+    return {
+      name: selected?.name.trim() || fallback?.name || "",
+      description: selected?.description.trim() || fallback?.description || "",
+    };
+  }
+
+  function translatedValue(translations: Array<{ languageCode: string; name: string }>, field: "name", languageCode: string) {
+    const fallbackCode = project?.languages.find((language) => language.isDefault)?.languageCode;
+    const selected = translations.find((translation) => translation.languageCode === languageCode && translation[field].trim());
     const fallback = translations.find((translation) => translation.languageCode === fallbackCode && translation[field].trim());
     return selected?.[field] ?? fallback?.[field] ?? translations.find((translation) => translation[field].trim())?.[field] ?? "Untitled";
+  }
+
+  function formatPrice(priceText: string, languageCode: string) {
+    const trimmed = priceText.trim();
+    const normalized = trimmed.replace(",", ".");
+    if (!/^\d+(?:\.\d{1,2})?$/.test(normalized) || !digitalMenu?.currencyCode) {
+      return trimmed;
+    }
+
+    return new Intl.NumberFormat(languageCode || "en", {
+      style: "currency",
+      currency: digitalMenu.currencyCode,
+    }).format(Number(normalized));
   }
 
   onMount(async () => {
@@ -225,54 +257,60 @@
         </div>
       {/if}
       {#if project.menuType === "digital"}
-        <header class="rounded-[2rem] border border-black/6 bg-white/88 px-5 py-7 text-center shadow-[0_20px_50px_rgba(45,53,46,0.08)] backdrop-blur sm:px-8 sm:py-10">
-          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Digital menu</p>
-          <h1 class="mt-3 text-3xl font-semibold tracking-tight text-stone-950 sm:text-5xl">{project.name}</h1>
-          {#if project.ownerDisplayName}
-            <p class="mt-3 text-sm text-stone-500">{project.ownerDisplayName}</p>
-          {/if}
-        </header>
+        {#if project.coverImage}
+          <header class="relative mb-12 sm:mb-16">
+            <div class="relative h-52 overflow-hidden rounded-[2rem] border border-black/6 shadow-[0_24px_60px_rgba(45,53,46,0.14)] sm:h-80 sm:rounded-[2.5rem]">
+              <img src={toApiUrl(project.coverImage.url)} alt={`${project.name} restaurant cover`} class="h-full w-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/45"></div>
+            </div>
+            <div class="absolute inset-x-4 bottom-0 flex translate-y-1/2 justify-center sm:inset-x-10">
+              <div class="max-w-3xl rounded-[1.5rem] border border-black/6 bg-white/94 px-6 py-4 text-center shadow-[0_18px_45px_rgba(45,53,46,0.16)] backdrop-blur-md sm:rounded-[2rem] sm:px-10 sm:py-6">
+                <h1 class="text-2xl font-semibold tracking-tight text-stone-950 sm:text-4xl">{project.name}</h1>
+              </div>
+            </div>
+          </header>
+        {:else}
+          <header class="rounded-[2rem] border border-black/6 bg-white/88 px-5 py-7 text-center shadow-[0_20px_50px_rgba(45,53,46,0.08)] backdrop-blur sm:px-8 sm:py-10">
+            <h1 class="text-3xl font-semibold tracking-tight text-stone-950 sm:text-5xl">{project.name}</h1>
+          </header>
+        {/if}
 
-        {#if digitalMenu && digitalMenu.categories.length > 1}
+        {#if visibleDigitalCategories.length > 1}
           <nav class="sticky top-2 z-10 -mx-1 mt-4 overflow-x-auto rounded-2xl border border-black/6 bg-white/90 p-2 shadow-[0_12px_30px_rgba(45,53,46,0.1)] backdrop-blur" aria-label="Menu sections">
             <div class="flex min-w-max gap-2">
-              {#each digitalMenu.categories as category}
-                <a href={`#section-${category.id}`} class="rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-700">{translatedCategoryName(category)}</a>
+              {#each visibleDigitalCategories as category}
+                <a href={`#section-${category.id}`} class="rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-700">{translatedCategoryName(category, selectedLanguageCode)}</a>
               {/each}
             </div>
           </nav>
         {/if}
 
         <section class="mt-5 space-y-5">
-          {#if !digitalMenu || digitalMenu.categories.length === 0}
+          {#if visibleDigitalCategories.length === 0}
             <div class="rounded-[2rem] border border-black/6 bg-white/90 p-10 text-center shadow-[0_24px_60px_rgba(45,53,46,0.08)]">
               <p class="text-base text-stone-600">This menu is being prepared. Please check back soon.</p>
             </div>
           {:else}
-            {#each digitalMenu.categories as category}
+            {#each visibleDigitalCategories as category}
               <article id={`section-${category.id}`} class="scroll-mt-24 rounded-[2rem] border border-black/6 bg-white/92 p-5 shadow-[0_18px_45px_rgba(45,53,46,0.07)] sm:p-8">
-                <div class="flex items-end justify-between gap-4 border-b border-stone-200 pb-4">
-                  <h2 class="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">{translatedCategoryName(category)}</h2>
-                  <span class="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">{category.items.length} items</span>
+                <div class="border-b border-stone-200 pb-4">
+                  <h2 class="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">{translatedCategoryName(category, selectedLanguageCode)}</h2>
                 </div>
                 <div class="divide-y divide-stone-100">
                   {#each category.items as item}
-                    {@const translation = translatedItem(item)}
-                    <div class={`py-5 ${item.isOutOfStock ? "opacity-55" : ""}`}>
+                    {@const translation = translatedItem(item, selectedLanguageCode)}
+                    <div class="py-5">
                       <div class="flex items-start justify-between gap-5">
                         <div class="min-w-0">
                           <div class="flex flex-wrap items-center gap-2">
                             <h3 class="text-base font-semibold text-stone-900 sm:text-lg">{translation.name || "Untitled item"}</h3>
-                            {#if item.isOutOfStock}
-                              <span class="rounded-full bg-amber-100 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-amber-900">Out of stock</span>
-                            {/if}
                           </div>
                           {#if translation.description}
                             <p class="mt-2 max-w-2xl text-sm leading-6 text-stone-600">{translation.description}</p>
                           {/if}
                         </div>
                         {#if item.priceText}
-                          <span class="shrink-0 text-base font-semibold text-stone-900">{item.priceText}</span>
+                          <span class="shrink-0 text-base font-semibold text-stone-900">{formatPrice(item.priceText, selectedLanguageCode)}</span>
                         {/if}
                       </div>
                     </div>

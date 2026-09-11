@@ -2,6 +2,7 @@
   import { beforeNavigate, goto } from "$app/navigation";
   import ConfirmationModal from "$lib/components/ConfirmationModal.svelte";
   import DigitalMenuEditor from "$lib/components/DigitalMenuEditor.svelte";
+  import MenuLanguageToolbar from "$lib/components/MenuLanguageToolbar.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
   import ProjectQrBuilder from "$lib/components/ProjectQrBuilder.svelte";
   import { apiFetch } from "$lib/api";
@@ -88,6 +89,11 @@
   let currentTier: Entitlement["tier"] | null = null;
   let hasDigitalMenuChanges = false;
   let activeEditorTab: "general" | "menu" = "general";
+  let activeImageLanguageCode = "en";
+  let removingLanguageCode = "";
+  let changingDefaultLanguageCode = "";
+  let uploadingCover = false;
+  let removingCover = false;
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
@@ -118,6 +124,7 @@
 
     return JSON.stringify(current) !== JSON.stringify(baseline);
   })();
+  $: hasImageMenuChanges = hasAssetOrderChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0;
   $: hasProjectChanges = hasFormChanges || hasAssetOrderChanges || hasLanguageChanges || draftAssets.length > 0 || removedSavedAssetIds.size > 0 || removedLanguageCodes.size > 0;
   $: hasUnsavedChanges = hasProjectChanges || hasDigitalMenuChanges;
 
@@ -160,6 +167,7 @@
 
       project = (await response.json()) as ProjectDetail;
       selectedMenuType = project.menuType;
+      activeImageLanguageCode = project.languages.find((language) => language.isDefault)?.languageCode ?? project.languages[0]?.languageCode ?? "en";
       originalSlug = project.slug;
       savedAssetOrderIds = project.assets.map((asset) => asset.id);
       mixedAssetOrderIds = project.assets.map((asset) => savedOrderId(asset.id));
@@ -538,6 +546,61 @@
     }
   }
 
+  async function uploadCoverImage(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !project || project.menuType !== "digital") {
+      input.value = "";
+      return;
+    }
+
+    uploadingCover = true;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await apiFetch(`/api/projects/${project.id}/cover-image`, {
+        method: "POST",
+        body: formData,
+        headers: {},
+      });
+      if (!response.ok) {
+        const body = (await response.json()) as { message?: string };
+        showSnackbar(body.message ?? "Unable to upload the cover image.", "error");
+        return;
+      }
+
+      project = { ...project, coverImage: (await response.json()) as Asset };
+      showSnackbar("Cover image updated.", "success");
+    } catch {
+      showSnackbar("Unable to upload the cover image.", "error");
+    } finally {
+      uploadingCover = false;
+      input.value = "";
+    }
+  }
+
+  async function removeCoverImage() {
+    if (!project?.coverImage || removingCover) {
+      return;
+    }
+
+    removingCover = true;
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}/cover-image`, { method: "DELETE" });
+      if (!response.ok) {
+        showSnackbar("Unable to remove the cover image.", "error");
+        return;
+      }
+
+      project = { ...project, coverImage: null };
+      showSnackbar("Cover image removed.", "success");
+    } catch {
+      showSnackbar("Unable to remove the cover image.", "error");
+    } finally {
+      removingCover = false;
+    }
+  }
+
   async function updateProjectStatus(status: UpdateProjectStatusRequest["status"]) {
     if (!project || isDraft) {
       return;
@@ -654,12 +717,21 @@
     resetMessages();
   }
 
-  async function addLanguage() {
+  async function addLanguage(languageCode: string) {
     if (!project) {
       return;
     }
 
-    const option = getFirstAvailableLanguageOption();
+    if (addingLanguage || removingLanguageCode || changingDefaultLanguageCode) {
+      return;
+    }
+
+    if (selectedMenuType === "image" && hasImageMenuChanges) {
+      showSnackbar("Save your image changes before adding another language.", "error");
+      return;
+    }
+
+    const option = availableLanguageOptions.find((candidate) => candidate.code === languageCode);
     if (!option) {
       showSnackbar("No more languages are available to add.", "error");
       return;
@@ -683,6 +755,7 @@
       mixedAssetOrderIds = project.assets.map((asset) => savedOrderId(asset.id));
       baselineSavedAssetOrderIds = [...savedAssetOrderIds];
       baselineLanguages = project.languages.map((language) => ({ ...language }));
+      activeImageLanguageCode = option.code;
       showSnackbar("Language added.", "success");
     } catch {
       showSnackbar("Unable to add language.", "error");
@@ -691,8 +764,18 @@
     }
   }
 
-  function removeLanguage(language: ProjectLanguageVariant) {
+  async function removeLanguage(language: ProjectLanguageVariant) {
     if (!project || language.isDefault) {
+      return;
+    }
+
+    if (addingLanguage || removingLanguageCode || changingDefaultLanguageCode) {
+      return;
+    }
+
+    const hasPendingImageChanges = draftAssets.length > 0 || removedSavedAssetIds.size > 0 || hasAssetOrderChanges;
+    if ((selectedMenuType === "digital" && hasDigitalMenuChanges) || (selectedMenuType === "image" && hasPendingImageChanges)) {
+      showSnackbar("Save your menu changes before removing a language.", "error");
       return;
     }
 
@@ -703,8 +786,74 @@
       return;
     }
 
-    removedLanguageCodes = new Set([...removedLanguageCodes, language.languageCode]);
-    showSnackbar("Language marked for removal. Save to apply changes.", "success");
+    removingLanguageCode = language.languageCode;
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}/languages/${encodeURIComponent(language.languageCode)}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const body = (await response.json()) as { message?: string };
+        showSnackbar(body.message ?? "Unable to remove language.", "error");
+        return;
+      }
+
+      project = (await response.json()) as ProjectDetail;
+      savedAssetOrderIds = project.assets.map((asset) => asset.id);
+      mixedAssetOrderIds = project.assets.map((asset) => savedOrderId(asset.id));
+      baselineSavedAssetOrderIds = [...savedAssetOrderIds];
+      baselineLanguages = project.languages.map((item) => ({ ...item }));
+      if (activeImageLanguageCode === language.languageCode) {
+        activeImageLanguageCode = project.languages.find((item) => item.isDefault)?.languageCode ?? project.languages[0]?.languageCode ?? "en";
+      }
+      showSnackbar("Language removed.", "success");
+    } catch {
+      showSnackbar("Unable to remove language.", "error");
+    } finally {
+      removingLanguageCode = "";
+    }
+  }
+
+  async function makeDefaultLanguage(language: ProjectLanguageVariant) {
+    if (!project || language.isDefault) {
+      return;
+    }
+
+    if (addingLanguage || removingLanguageCode || changingDefaultLanguageCode) {
+      return;
+    }
+
+    const hasPendingImageChanges = draftAssets.length > 0 || removedSavedAssetIds.size > 0 || hasAssetOrderChanges;
+    if ((selectedMenuType === "digital" && hasDigitalMenuChanges) || (selectedMenuType === "image" && hasPendingImageChanges)) {
+      showSnackbar("Save your menu changes before changing the default language.", "error");
+      return;
+    }
+
+    const currentDefault = project.languages.find((item) => item.isDefault);
+    if (!currentDefault) {
+      return;
+    }
+
+    changingDefaultLanguageCode = language.languageCode;
+    try {
+      const response = await apiFetch(`/api/projects/${project.id}/languages/${encodeURIComponent(currentDefault.languageCode)}`, {
+        method: "PUT",
+        body: JSON.stringify({ languageCode: language.languageCode, displayName: language.displayName }),
+      });
+      if (!response.ok) {
+        const body = (await response.json()) as { message?: string };
+        showSnackbar(body.message ?? "Unable to change the default language.", "error");
+        return;
+      }
+
+      project = (await response.json()) as ProjectDetail;
+      baselineLanguages = project.languages.map((item) => ({ ...item }));
+      activeImageLanguageCode = language.languageCode;
+      showSnackbar(`${language.displayName} is now the default language.`, "success");
+    } catch {
+      showSnackbar("Unable to change the default language.", "error");
+    } finally {
+      changingDefaultLanguageCode = "";
+    }
   }
 
   async function uploadImages(event: Event, languageCode: string) {
@@ -811,6 +960,23 @@
     draggedAssetOrderId = "";
   }
 
+  function moveImageAsset(languageCode: string, orderId: string, direction: -1 | 1) {
+    const languageOrderIds = mixedAssetItems
+      .filter((item) => item.languageCode === languageCode)
+      .map((item) => item.orderId);
+    const currentIndex = languageOrderIds.indexOf(orderId);
+    const targetOrderId = languageOrderIds[currentIndex + direction];
+    if (currentIndex === -1 || !targetOrderId) {
+      return;
+    }
+
+    const nextOrder = [...mixedAssetOrderIds];
+    const currentGlobalIndex = nextOrder.indexOf(orderId);
+    const targetGlobalIndex = nextOrder.indexOf(targetOrderId);
+    [nextOrder[currentGlobalIndex], nextOrder[targetGlobalIndex]] = [nextOrder[targetGlobalIndex], nextOrder[currentGlobalIndex]];
+    mixedAssetOrderIds = nextOrder;
+  }
+
   $: mixedAssetItems = mixedAssetOrderIds
     .map((orderId) => {
       if (orderId.startsWith("saved:")) {
@@ -830,6 +996,9 @@
   $: if (languageSections.length > 0) {
     form.defaultLanguageCode = languageSections[0].languageCode;
     form.defaultLanguageDisplayName = languageSections[0].displayName;
+  }
+  $: if (languageSections.length > 0 && !languageSections.some((language) => language.languageCode === activeImageLanguageCode)) {
+    activeImageLanguageCode = languageSections.find((language) => language.isDefault)?.languageCode ?? languageSections[0].languageCode;
   }
 
   onMount(async () => {
@@ -941,15 +1110,15 @@
             <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-stone-900">Choose Image Menu <span aria-hidden="true">→</span></span>
           </button>
 
-          <button type="button" on:click={() => selectedMenuType = "digital"} disabled={currentTier === "standard"} class="group rounded-[1.75rem] border border-emerald-200 bg-emerald-50/70 p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
-            <span class="inline-flex rounded-full bg-emerald-700 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">Digital Menu</span>
+          <button type="button" on:click={() => selectedMenuType = "digital"} disabled={currentTier === "standard"} class="group rounded-[1.75rem] border border-stone-300 bg-[rgba(220,228,216,0.62)] p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-stone-400 hover:bg-[rgba(220,228,216,0.82)] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
+            <span class="inline-flex rounded-full bg-stone-800 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">Digital Menu</span>
             <h2 class="mt-5 text-2xl font-semibold tracking-tight text-stone-900">Edit everything anytime</h2>
             <p class="mt-3 text-sm leading-7 text-stone-600">Manage sections, dishes, prices, translations, stock, and serving times from any device.</p>
-            <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-800">Choose Digital Menu <span aria-hidden="true">→</span></span>
+            <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-stone-800">Choose Digital Menu <span aria-hidden="true">→</span></span>
           </button>
         </div>
         {#if currentTier === "standard"}
-          <p class="mx-auto mt-5 max-w-xl text-center text-sm text-stone-600">Digital Menu requires the Digital Menu plan. <a href="/pricing" class="font-semibold text-emerald-800 underline">View pricing</a></p>
+          <p class="mx-auto mt-5 max-w-xl text-center text-sm text-stone-600">Digital Menu requires the Digital Menu plan. <a href="/pricing" class="font-semibold text-stone-800 underline">View pricing</a></p>
         {/if}
       </section>
     {:else if project || isDraft}
@@ -994,8 +1163,8 @@
             {/if}
           </div>
 
-          {#if selectedMenuType === "digital"}
-            <div class="mb-6 rounded-2xl border border-stone-200 bg-stone-100 p-1" role="tablist" aria-label="Digital Menu project sections">
+          {#if selectedMenuType}
+            <div class="mb-6 rounded-2xl border border-stone-200 bg-stone-100 p-1" role="tablist" aria-label="Project editor sections">
               <div class="grid grid-cols-2 gap-1">
                 <button
                   type="button"
@@ -1020,8 +1189,8 @@
             </div>
           {/if}
 
-          <div class="grid gap-5" class:hidden={selectedMenuType === "digital" && activeEditorTab === "menu"}>
-            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
+          <div class="grid gap-5">
+            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Project name</p>
               <input
                 bind:value={form.name}
@@ -1031,7 +1200,7 @@
                 placeholder="Project title"
               />
             </div>
-            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
+            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Active slug</p>
               <div class="mt-3 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-2 lg:flex-row lg:items-stretch">
                 <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[1rem] border border-stone-200 bg-stone-50 sm:flex-row">
@@ -1071,7 +1240,7 @@
                 <p class="mt-3 text-sm text-[color:var(--error-strong)]">{slugError}</p>
               {/if}
             </div>
-            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
+            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>
               <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Public page background</p>
               <p class="mt-2 text-sm leading-7 text-stone-600">Choose the background color visitors see behind your menu.</p>
               <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -1096,93 +1265,97 @@
                 </div>
               </div>
             </div>
-            <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Content languages</p>
-                  <p class="mt-2 text-sm leading-7 text-stone-600">{selectedMenuType === "digital" ? "Add the languages you use for section names, dishes, and descriptions." : "Upload images per language, then drag them into the order visitors should see."}</p>
-                </div>
-                <button type="button" class="btn-secondary text-sm" on:click={addLanguage} disabled={addingLanguage}>
-                  {addingLanguage ? "Adding..." : "+ Add"}
-                </button>
-              </div>
-
-              <div class="mt-5 grid gap-5">
-                {#each languageSections as language}
-                  {@const choices = languageOptionsFor(language)}
-                  {@const sectionAssets = mixedAssetItems.filter((item) => item.languageCode === language.languageCode)}
-                  <section class="rounded-[1.25rem] border border-stone-200 bg-white px-4 py-4 shadow-sm">
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                          {#if selectedMenuType === "digital" && !isDraft}
-                            <span class="min-w-56 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm font-medium text-stone-900">{languageMeta(language.languageCode).flag} {language.displayName}</span>
-                          {:else}
-                            <select
-                              value={language.languageCode}
-                              on:change={(event) => updateLanguageSelection(language, (event.currentTarget as HTMLSelectElement).value)}
-                              class="min-w-56 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-900 outline-none transition-all focus:border-stone-400"
-                              aria-label={`Language for ${language.displayName}`}
-                            >
-                              {#each choices as option}
-                                <option value={option.code}>{option.flag} {option.name}</option>
-                              {/each}
-                              {#if !choices.some((option) => option.code === language.languageCode)}
-                                {@const currentMeta = languageMeta(language.languageCode)}
-                                <option value={currentMeta.code}>{currentMeta.flag} {currentMeta.name}</option>
-                              {/if}
-                            </select>
-                          {/if}
-                          <span class="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-medium uppercase text-stone-500">{language.languageCode}</span>
-                          {#if language.isDefault}
-                            <span class="rounded-full border border-[rgba(77,106,83,0.14)] bg-[rgba(236,245,238,0.7)] px-2.5 py-1 text-xs font-medium text-[color:var(--success-strong)]">Default</span>
-                          {/if}
-                        </div>
-                        <p class="mt-1 text-sm text-stone-500">{selectedMenuType === "digital" ? "Edit this translation from the digital menu below." : "Images in this section appear when visitors select this language."}</p>
-                      </div>
-                      <div class="flex flex-col gap-2 sm:flex-row">
-                        {#if !language.isDefault && !isDraft}
-                          <button type="button" class="btn-secondary text-sm" on:click={() => removeLanguage(language)}>Remove</button>
-                        {/if}
-                        {#if selectedMenuType === "image"}
-                          <label class="btn-secondary cursor-pointer text-center text-sm">
-                            <span>{uploading ? "Uploading..." : "Add images"}</span>
-                            <input type="file" accept="image/*" multiple class="hidden" on:change={(event) => uploadImages(event, language.languageCode)} disabled={uploading} />
-                          </label>
-                        {/if}
-                      </div>
+            {#if selectedMenuType === "digital"}
+              <div class="rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>
+                <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Restaurant cover</p>
+                <p class="mt-2 text-sm leading-7 text-stone-600">Add a wide restaurant or food photo to the top of your public menu.</p>
+                {#if project?.coverImage}
+                  <div class="mt-4 overflow-hidden rounded-[1.25rem] border border-stone-200 bg-white">
+                    <img src={toApiUrl(project.coverImage.url)} alt="Current restaurant cover" class="aspect-[16/7] w-full object-cover" />
+                    <div class="flex flex-col gap-2 p-3 sm:flex-row sm:justify-end">
+                      <label class="btn-secondary cursor-pointer text-center text-sm">
+                        <span>{uploadingCover ? "Replacing..." : "Replace image"}</span>
+                        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" on:change={uploadCoverImage} disabled={uploadingCover || removingCover} />
+                      </label>
+                      <button type="button" class="btn-secondary text-sm text-[color:var(--error-strong)]" on:click={removeCoverImage} disabled={uploadingCover || removingCover}>
+                        {removingCover ? "Removing..." : "Remove image"}
+                      </button>
                     </div>
+                  </div>
+                {:else if project}
+                  <label class="mt-4 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-stone-300 bg-white px-5 py-7 text-center transition-colors hover:border-stone-400 hover:bg-stone-50">
+                    <span class="text-sm font-semibold text-stone-800">{uploadingCover ? "Uploading..." : "Choose cover image"}</span>
+                    <span class="mt-1 text-xs text-stone-500">JPG, PNG, WebP, or GIF</span>
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" on:change={uploadCoverImage} disabled={uploadingCover} />
+                  </label>
+                {:else}
+                  <p class="mt-4 rounded-2xl border border-dashed border-stone-300 bg-white px-5 py-6 text-center text-sm text-stone-600">Save this project before adding a cover image.</p>
+                {/if}
+              </div>
+            {/if}
+            <div class="rounded-[1.5rem] border border-stone-200 bg-stone-50/70 px-4 py-5 shadow-sm sm:px-6" class:hidden={selectedMenuType !== "image" || activeEditorTab !== "menu"}>
+              <MenuLanguageToolbar
+                languages={languageSections}
+                bind:activeLanguageCode={activeImageLanguageCode}
+                options={availableLanguageOptions}
+                adding={addingLanguage}
+                {removingLanguageCode}
+                {changingDefaultLanguageCode}
+                onAdd={addLanguage}
+                onRemove={removeLanguage}
+                onMakeDefault={makeDefaultLanguage}
+              />
 
-                    {#if selectedMenuType === "digital"}
-                      <div class="mt-4 rounded-2xl border border-dashed border-stone-200 bg-stone-50 px-5 py-4 text-sm text-stone-600">
-                        Menu text for {language.displayName} is managed in the Digital Menu editor.
-                      </div>
-                    {:else if sectionAssets.length === 0}
-                      <div class="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-6 text-sm text-stone-600">
-                        No images uploaded for {language.displayName} yet.
-                      </div>
-                    {:else}
-                      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {#each sectionAssets as item}
-                          <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedAssetOrderId === item.orderId ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragMixedAsset(event, item.orderId)} on:dragend={() => draggedAssetOrderId = ""} on:dragover|preventDefault on:drop={(event) => dropMixedAsset(event, item.orderId)} role="group" aria-label={`Drag to reorder ${item.asset.originalFileName}`}>
-                            <img src={item.kind === "saved" ? toApiUrl(item.asset.url) : item.asset.previewUrl} alt={item.asset.originalFileName} class="aspect-square w-full object-cover" />
-                            <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">Drag</div>
-                            <button type="button" on:click={() => item.kind === "saved" ? deleteSavedAsset(item.asset.id) : removeDraftAsset(item.asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${item.asset.originalFileName}`}>
-                              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
-                            </button>
-                            <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{item.asset.originalFileName}</p>{#if item.kind === "draft"}<p class="mt-1 text-xs text-stone-500">Pending upload</p>{/if}</div>
+              {#each languageSections.filter((language) => language.languageCode === activeImageLanguageCode) as language}
+                {@const sectionAssets = mixedAssetItems.filter((item) => item.languageCode === language.languageCode)}
+                <section class="mt-4 rounded-[1.25rem] border border-stone-200 bg-white px-4 py-4 shadow-sm">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h2 class="text-lg font-semibold text-stone-900">{language.displayName} menu images</h2>
+                      <p class="mt-1 text-sm text-stone-500">Drag images into the order visitors should see.</p>
+                    </div>
+                    <label class="btn-secondary cursor-pointer text-center text-sm">
+                      <span>{uploading ? "Adding..." : "+ Add images"}</span>
+                      <input type="file" accept="image/*" multiple class="hidden" on:change={(event) => uploadImages(event, language.languageCode)} disabled={uploading} />
+                    </label>
+                  </div>
+
+                  {#if sectionAssets.length === 0}
+                    <div class="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-5 py-8 text-center text-sm text-stone-600">
+                      No images added for {language.displayName} yet.
+                    </div>
+                  {:else}
+                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {#each sectionAssets as item, itemIndex}
+                        <div class={`relative overflow-hidden rounded-[1.25rem] border bg-white shadow-sm transition-all ${draggedAssetOrderId === item.orderId ? "border-stone-400 opacity-60" : "border-stone-200"}`} draggable="true" on:dragstart={(event) => dragMixedAsset(event, item.orderId)} on:dragend={() => draggedAssetOrderId = ""} on:dragover|preventDefault on:drop={(event) => dropMixedAsset(event, item.orderId)} role="group" aria-label={`Drag to reorder ${item.asset.originalFileName}`}>
+                          <img src={item.kind === "saved" ? toApiUrl(item.asset.url) : item.asset.previewUrl} alt={item.asset.originalFileName} class="aspect-square w-full object-cover" />
+                          <div class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-stone-500 shadow-sm" title="Drag to reorder">Drag</div>
+                          <button type="button" on:click={() => item.kind === "saved" ? deleteSavedAsset(item.asset.id) : removeDraftAsset(item.asset.id)} class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-[color:var(--error-strong)] shadow-sm transition-colors hover:bg-white" aria-label={`Delete ${item.asset.originalFileName}`}>
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 6V4h8v2" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14H6L5 6" /><path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6" /></svg>
+                          </button>
+                          <div class="absolute bottom-14 right-3 flex gap-1 rounded-full bg-white/95 p-1 shadow-sm lg:hidden">
+                            <button type="button" on:click={() => moveImageAsset(language.languageCode, item.orderId, -1)} disabled={itemIndex === 0} class="flex h-10 w-10 items-center justify-center rounded-full text-stone-700 disabled:opacity-30" aria-label={`Move ${item.asset.originalFileName} earlier`}>←</button>
+                            <button type="button" on:click={() => moveImageAsset(language.languageCode, item.orderId, 1)} disabled={itemIndex === sectionAssets.length - 1} class="flex h-10 w-10 items-center justify-center rounded-full text-stone-700 disabled:opacity-30" aria-label={`Move ${item.asset.originalFileName} later`}>→</button>
                           </div>
-                        {/each}
-                      </div>
-                    {/if}
-                  </section>
-                {/each}
+                          <div class="border-t border-stone-100 px-3 py-3"><p class="truncate text-sm font-medium text-stone-700">{item.asset.originalFileName}</p>{#if item.kind === "draft"}<p class="mt-1 text-xs text-stone-500">Pending upload</p>{/if}</div>
+                        </div>
+                      {/each}
+                    </div>
+                  {/if}
+                </section>
+              {/each}
+
+              <div class="sticky bottom-4 z-10 mt-4 rounded-2xl border border-stone-200 bg-white/95 p-3 shadow-[0_16px_40px_rgba(45,53,46,0.16)] backdrop-blur sm:flex sm:items-center sm:justify-between">
+                <p class="px-2 text-sm text-stone-600">{hasImageMenuChanges ? "You have unsaved image changes." : "Image menu is saved."}</p>
+                <button type="button" class={`mt-3 w-full text-sm sm:mt-0 sm:w-auto ${hasImageMenuChanges ? "btn-primary" : "btn-secondary"}`} on:click={saveProject} disabled={!hasImageMenuChanges || saving}>{saving ? "Saving..." : hasImageMenuChanges ? "Save menu" : "Saved"}</button>
               </div>
             </div>
 
-            <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />
+            <div class:hidden={activeEditorTab === "menu"}>
+              <ProjectQrBuilder slug={form.slug} projectName={form.name || project?.name || ""} />
+            </div>
 
-            <div class="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-4 rounded-[1.5rem] border border-stone-200 bg-[rgba(248,247,243,0.96)] px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between" class:hidden={activeEditorTab === "menu"}>
               <div>
                 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Save settings</p>
                 <p class="mt-2 text-sm leading-7 text-stone-600">
@@ -1216,7 +1389,7 @@
             </div>
 
             {#if !isDraft}
-            <div class="mt-3 rounded-[1.5rem] border border-[rgba(165,93,79,0.16)] bg-[rgba(249,238,234,0.72)] px-6 py-5 shadow-sm">
+            <div class="mt-3 rounded-[1.5rem] border border-[rgba(165,93,79,0.16)] bg-[rgba(249,238,234,0.72)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>
               <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p class="text-xs uppercase tracking-[0.18em] text-[color:var(--error-strong)]">Danger zone</p>
@@ -1237,7 +1410,19 @@
 
           {#if !isDraft && project?.menuType === "digital"}
             <div class:hidden={activeEditorTab !== "menu"} role="tabpanel" aria-label="Menu Editor">
-              <DigitalMenuEditor projectId={project.id} languages={languageSections} initialTimeZone={project.timeZone} bind:dirty={hasDigitalMenuChanges} />
+              <DigitalMenuEditor
+                projectId={project.id}
+                languages={languageSections}
+                initialTimeZone={project.timeZone}
+                languageOptions={availableLanguageOptions}
+                {addingLanguage}
+                {removingLanguageCode}
+                {changingDefaultLanguageCode}
+                onAddLanguage={addLanguage}
+                onRemoveLanguage={removeLanguage}
+                onMakeDefaultLanguage={makeDefaultLanguage}
+                bind:dirty={hasDigitalMenuChanges}
+              />
             </div>
           {/if}
       </section>

@@ -25,6 +25,7 @@ export type ProjectDetail = {
   lastViewedAt: string | null;
   languages: ProjectLanguageVariant[];
   assets: Asset[];
+  coverImage: Asset | null;
 };
 
 export type ProjectLanguageVariant = {
@@ -73,6 +74,8 @@ export type GeneratedSlugResponse = {
 
 export type DigitalMenu = {
   timeZone: string;
+  timeZoneConfigured: boolean;
+  currencyCode: string;
   categories: DigitalMenuCategory[];
 };
 

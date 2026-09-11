@@ -332,7 +332,13 @@ public sealed class PlanLimitEnforcementTests
         public Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, string languageCode, IFormFileCollection files, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<AssetResponse>>([]);
 
+        public Task<AssetResponse> UploadDigitalMenuCoverAsync(Guid projectId, IFormFile file, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
         public Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(false);
+
+        public Task<bool> DeleteDigitalMenuCoverAsync(Guid projectId, CancellationToken cancellationToken = default) =>
             Task.FromResult(false);
 
         public Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default) =>

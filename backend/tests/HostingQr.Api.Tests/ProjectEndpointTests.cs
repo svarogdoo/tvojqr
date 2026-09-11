@@ -124,6 +124,36 @@ public sealed class ProjectEndpointTests
     }
 
     [Fact]
+    public async Task PostCoverImage_ReturnsUploadedCover()
+    {
+        await using TestApplicationFactory factory = new(authenticated: true);
+        HttpClient client = factory.CreateClient();
+        using MultipartFormDataContent form = new();
+        form.Add(new ByteArrayContent([1, 2, 3]), "file", "cover.png");
+
+        HttpResponseMessage response = await client.PostAsync("/api/projects/11111111-1111-1111-1111-111111111111/cover-image", form);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        AssetResponse? payload = await response.Content.ReadFromJsonAsync<AssetResponse>();
+        Assert.NotNull(payload);
+        Assert.Equal("cover.png", payload.OriginalFileName);
+    }
+
+    [Fact]
+    public async Task GetPublicProject_ReturnsCoverImage()
+    {
+        await using TestApplicationFactory factory = new(authenticated: false);
+        HttpClient client = factory.CreateClient();
+
+        HttpResponseMessage response = await client.GetAsync("/api/public/summer-menu");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        PublicProjectResponse? payload = await response.Content.ReadFromJsonAsync<PublicProjectResponse>();
+        Assert.NotNull(payload?.CoverImage);
+        Assert.Equal("cover.png", payload.CoverImage.OriginalFileName);
+    }
+
+    [Fact]
     public async Task PutProjectAssetsOrder_ReturnsReorderedAssets()
     {
         await using TestApplicationFactory factory = new(authenticated: true);
@@ -323,7 +353,8 @@ public sealed class ProjectEndpointTests
 
         public Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", "image", "UTC", "#f8f7f3", Languages, []));
+            var cover = new AssetResponse(Guid.NewGuid(), "cover.png", "image/png", 3, "/uploads/cover.png", "und", 0, DateTimeOffset.UtcNow);
+            return Task.FromResult<PublicProjectResponse?>(new PublicProjectResponse(Guid.NewGuid(), "Summer Menu", slug, "Demo User", "active", "digital", "UTC", "#f8f7f3", Languages, [], cover));
         }
 
         public Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default)
@@ -362,6 +393,9 @@ public sealed class ProjectEndpointTests
             return Task.FromResult(true);
         }
 
+        public Task<bool> DeleteDigitalMenuCoverAsync(Guid projectId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(true);
+
         public Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, string languageCode, IFormFileCollection files, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<AssetResponse> assets =
@@ -371,6 +405,9 @@ public sealed class ProjectEndpointTests
 
             return Task.FromResult(assets);
         }
+
+        public Task<AssetResponse> UploadDigitalMenuCoverAsync(Guid projectId, IFormFile file, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new AssetResponse(Guid.NewGuid(), file.FileName, file.ContentType, file.Length, "/uploads/test-cover.png", "und", 0, DateTimeOffset.UtcNow));
 
         public Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
         {
@@ -384,13 +421,13 @@ public sealed class ProjectEndpointTests
 
     private sealed class FakeDigitalMenuService : IDigitalMenuService
     {
-        private static readonly DigitalMenuResponse Menu = new("Europe/Nicosia", []);
+        private static readonly DigitalMenuResponse Menu = new("Europe/Nicosia", true, "EUR", []);
 
         public Task<DigitalMenuResponse?> GetForOwnerAsync(Guid projectId, CancellationToken cancellationToken = default) =>
             Task.FromResult<DigitalMenuResponse?>(Menu);
 
         public Task<DigitalMenuResponse?> SaveAsync(Guid projectId, SaveDigitalMenuRequest request, CancellationToken cancellationToken = default) =>
-            Task.FromResult<DigitalMenuResponse?>(new DigitalMenuResponse(request.TimeZone, []));
+            Task.FromResult<DigitalMenuResponse?>(new DigitalMenuResponse(request.TimeZone, true, request.CurrencyCode, []));
 
         public Task<bool> UpdateItemAvailabilityAsync(Guid projectId, Guid itemId, bool isOutOfStock, CancellationToken cancellationToken = default) =>
             Task.FromResult(true);

@@ -15,7 +15,7 @@ public sealed class DigitalMenuServiceTests
     {
         DigitalMenuCategoryResponse visible = Category("Breakfast", new DigitalMenuSchedule(1, "09:00", "11:00"));
         DigitalMenuCategoryResponse hidden = Category("Lunch", new DigitalMenuSchedule(1, "11:00", "15:00"));
-        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", [visible, hidden]));
+        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", true, "EUR", [visible, hidden]));
         DigitalMenuService service = CreateService(repository, new DateTimeOffset(2026, 9, 7, 10, 0, 0, TimeSpan.Zero));
 
         DigitalMenuResponse result = await service.GetPublicAsync(ProjectId, "UTC");
@@ -28,7 +28,7 @@ public sealed class DigitalMenuServiceTests
     public async Task GetPublicAsync_SupportsServingWindowsAcrossMidnight()
     {
         DigitalMenuCategoryResponse lateMenu = Category("Late menu", new DigitalMenuSchedule(1, "22:00", "02:00"));
-        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", [lateMenu]));
+        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", true, "EUR", [lateMenu]));
         DigitalMenuService service = CreateService(repository, new DateTimeOffset(2026, 9, 8, 1, 0, 0, TimeSpan.Zero));
 
         DigitalMenuResponse result = await service.GetPublicAsync(ProjectId, "UTC");
@@ -39,9 +39,9 @@ public sealed class DigitalMenuServiceTests
     [Fact]
     public async Task SaveAsync_RejectsEqualScheduleTimes()
     {
-        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", []));
+        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", true, "EUR", []));
         DigitalMenuService service = CreateService(repository, new DateTimeOffset(2026, 9, 7, 10, 0, 0, TimeSpan.Zero));
-        SaveDigitalMenuRequest request = new("UTC", [new DigitalMenuCategoryRequest(
+        SaveDigitalMenuRequest request = new("UTC", "EUR", [new DigitalMenuCategoryRequest(
             Guid.NewGuid(),
             [new DigitalMenuCategoryTranslation("en", "Breakfast")],
             [new DigitalMenuSchedule(1, "09:00", "09:00")],
@@ -53,8 +53,28 @@ public sealed class DigitalMenuServiceTests
         Assert.False(repository.SaveCalled);
     }
 
+    [Fact]
+    public async Task GetPublicAsync_HidesOutOfStockItemsAndEmptySections()
+    {
+        DigitalMenuItemResponse available = Item("Available", false);
+        DigitalMenuItemResponse unavailable = Item("Unavailable", true);
+        DigitalMenuCategoryResponse mixed = new(Guid.NewGuid(), 0, [new DigitalMenuCategoryTranslation("en", "Mains")], [], [available, unavailable]);
+        DigitalMenuCategoryResponse emptyAfterFiltering = new(Guid.NewGuid(), 1, [new DigitalMenuCategoryTranslation("en", "Specials")], [], [unavailable with { Id = Guid.NewGuid() }]);
+        FakeMenuRepository repository = new(new DigitalMenuResponse("UTC", true, "EUR", [mixed, emptyAfterFiltering]));
+        DigitalMenuService service = CreateService(repository, new DateTimeOffset(2026, 9, 7, 10, 0, 0, TimeSpan.Zero));
+
+        DigitalMenuResponse result = await service.GetPublicAsync(ProjectId, "UTC");
+
+        Assert.Single(result.Categories);
+        Assert.Single(result.Categories[0].Items);
+        Assert.Equal("Available", result.Categories[0].Items[0].Translations[0].Name);
+    }
+
     private static DigitalMenuCategoryResponse Category(string name, params DigitalMenuSchedule[] schedules) =>
-        new(Guid.NewGuid(), 0, [new DigitalMenuCategoryTranslation("en", name)], schedules, []);
+        new(Guid.NewGuid(), 0, [new DigitalMenuCategoryTranslation("en", name)], schedules, [Item("Item", false)]);
+
+    private static DigitalMenuItemResponse Item(string name, bool isOutOfStock) =>
+        new(Guid.NewGuid(), "8.50", isOutOfStock, 0, [new DigitalMenuItemTranslation("en", name, "")]);
 
     private static DigitalMenuService CreateService(FakeMenuRepository repository, DateTimeOffset now) => new(
         new FakeCurrentUserContext(),
@@ -110,7 +130,7 @@ public sealed class DigitalMenuServiceTests
     private sealed class FakeMenuRepository(DigitalMenuResponse menu) : IDigitalMenuRepository
     {
         public bool SaveCalled { get; private set; }
-        public Task<DigitalMenuResponse> GetAsync(Guid projectId, string timeZone, CancellationToken cancellationToken = default) => Task.FromResult(menu);
+        public Task<DigitalMenuResponse> GetAsync(Guid projectId, CancellationToken cancellationToken = default) => Task.FromResult(menu);
         public Task SaveAsync(Guid projectId, SaveDigitalMenuRequest request, CancellationToken cancellationToken = default) { SaveCalled = true; return Task.CompletedTask; }
         public Task<bool> UpdateItemAvailabilityAsync(Guid projectId, Guid itemId, bool isOutOfStock, CancellationToken cancellationToken = default) => Task.FromResult(true);
     }

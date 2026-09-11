@@ -260,8 +260,11 @@ Status markers for tasks:
 [DONE] 5.4.e Show a distinct disabled-project state with a path back to HostingQr.
 [DONE] 5.5 Support separate Image Menu and Digital Menu public experiences.
 [DONE] 5.5.a Render translated Digital Menu sections, items, descriptions, and prices.
-[DONE] 5.5.b Show out-of-stock items as unavailable.
+[DONE] 5.5.b Omit out-of-stock Digital Menu items and sections left empty by availability filtering.
 [DONE] 5.5.c Hide timed sections outside recurring serving hours using the restaurant timezone.
+[DONE] 5.5.d Format numeric Digital Menu prices using the menu currency while preserving custom price text.
+[DONE] 5.5.e Keep newly added empty Digital Menu languages private until translated names are saved.
+[DONE] 5.5.f Display an optional restaurant cover image in a responsive Digital Menu header.
 
 ### 6. Authentication & User Dashboard (Core Missing Product Layer)
 
@@ -288,6 +291,12 @@ Status markers for tasks:
 [DONE] 6.2.f.5 Reorder saved images from the project editor.
 [DONE] 6.2.f.6 Add a mobile-first Digital Menu editor for sections, items, prices, translations, availability, ordering, and schedules.
 [DONE] 6.2.f.7 Separate Digital Menu general settings and content editing into focused mobile-friendly tabs.
+[DONE] 6.2.f.8 Add compact menu currency and browser-detected restaurant timezone controls.
+[DONE] 6.2.f.9 Align newly added Digital Menu controls with the neutral and muted-sage visual system.
+[DONE] 6.2.f.10 Make section translations explicit per language and provide a browser-supported timezone selector with city and live local time.
+[DONE] 6.2.f.11 Move language management into a shared Menu Editor toolbar and add a focused Image Menu editor tab.
+[DONE] 6.2.f.12 Support default-language changes, safe immediate language removal, and touch-friendly Image Menu ordering from the editor toolbar.
+[DONE] 6.2.f.13 Upload, replace, and remove a language-independent Digital Menu cover image from General Settings.
 [DONE] 6.2.g Manage languages
 [DONE] 6.2.g.1 Add/remove language sections in the project editor.
 [DONE] 6.2.g.2 Upload images into a selected language section.

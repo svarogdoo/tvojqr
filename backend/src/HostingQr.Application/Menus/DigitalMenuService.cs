@@ -32,7 +32,7 @@ public sealed class DigitalMenuService : IDigitalMenuService
     public async Task<DigitalMenuResponse?> GetForOwnerAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
         ProjectWithSlug? project = await GetOwnedDigitalProjectAsync(projectId, cancellationToken);
-        return project is null ? null : await _menuRepository.GetAsync(projectId, project.TimeZone, cancellationToken);
+        return project is null ? null : await _menuRepository.GetAsync(projectId, cancellationToken);
     }
 
     public async Task<DigitalMenuResponse?> SaveAsync(Guid projectId, SaveDigitalMenuRequest request, CancellationToken cancellationToken = default)
@@ -44,13 +44,14 @@ public sealed class DigitalMenuService : IDigitalMenuService
         }
 
         ValidateTimeZone(request.TimeZone);
+        ValidateCurrency(request.CurrencyCode);
         IReadOnlySet<string> languageCodes = (await _languageRepository.ListByProjectAsync(projectId, cancellationToken))
             .Select(language => language.LanguageCode)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         ValidateMenu(request, languageCodes);
 
         await _menuRepository.SaveAsync(projectId, request, cancellationToken);
-        return await _menuRepository.GetAsync(projectId, request.TimeZone, cancellationToken);
+        return await _menuRepository.GetAsync(projectId, cancellationToken);
     }
 
     public async Task<bool> UpdateItemAvailabilityAsync(Guid projectId, Guid itemId, bool isOutOfStock, CancellationToken cancellationToken = default)
@@ -61,11 +62,15 @@ public sealed class DigitalMenuService : IDigitalMenuService
 
     public async Task<DigitalMenuResponse> GetPublicAsync(Guid projectId, string timeZone, CancellationToken cancellationToken = default)
     {
-        DigitalMenuResponse menu = await _menuRepository.GetAsync(projectId, timeZone, cancellationToken);
-        DateTime localNow = TimeZoneInfo.ConvertTimeFromUtc(_timeProvider.GetUtcNow().UtcDateTime, ValidateTimeZone(timeZone));
+        DigitalMenuResponse menu = await _menuRepository.GetAsync(projectId, cancellationToken);
+        DateTime localNow = TimeZoneInfo.ConvertTimeFromUtc(_timeProvider.GetUtcNow().UtcDateTime, ValidateTimeZone(menu.TimeZone));
         return menu with
         {
-            Categories = menu.Categories.Where(category => IsVisibleNow(category.Schedules, localNow)).ToArray(),
+            Categories = menu.Categories
+                .Where(category => IsVisibleNow(category.Schedules, localNow))
+                .Select(category => category with { Items = category.Items.Where(item => !item.IsOutOfStock).ToArray() })
+                .Where(category => category.Items.Count > 0)
+                .ToArray(),
         };
     }
 
@@ -161,6 +166,15 @@ public sealed class DigitalMenuService : IDigitalMenuService
         catch (InvalidTimeZoneException)
         {
             throw new ArgumentException("Choose a valid restaurant timezone.", nameof(timeZone));
+        }
+    }
+
+    private static void ValidateCurrency(string currencyCode)
+    {
+        string normalized = currencyCode.Trim().ToUpperInvariant();
+        if (normalized is not ("EUR" or "USD" or "GBP" or "CHF" or "CAD" or "AUD"))
+        {
+            throw new ArgumentException("Choose a supported menu currency.", nameof(currencyCode));
         }
     }
 

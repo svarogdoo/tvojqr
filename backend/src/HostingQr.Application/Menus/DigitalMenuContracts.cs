@@ -1,6 +1,6 @@
 namespace HostingQr.Application.Menus;
 
-public sealed record DigitalMenuResponse(string TimeZone, IReadOnlyList<DigitalMenuCategoryResponse> Categories);
+public sealed record DigitalMenuResponse(string TimeZone, bool TimeZoneConfigured, string CurrencyCode, IReadOnlyList<DigitalMenuCategoryResponse> Categories);
 
 public sealed record DigitalMenuCategoryResponse(
     Guid Id,
@@ -22,7 +22,7 @@ public sealed record DigitalMenuItemResponse(
 
 public sealed record DigitalMenuItemTranslation(string LanguageCode, string Name, string Description);
 
-public sealed record SaveDigitalMenuRequest(string TimeZone, IReadOnlyList<DigitalMenuCategoryRequest> Categories);
+public sealed record SaveDigitalMenuRequest(string TimeZone, string CurrencyCode, IReadOnlyList<DigitalMenuCategoryRequest> Categories);
 
 public sealed record DigitalMenuCategoryRequest(
     Guid Id,

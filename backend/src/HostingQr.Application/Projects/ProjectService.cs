@@ -261,7 +261,10 @@ public sealed class ProjectService : IProjectService
             await GetLanguagesAsync(project.ProjectId, cancellationToken),
             project.Status == Domain.Projects.ProjectStatus.Active
                 ? await GetAssetsAsync(project.ProjectId, cancellationToken)
-                : []);
+                : [],
+            project.Status == Domain.Projects.ProjectStatus.Active
+                ? await GetCoverImageAsync(project.ProjectId, cancellationToken)
+                : null);
     }
 
     private async Task<ProjectDetailResponse> MapProjectDetailAsync(Domain.Projects.ProjectWithSlug project, CancellationToken cancellationToken)
@@ -280,7 +283,8 @@ public sealed class ProjectService : IProjectService
             stats.TotalViews,
             stats.LastViewedAt,
             await GetLanguagesAsync(project.Id, cancellationToken),
-            await GetAssetsAsync(project.Id, cancellationToken));
+            await GetAssetsAsync(project.Id, cancellationToken),
+            await GetCoverImageAsync(project.Id, cancellationToken));
     }
 
     private async Task<ProjectViewStats> GetStatsOrDefaultAsync(Guid projectId, CancellationToken cancellationToken) =>
@@ -292,7 +296,14 @@ public sealed class ProjectService : IProjectService
     private async Task<IReadOnlyList<Assets.AssetResponse>> GetAssetsAsync(Guid projectId, CancellationToken cancellationToken)
     {
         var assets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
-        return _assetService.MapAssets(assets);
+        return _assetService.MapAssets(assets.Where(asset => asset.Purpose == Domain.Assets.AssetPurpose.MenuContent).ToArray());
+    }
+
+    private async Task<Assets.AssetResponse?> GetCoverImageAsync(Guid projectId, CancellationToken cancellationToken)
+    {
+        var assets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
+        var cover = assets.LastOrDefault(asset => asset.Purpose == Domain.Assets.AssetPurpose.DigitalMenuCover);
+        return cover is null ? null : _assetService.MapAssets([cover]).Single();
     }
 
     private async Task<IReadOnlyList<ProjectLanguageVariantResponse>> GetLanguagesAsync(Guid projectId, CancellationToken cancellationToken)

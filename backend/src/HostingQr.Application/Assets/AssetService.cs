@@ -1,4 +1,6 @@
 using HostingQr.Application.Abstractions;
+using HostingQr.Domain.Assets;
+using HostingQr.Domain.Projects;
 using Microsoft.AspNetCore.Http;
 
 namespace HostingQr.Application.Assets;
@@ -46,7 +48,8 @@ public sealed class AssetService : IAssetService
 
         string normalizedLanguageCode = NormalizeLanguageCode(languageCode);
         List<CreateAssetRecord> records = [];
-        int startingOrder = (await _assetRepository.ListByProjectAsync(projectId, cancellationToken)).Count(asset => asset.LanguageCode == normalizedLanguageCode);
+        int startingOrder = (await _assetRepository.ListByProjectAsync(projectId, cancellationToken))
+            .Count(asset => asset.Purpose == AssetPurpose.MenuContent && asset.LanguageCode == normalizedLanguageCode);
 
         for (int i = 0; i < files.Count; i++)
         {
@@ -62,7 +65,49 @@ public sealed class AssetService : IAssetService
         }
 
         var saved = await _assetRepository.CreateAsync(projectId, normalizedLanguageCode, records, cancellationToken);
-        return MapAssets(saved);
+        return MapAssets(saved.Where(asset => asset.Purpose == AssetPurpose.MenuContent).ToArray());
+    }
+
+    public async Task<AssetResponse> UploadDigitalMenuCoverAsync(Guid projectId, IFormFile file, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null)
+        {
+            throw new InvalidOperationException("Project was not found.");
+        }
+
+        if (project.MenuType != ProjectMenuType.Digital)
+        {
+            throw new ArgumentException("Cover images are available only for Digital Menu projects.");
+        }
+
+        ValidateImage(file);
+        await using Stream stream = file.OpenReadStream();
+        StoredAssetFile stored = await _assetStorageService.SaveImageAsync(projectId, stream, file.FileName, file.ContentType, cancellationToken);
+
+        IReadOnlyList<Domain.Assets.Asset> savedAssets;
+        try
+        {
+            savedAssets = await _assetRepository.CreateAsync(projectId, "und",
+            [
+                new CreateAssetRecord(file.FileName, stored.StoredFileName, stored.ContentType, stored.SizeBytes, 0, AssetPurpose.DigitalMenuCover),
+            ], cancellationToken);
+        }
+        catch
+        {
+            await _assetStorageService.DeleteAsync(stored.StoredFileName, cancellationToken);
+            throw;
+        }
+
+        var savedCover = savedAssets.Single(asset => asset.StoredFileName == stored.StoredFileName);
+        foreach (var oldCover in savedAssets.Where(asset => asset.Purpose == AssetPurpose.DigitalMenuCover && asset.Id != savedCover.Id))
+        {
+            await _assetStorageService.DeleteAsync(oldCover.StoredFileName, cancellationToken);
+            await _assetRepository.DeleteAsync(oldCover.Id, cancellationToken);
+        }
+
+        return MapAsset(savedCover);
     }
 
     public async Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default)
@@ -75,13 +120,34 @@ public sealed class AssetService : IAssetService
         }
 
         var asset = await _assetRepository.GetByIdAsync(assetId, cancellationToken);
-        if (asset is null || asset.ProjectId != projectId)
+        if (asset is null || asset.ProjectId != projectId || asset.Purpose != AssetPurpose.MenuContent)
         {
             return false;
         }
 
         await _assetStorageService.DeleteAsync(asset.StoredFileName, cancellationToken);
         return await _assetRepository.DeleteAsync(assetId, cancellationToken);
+    }
+
+    public async Task<bool> DeleteDigitalMenuCoverAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        Guid userId = _currentUserContext.GetCurrentUserId();
+        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        if (project is null || project.MenuType != ProjectMenuType.Digital)
+        {
+            return false;
+        }
+
+        var covers = (await _assetRepository.ListByProjectAsync(projectId, cancellationToken))
+            .Where(asset => asset.Purpose == AssetPurpose.DigitalMenuCover)
+            .ToArray();
+        foreach (var cover in covers)
+        {
+            await _assetStorageService.DeleteAsync(cover.StoredFileName, cancellationToken);
+            await _assetRepository.DeleteAsync(cover.Id, cancellationToken);
+        }
+
+        return covers.Length > 0;
     }
 
     public async Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
@@ -98,7 +164,9 @@ public sealed class AssetService : IAssetService
             throw new ArgumentException("Asset order contains duplicate images.");
         }
 
-        var existingAssets = await _assetRepository.ListByProjectAsync(projectId, cancellationToken);
+        var existingAssets = (await _assetRepository.ListByProjectAsync(projectId, cancellationToken))
+            .Where(asset => asset.Purpose == AssetPurpose.MenuContent)
+            .ToArray();
         var orderedAssets = assetIds
             .Select(assetId => existingAssets.SingleOrDefault(asset => asset.Id == assetId))
             .ToArray();
@@ -143,5 +211,23 @@ public sealed class AssetService : IAssetService
                 asset.SortOrder,
                 asset.CreatedAt))
             .ToArray();
+    }
+
+    private AssetResponse MapAsset(Domain.Assets.Asset asset) => new(
+        asset.Id,
+        asset.OriginalFileName,
+        asset.ContentType,
+        asset.SizeBytes,
+        _assetStorageService.GetPublicUrl(asset.StoredFileName),
+        asset.LanguageCode,
+        asset.SortOrder,
+        asset.CreatedAt);
+
+    private static void ValidateImage(IFormFile file)
+    {
+        if (!AllowedContentTypes.Contains(file.ContentType))
+        {
+            throw new ArgumentException($"Unsupported file type '{file.ContentType}'.");
+        }
     }
 }

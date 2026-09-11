@@ -8,6 +8,8 @@ public sealed record Asset
 
     public string LanguageCode { get; init; } = string.Empty;
 
+    public string Purpose { get; init; } = AssetPurpose.MenuContent;
+
     public string OriginalFileName { get; init; } = string.Empty;
 
     public string StoredFileName { get; init; } = string.Empty;

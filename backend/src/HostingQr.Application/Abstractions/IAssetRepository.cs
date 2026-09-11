@@ -15,4 +15,4 @@ public interface IAssetRepository
     Task<bool> DeleteAsync(Guid assetId, CancellationToken cancellationToken = default);
 }
 
-public sealed record CreateAssetRecord(string OriginalFileName, string StoredFileName, string ContentType, long SizeBytes, int SortOrder);
+public sealed record CreateAssetRecord(string OriginalFileName, string StoredFileName, string ContentType, long SizeBytes, int SortOrder, string Purpose = AssetPurpose.MenuContent);

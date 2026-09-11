@@ -91,7 +91,7 @@
 
       <div class="mt-8">
         {#if form?.success}
-          <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-7 text-emerald-900">
+          <div class="rounded-2xl border border-[rgba(140,157,142,0.24)] bg-[rgba(220,228,216,0.7)] px-5 py-4 text-sm leading-7 text-stone-800">
             {copy.success}
           </div>
         {:else if form?.message}

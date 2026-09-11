@@ -141,7 +141,7 @@
         </div>
       </div>
     </div>
-    <p class="mt-3 text-center text-sm font-medium text-emerald-700">{copy.annualNote}</p>
+    <p class="mt-3 text-center text-sm font-medium text-stone-600">{copy.annualNote}</p>
 
     <div class="mx-auto mt-10 grid max-w-4xl gap-6 md:grid-cols-2 md:items-stretch">
       {#each plans as plan}

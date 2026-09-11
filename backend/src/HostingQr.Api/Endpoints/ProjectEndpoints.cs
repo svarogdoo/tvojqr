@@ -109,6 +109,39 @@ public static class ProjectEndpoints
             .WithName("DeleteProjectAsset")
             .WithSummary("Deletes one uploaded image asset from a project.");
 
+        group.MapPost("/{projectId:guid}/cover-image", async (Guid projectId, HttpRequest request, IAssetService assetService, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                IFormCollection form = await request.ReadFormAsync(cancellationToken);
+                if (form.Files.Count != 1)
+                {
+                    return Results.BadRequest(new { message = "Choose one cover image." });
+                }
+
+                return Results.Ok(await assetService.UploadDigitalMenuCoverAsync(projectId, form.Files[0], cancellationToken));
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.NotFound(new { message = ex.Message });
+            }
+        })
+            .DisableAntiforgery()
+            .WithName("UploadDigitalMenuCover")
+            .WithSummary("Uploads or replaces the cover image for a Digital Menu project.");
+
+        group.MapDelete("/{projectId:guid}/cover-image", async (Guid projectId, IAssetService assetService, CancellationToken cancellationToken) =>
+        {
+            bool deleted = await assetService.DeleteDigitalMenuCoverAsync(projectId, cancellationToken);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        })
+            .WithName("DeleteDigitalMenuCover")
+            .WithSummary("Removes the cover image from a Digital Menu project.");
+
         group.MapPut("/{projectId:guid}/assets/order", async (Guid projectId, ReorderAssetsRequest request, IAssetService assetService, CancellationToken cancellationToken) =>
         {
             try

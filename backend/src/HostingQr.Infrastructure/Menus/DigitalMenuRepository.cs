@@ -14,16 +14,17 @@ public sealed class DigitalMenuRepository : IDigitalMenuRepository
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<DigitalMenuResponse> GetAsync(Guid projectId, string timeZone, CancellationToken cancellationToken = default)
+    public async Task<DigitalMenuResponse> GetAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
         const string sql = """
+            select time_zone as TimeZone, time_zone_configured as TimeZoneConfigured, currency_code as CurrencyCode from projects where id = @ProjectId;
             select id, sort_order as SortOrder from menu_categories where project_id = @ProjectId order by sort_order;
             select t.category_id as CategoryId, l.language_code as LanguageCode, t.name
             from menu_category_translations t
             inner join project_language_variants l on l.id = t.language_variant_id
             inner join menu_categories c on c.id = t.category_id
             where c.project_id = @ProjectId;
-            select s.category_id as CategoryId, s.day_of_week as DayOfWeek,
+            select s.category_id as CategoryId, s.day_of_week::integer as DayOfWeek,
                    to_char(s.starts_at, 'HH24:MI') as StartsAt, to_char(s.ends_at, 'HH24:MI') as EndsAt
             from menu_category_schedules s
             inner join menu_categories c on c.id = s.category_id
@@ -42,13 +43,14 @@ public sealed class DigitalMenuRepository : IDigitalMenuRepository
 
         using var connection = _connectionFactory.CreateConnection();
         using var result = await connection.QueryMultipleAsync(new CommandDefinition(sql, new { ProjectId = projectId }, cancellationToken: cancellationToken));
+        SettingsRow settings = await result.ReadSingleAsync<SettingsRow>();
         CategoryRow[] categories = (await result.ReadAsync<CategoryRow>()).ToArray();
         CategoryTranslationRow[] categoryTranslations = (await result.ReadAsync<CategoryTranslationRow>()).ToArray();
         ScheduleRow[] schedules = (await result.ReadAsync<ScheduleRow>()).ToArray();
         ItemRow[] items = (await result.ReadAsync<ItemRow>()).ToArray();
         ItemTranslationRow[] itemTranslations = (await result.ReadAsync<ItemTranslationRow>()).ToArray();
 
-        return new DigitalMenuResponse(timeZone, categories.Select(category => new DigitalMenuCategoryResponse(
+        return new DigitalMenuResponse(settings.TimeZone, settings.TimeZoneConfigured, settings.CurrencyCode, categories.Select(category => new DigitalMenuCategoryResponse(
             category.Id,
             category.SortOrder,
             categoryTranslations.Where(row => row.CategoryId == category.Id).Select(row => new DigitalMenuCategoryTranslation(row.LanguageCode, row.Name)).ToArray(),
@@ -73,7 +75,7 @@ public sealed class DigitalMenuRepository : IDigitalMenuRepository
             .ToDictionary(language => language.LanguageCode, language => language.Id, StringComparer.OrdinalIgnoreCase);
 
         await connection.ExecuteAsync(new CommandDefinition("delete from menu_categories where project_id = @ProjectId;", new { ProjectId = projectId }, transaction, cancellationToken: cancellationToken));
-        await connection.ExecuteAsync(new CommandDefinition("update projects set time_zone = @TimeZone, updated_at = now() where id = @ProjectId;", new { ProjectId = projectId, request.TimeZone }, transaction, cancellationToken: cancellationToken));
+        await connection.ExecuteAsync(new CommandDefinition("update projects set time_zone = @TimeZone, time_zone_configured = true, currency_code = @CurrencyCode, updated_at = now() where id = @ProjectId;", new { ProjectId = projectId, request.TimeZone, CurrencyCode = request.CurrencyCode.Trim().ToUpperInvariant() }, transaction, cancellationToken: cancellationToken));
 
         for (int categoryIndex = 0; categoryIndex < request.Categories.Count; categoryIndex++)
         {
@@ -128,6 +130,7 @@ public sealed class DigitalMenuRepository : IDigitalMenuRepository
     }
 
     private sealed record CategoryRow(Guid Id, int SortOrder);
+    private sealed record SettingsRow(string TimeZone, bool TimeZoneConfigured, string CurrencyCode);
     private sealed record CategoryTranslationRow(Guid CategoryId, string LanguageCode, string Name);
     private sealed record ScheduleRow(Guid CategoryId, int DayOfWeek, string StartsAt, string EndsAt);
     private sealed record ItemRow(Guid Id, Guid CategoryId, string PriceText, bool IsOutOfStock, int SortOrder);

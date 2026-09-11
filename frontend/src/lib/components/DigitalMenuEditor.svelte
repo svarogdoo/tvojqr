@@ -1,5 +1,6 @@
 <script lang="ts">
   import { apiFetch } from "$lib/api";
+  import MenuLanguageToolbar from "$lib/components/MenuLanguageToolbar.svelte";
   import { showSnackbar } from "$lib/stores/snackbar";
   import type {
     DigitalMenu,
@@ -13,6 +14,13 @@
   export let languages: ProjectLanguageVariant[];
   export let initialTimeZone = "UTC";
   export let dirty = false;
+  export let languageOptions: Array<{ code: string; name: string; flag: string }>;
+  export let addingLanguage = false;
+  export let removingLanguageCode = "";
+  export let changingDefaultLanguageCode = "";
+  export let onAddLanguage: (languageCode: string) => void | Promise<void>;
+  export let onRemoveLanguage: (language: ProjectLanguageVariant) => void | Promise<void>;
+  export let onMakeDefaultLanguage: (language: ProjectLanguageVariant) => void | Promise<void>;
 
   const weekdays = [
     { value: 1, short: "Mon" },
@@ -23,8 +31,19 @@
     { value: 6, short: "Sat" },
     { value: 0, short: "Sun" },
   ];
+  const currencies = ["EUR", "USD", "GBP", "CHF", "CAD", "AUD"];
+  const fallbackTimeZones = ["UTC", "Europe/Nicosia", "Europe/Zagreb", "Europe/Rome", "Europe/Madrid"];
+  const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  const intlWithSupportedValues = Intl as typeof Intl & { supportedValuesOf?: (key: "timeZone") => string[] };
+  const timeZoneOptions = [...new Set([
+    "UTC",
+    browserTimeZone,
+    ...(intlWithSupportedValues.supportedValuesOf?.("timeZone") ?? fallbackTimeZones),
+  ])]
+    .map((value) => ({ value, city: timeZoneCity(value) }))
+    .sort((a, b) => a.city.localeCompare(b.city));
 
-  let menu: DigitalMenu = { timeZone: initialTimeZone, categories: [] };
+  let menu: DigitalMenu = { timeZone: initialTimeZone, timeZoneConfigured: false, currencyCode: "EUR", categories: [] };
   let baseline = JSON.stringify(menu);
   let loading = true;
   let saving = false;
@@ -33,15 +52,33 @@
   let expandedCategoryId = "";
   let savedItemIds = new Set<string>();
   let loadedSuccessfully = false;
+  let currentClock = new Date();
+  let synchronizedLanguageCodes = "";
 
   $: sortedLanguages = [...languages].sort((a, b) => a.sortOrder - b.sortOrder);
   $: if (!sortedLanguages.some((language) => language.languageCode === activeLanguageCode)) {
     activeLanguageCode = sortedLanguages.find((language) => language.isDefault)?.languageCode ?? sortedLanguages[0]?.languageCode ?? "en";
   }
+  $: activeLanguageName = sortedLanguages.find((language) => language.languageCode === activeLanguageCode)?.displayName ?? activeLanguageCode.toUpperCase();
+  $: selectedTimeZoneCity = timeZoneCity(menu.timeZone);
+  $: selectedTimeZoneTime = formatTimeInZone(menu.timeZone, currentClock);
+  $: if (loadedSuccessfully) {
+    const languageCodes = sortedLanguages.map((language) => language.languageCode).sort().join(",");
+    if (languageCodes !== synchronizedLanguageCodes) {
+      const allowedCodes = new Set(sortedLanguages.map((language) => language.languageCode));
+      menu = stripRemovedLanguageTranslations(menu, allowedCodes);
+      baseline = JSON.stringify(stripRemovedLanguageTranslations(JSON.parse(baseline) as DigitalMenu, allowedCodes));
+      synchronizedLanguageCodes = languageCodes;
+    }
+  }
   $: hasChanges = JSON.stringify(menu) !== baseline;
   $: dirty = hasChanges;
 
-  onMount(loadMenu);
+  onMount(() => {
+    void loadMenu();
+    const clockInterval = window.setInterval(() => currentClock = new Date(), 60_000);
+    return () => window.clearInterval(clockInterval);
+  });
 
   async function loadMenu() {
     loading = true;
@@ -62,11 +99,15 @@
         throw new Error(message);
       }
 
-      menu = (await response.json()) as DigitalMenu;
-      baseline = JSON.stringify(menu);
+      const loadedMenu = (await response.json()) as DigitalMenu;
+      menu = !loadedMenu.timeZoneConfigured && browserTimeZone
+        ? { ...loadedMenu, timeZone: browserTimeZone }
+        : loadedMenu;
+      baseline = JSON.stringify(loadedMenu);
       savedItemIds = new Set(menu.categories.flatMap((category) => category.items.map((item) => item.id)));
       expandedCategoryId = menu.categories[0]?.id ?? "";
       loadedSuccessfully = true;
+      synchronizedLanguageCodes = sortedLanguages.map((language) => language.languageCode).sort().join(",");
     } catch (caught) {
       error = caught instanceof Error ? caught.message : "Unable to load the digital menu right now.";
     } finally {
@@ -78,8 +119,39 @@
     return category.translations.find((translation) => translation.languageCode === languageCode)?.name ?? "";
   }
 
+  function timeZoneCity(timeZone: string) {
+    if (timeZone === "UTC") return "UTC";
+    return (timeZone.split("/").at(-1) ?? timeZone).replaceAll("_", " ");
+  }
+
+  function formatTimeInZone(timeZone: string, date: Date) {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date);
+    } catch {
+      return "--:--";
+    }
+  }
+
   function itemText(item: DigitalMenuItem, languageCode = activeLanguageCode) {
     return item.translations.find((translation) => translation.languageCode === languageCode) ?? { languageCode, name: "", description: "" };
+  }
+
+  function stripRemovedLanguageTranslations(source: DigitalMenu, allowedCodes: Set<string>): DigitalMenu {
+    return {
+      ...source,
+      categories: source.categories.map((category) => ({
+        ...category,
+        translations: category.translations.filter((translation) => allowedCodes.has(translation.languageCode)),
+        items: category.items.map((item) => ({
+          ...item,
+          translations: item.translations.filter((translation) => allowedCodes.has(translation.languageCode)),
+        })),
+      })),
+    };
   }
 
   function updateCategoryName(categoryId: string, value: string) {
@@ -270,41 +342,55 @@
   }
 </script>
 
-<section class="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/40 px-4 py-5 shadow-sm sm:px-6">
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Digital menu</p>
-      <h2 class="mt-2 text-2xl font-semibold tracking-tight text-stone-900">Sections and items</h2>
-      <p class="mt-2 text-sm leading-6 text-stone-600">Edit the selected language, manage availability, and decide when each section is served.</p>
-    </div>
-    <button type="button" class="btn-primary w-full text-sm sm:w-auto" on:click={addCategory} disabled={!loadedSuccessfully}>+ Add section</button>
-  </div>
-
+<section class="rounded-[1.5rem] border border-stone-200 bg-stone-50/70 px-4 py-5 shadow-sm sm:px-6">
   {#if loading}
-    <div class="mt-5 rounded-2xl border border-stone-200 bg-white p-5 text-sm text-stone-600">Loading digital menu...</div>
+    <div class="rounded-2xl border border-stone-200 bg-white p-5 text-sm text-stone-600">Loading digital menu...</div>
   {:else if !loadedSuccessfully}
-    <div class="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+    <div class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
       <p>{error || "Unable to load the digital menu right now."}</p>
       <button type="button" class="mt-3 rounded-full bg-stone-900 px-4 py-2 text-sm font-medium text-white" on:click={loadMenu}>Try again</button>
     </div>
   {:else}
-    <div class="mt-5 overflow-x-auto pb-1">
-      <div class="flex min-w-max gap-2" role="tablist" aria-label="Menu language">
-        {#each sortedLanguages as language}
-          <button type="button" on:click={() => activeLanguageCode = language.languageCode} class={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${activeLanguageCode === language.languageCode ? "bg-stone-900 text-white" : "border border-stone-200 bg-white text-stone-600"}`}>
-            {language.displayName}
-          </button>
-        {/each}
-      </div>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <label class="block rounded-2xl border border-stone-200 bg-white p-4">
+        <span class="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">Currency</span>
+        <select bind:value={menu.currencyCode} class="mt-2 block w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-stone-400">
+          {#each currencies as currency}
+            <option value={currency}>{currency}</option>
+          {/each}
+        </select>
+      </label>
+      <label class="block rounded-2xl border border-stone-200 bg-white p-4">
+        <span class="flex items-center justify-between gap-3">
+          <span class="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">Restaurant timezone</span>
+          <span class="text-xs font-medium text-stone-600">{selectedTimeZoneCity} · {selectedTimeZoneTime}</span>
+        </span>
+        <select bind:value={menu.timeZone} class="mt-2 block w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-stone-400">
+          {#each timeZoneOptions as option}
+            <option value={option.value}>{option.city} · {option.value}</option>
+          {/each}
+        </select>
+      </label>
     </div>
 
-    <label class="mt-5 block rounded-2xl border border-stone-200 bg-white p-4">
-      <span class="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">Restaurant timezone</span>
-      <input bind:value={menu.timeZone} list="digital-menu-timezones" class="mt-2 block w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm text-stone-900 outline-none focus:border-stone-400" />
-      <datalist id="digital-menu-timezones">
-        <option value="Europe/Nicosia"></option><option value="Europe/Zagreb"></option><option value="Europe/Rome"></option><option value="Europe/Madrid"></option><option value="UTC"></option>
-      </datalist>
-    </label>
+    <div class="mt-4">
+      <MenuLanguageToolbar
+        languages={sortedLanguages}
+        bind:activeLanguageCode
+        options={languageOptions}
+        adding={addingLanguage}
+        {removingLanguageCode}
+        {changingDefaultLanguageCode}
+        onAdd={onAddLanguage}
+        onRemove={onRemoveLanguage}
+        onMakeDefault={onMakeDefaultLanguage}
+      />
+    </div>
+
+    <div class="mt-5 flex items-center justify-between gap-4">
+      <h2 class="text-lg font-semibold text-stone-900">Menu sections</h2>
+      <button type="button" class="btn-primary text-sm" on:click={addCategory}>+ Add section</button>
+    </div>
 
     {#if error}
       <p class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
@@ -320,7 +406,12 @@
           <article class="overflow-hidden rounded-[1.35rem] border border-stone-200 bg-white shadow-sm">
             <div class="flex items-center gap-2 p-3 sm:p-4">
               <button type="button" class="min-w-0 flex-1 text-left" on:click={() => expandedCategoryId = expandedCategoryId === category.id ? "" : category.id}>
-                <span class="block truncate text-lg font-semibold text-stone-900">{categoryName(category) || "Untitled section"}</span>
+                <span class="flex min-w-0 flex-wrap items-center gap-2">
+                  <span class="truncate text-lg font-semibold text-stone-900">{categoryName(category) || `Add ${activeLanguageName} section name`}</span>
+                  {#if !categoryName(category).trim()}
+                    <span class="rounded-full bg-stone-200 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-stone-600">Missing translation</span>
+                  {/if}
+                </span>
                 <span class="mt-1 block text-xs text-stone-500">{category.items.length} {category.items.length === 1 ? "item" : "items"}{category.schedules.length ? " · Timed" : " · Always visible"}</span>
               </button>
               <button type="button" class="h-10 w-10 rounded-full border border-stone-200 text-stone-600 disabled:opacity-30" on:click={() => moveCategory(categoryIndex, -1)} disabled={categoryIndex === 0} aria-label="Move section up">↑</button>
@@ -330,20 +421,27 @@
 
             {#if expandedCategoryId === category.id}
               <div class="border-t border-stone-100 bg-stone-50/60 p-3 sm:p-5">
-                <label class="block">
-                  <span class="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">Section name · {activeLanguageCode.toUpperCase()}</span>
-                  <input value={categoryName(category)} on:input={(event) => updateCategoryName(category.id, event.currentTarget.value)} class="mt-2 block w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-stone-900 outline-none focus:border-stone-400" placeholder="Breakfast" />
-                </label>
+                {#key `${category.id}:${activeLanguageCode}`}
+                  <label class="block">
+                    <span class="flex flex-wrap items-center justify-between gap-2">
+                      <span class="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">Section name · {activeLanguageName}</span>
+                      {#if !categoryName(category).trim()}
+                        <span class="text-xs font-medium text-stone-500">Missing translation</span>
+                      {/if}
+                    </span>
+                    <input value={categoryName(category)} on:input={(event) => updateCategoryName(category.id, event.currentTarget.value)} class="mt-2 block w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-stone-900 outline-none focus:border-stone-400" placeholder={`Add ${activeLanguageName} section name`} />
+                  </label>
+                {/key}
 
                 <div class="mt-4 rounded-xl border border-stone-200 bg-white p-4">
                   <label class="flex items-center justify-between gap-4">
                     <span><span class="block text-sm font-semibold text-stone-900">Timed section</span><span class="mt-1 block text-xs text-stone-500">Only show this section during serving hours.</span></span>
-                    <input type="checkbox" checked={category.schedules.length > 0} on:change={(event) => setScheduleEnabled(category, event.currentTarget.checked)} class="h-5 w-5 accent-emerald-700" />
+                    <input type="checkbox" checked={category.schedules.length > 0} on:change={(event) => setScheduleEnabled(category, event.currentTarget.checked)} class="h-5 w-5 accent-stone-700" />
                   </label>
                   {#if category.schedules.length > 0}
                     <div class="mt-4 flex flex-wrap gap-2">
                       {#each weekdays as day}
-                        <label class={`cursor-pointer rounded-full border px-3 py-2 text-xs font-medium ${category.schedules.some((schedule) => schedule.dayOfWeek === day.value) ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-stone-200 text-stone-500"}`}>
+                        <label class={`cursor-pointer rounded-full border px-3 py-2 text-xs font-medium ${category.schedules.some((schedule) => schedule.dayOfWeek === day.value) ? "border-stone-400 bg-stone-200 text-stone-900" : "border-stone-200 text-stone-500"}`}>
                           <input type="checkbox" class="sr-only" checked={category.schedules.some((schedule) => schedule.dayOfWeek === day.value)} on:change={(event) => setScheduleDay(category, day.value, event.currentTarget.checked)} />{day.short}
                         </label>
                       {/each}
@@ -361,11 +459,11 @@
                     <div class={`rounded-xl border bg-white p-3 ${item.isOutOfStock ? "border-amber-200" : "border-stone-200"}`}>
                       <div class="grid gap-3 sm:grid-cols-[1fr_8rem]">
                         <input value={translation.name} on:input={(event) => updateItemTranslation(item, "name", event.currentTarget.value)} class="min-w-0 rounded-xl border border-stone-200 px-3 py-2.5 text-sm font-medium outline-none focus:border-stone-400" placeholder={`Item name · ${activeLanguageCode.toUpperCase()}`} />
-                        <input value={item.priceText} on:input={(event) => updateItem(item.id, { priceText: event.currentTarget.value })} class="rounded-xl border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-stone-400" placeholder="€8.50" />
+                        <input value={item.priceText} on:input={(event) => updateItem(item.id, { priceText: event.currentTarget.value })} inputmode="decimal" class="rounded-xl border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-stone-400" placeholder={`8.50 ${menu.currencyCode}`} />
                       </div>
                       <textarea value={translation.description} on:input={(event) => updateItemTranslation(item, "description", event.currentTarget.value)} rows="2" class="mt-3 block w-full resize-none rounded-xl border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-stone-400" placeholder={`Description · ${activeLanguageCode.toUpperCase()}`}></textarea>
                       <div class="mt-3 flex flex-wrap items-center gap-2">
-                        <button type="button" on:click={() => toggleAvailability(item)} class={`min-h-10 rounded-full px-4 text-xs font-semibold ${item.isOutOfStock ? "bg-amber-100 text-amber-900" : "bg-emerald-50 text-emerald-800"}`}>{item.isOutOfStock ? "Out of stock" : "Available"}</button>
+                        <button type="button" on:click={() => toggleAvailability(item)} class={`min-h-10 rounded-full border px-4 text-xs font-semibold ${item.isOutOfStock ? "border-stone-300 bg-stone-200 text-stone-700" : "border-[rgba(140,157,142,0.28)] bg-[rgba(220,228,216,0.72)] text-stone-800"}`}>{item.isOutOfStock ? "Hidden · out of stock" : "Available"}</button>
                         <div class="ml-auto flex gap-2">
                           <button type="button" class="h-10 w-10 rounded-full border border-stone-200 disabled:opacity-30" on:click={() => moveItem(category.id, itemIndex, -1)} disabled={itemIndex === 0} aria-label="Move item up">↑</button>
                           <button type="button" class="h-10 w-10 rounded-full border border-stone-200 disabled:opacity-30" on:click={() => moveItem(category.id, itemIndex, 1)} disabled={itemIndex === category.items.length - 1} aria-label="Move item down">↓</button>

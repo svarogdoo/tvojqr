@@ -21,6 +21,7 @@ public sealed class AssetRepository : IAssetRepository
                 id,
                 project_id as ProjectId,
                 language_code as LanguageCode,
+                purpose,
                 original_file_name as OriginalFileName,
                 stored_file_name as StoredFileName,
                 content_type as ContentType,
@@ -44,6 +45,7 @@ public sealed class AssetRepository : IAssetRepository
                 id,
                 project_id as ProjectId,
                 language_code as LanguageCode,
+                purpose,
                 original_file_name as OriginalFileName,
                 stored_file_name as StoredFileName,
                 content_type as ContentType,
@@ -61,8 +63,8 @@ public sealed class AssetRepository : IAssetRepository
     public async Task<IReadOnlyList<Asset>> CreateAsync(Guid projectId, string languageCode, IReadOnlyList<CreateAssetRecord> assets, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            insert into assets (id, project_id, language_code, original_file_name, stored_file_name, content_type, size_bytes, sort_order)
-            values (@Id, @ProjectId, @LanguageCode, @OriginalFileName, @StoredFileName, @ContentType, @SizeBytes, @SortOrder);
+            insert into assets (id, project_id, language_code, purpose, original_file_name, stored_file_name, content_type, size_bytes, sort_order)
+            values (@Id, @ProjectId, @LanguageCode, @Purpose, @OriginalFileName, @StoredFileName, @ContentType, @SizeBytes, @SortOrder);
             """;
 
         using var connection = _connectionFactory.CreateConnection();
@@ -76,6 +78,7 @@ public sealed class AssetRepository : IAssetRepository
                 Id = Guid.NewGuid(),
                 ProjectId = projectId,
                 LanguageCode = languageCode,
+                asset.Purpose,
                 asset.OriginalFileName,
                 asset.StoredFileName,
                 asset.ContentType,

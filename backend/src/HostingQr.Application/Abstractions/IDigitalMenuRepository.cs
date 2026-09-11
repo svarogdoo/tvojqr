@@ -4,7 +4,7 @@ namespace HostingQr.Application.Abstractions;
 
 public interface IDigitalMenuRepository
 {
-    Task<DigitalMenuResponse> GetAsync(Guid projectId, string timeZone, CancellationToken cancellationToken = default);
+    Task<DigitalMenuResponse> GetAsync(Guid projectId, CancellationToken cancellationToken = default);
 
     Task SaveAsync(Guid projectId, SaveDigitalMenuRequest request, CancellationToken cancellationToken = default);
 
