@@ -48,3 +48,4 @@
 - Simplified public Digital Menu presentation by removing the format label, owner name, and section item counts.
 - Digital Menu cover verification passed: frontend check/build, backend tests, diff whitespace check, and local migration application.
 - Asset-purpose migration applied locally and the non-null `assets.purpose` column/default were verified.
+- Refined the cover layout so the photo fills the complete header and the restaurant name sits directly over the image.

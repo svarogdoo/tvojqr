@@ -258,16 +258,10 @@
       {/if}
       {#if project.menuType === "digital"}
         {#if project.coverImage}
-          <header class="relative mb-12 sm:mb-16">
-            <div class="relative h-52 overflow-hidden rounded-[2rem] border border-black/6 shadow-[0_24px_60px_rgba(45,53,46,0.14)] sm:h-80 sm:rounded-[2.5rem]">
-              <img src={toApiUrl(project.coverImage.url)} alt={`${project.name} restaurant cover`} class="h-full w-full object-cover" />
-              <div class="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/45"></div>
-            </div>
-            <div class="absolute inset-x-4 bottom-0 flex translate-y-1/2 justify-center sm:inset-x-10">
-              <div class="max-w-3xl rounded-[1.5rem] border border-black/6 bg-white/94 px-6 py-4 text-center shadow-[0_18px_45px_rgba(45,53,46,0.16)] backdrop-blur-md sm:rounded-[2rem] sm:px-10 sm:py-6">
-                <h1 class="text-2xl font-semibold tracking-tight text-stone-950 sm:text-4xl">{project.name}</h1>
-              </div>
-            </div>
+          <header class="relative flex h-52 items-center justify-center overflow-hidden rounded-[2rem] border border-black/6 px-6 text-center shadow-[0_24px_60px_rgba(45,53,46,0.14)] sm:h-80 sm:rounded-[2.5rem]">
+            <img src={toApiUrl(project.coverImage.url)} alt={`${project.name} restaurant cover`} class="absolute inset-0 h-full w-full object-cover" />
+            <div class="absolute inset-0 bg-black/38"></div>
+            <h1 class="relative max-w-3xl text-3xl font-semibold tracking-tight text-white drop-shadow-lg sm:text-5xl">{project.name}</h1>
           </header>
         {:else}
           <header class="rounded-[2rem] border border-black/6 bg-white/88 px-5 py-7 text-center shadow-[0_20px_50px_rgba(45,53,46,0.08)] backdrop-blur sm:px-8 sm:py-10">
