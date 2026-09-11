@@ -49,3 +49,4 @@
 - Digital Menu cover verification passed: frontend check/build, backend tests, diff whitespace check, and local migration application.
 - Asset-purpose migration applied locally and the non-null `assets.purpose` column/default were verified.
 - Refined the cover layout so the photo fills the complete header and the restaurant name sits directly over the image.
+- Expanded the cover to the viewport edges and top edge, with the language selector overlaid on the photo while menu content remains constrained.

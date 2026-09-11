@@ -31,7 +31,7 @@ Restaurants should immediately understand whether they want to host their existi
 - Both menu types manage languages from a shared toolbar inside Menu Editor rather than from General Settings.
 - Image Menu content is shown one selected language at a time, matching the Digital Menu editing flow.
 - Digital Menu General Settings provides one cover-image upload with preview, replacement, and removal.
-- A saved cover fills the complete header behind a centered restaurant name and readability overlay; menus without a cover retain the clean title-only header.
+- A saved cover fills a full-viewport-width header from the top edge behind a centered restaurant name and readability overlay; menus without a cover retain the clean title-only header.
 
 ## Risks Or Tradeoffs
 

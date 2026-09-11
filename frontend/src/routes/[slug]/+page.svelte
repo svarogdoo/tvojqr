@@ -210,7 +210,7 @@
     </div>
   {:else if state === "active" && project}
     <main class="mx-auto max-w-5xl">
-      {#if availableLanguages.length > 1 && selectedLanguage}
+      {#if availableLanguages.length > 1 && selectedLanguage && (project.menuType !== "digital" || !project.coverImage)}
         {@const currentMeta = getLanguageMeta(selectedLanguage.languageCode)}
         <div class="mb-4 flex justify-end">
           <div
@@ -258,9 +258,44 @@
       {/if}
       {#if project.menuType === "digital"}
         {#if project.coverImage}
-          <header class="relative flex h-52 items-center justify-center overflow-hidden rounded-[2rem] border border-black/6 px-6 text-center shadow-[0_24px_60px_rgba(45,53,46,0.14)] sm:h-80 sm:rounded-[2.5rem]">
+          <header class="relative left-1/2 -mt-4 flex h-64 w-screen -translate-x-1/2 items-center justify-center overflow-hidden rounded-b-[2rem] px-6 text-center shadow-[0_24px_60px_rgba(45,53,46,0.14)] sm:h-96 sm:rounded-b-[2.5rem]">
             <img src={toApiUrl(project.coverImage.url)} alt={`${project.name} restaurant cover`} class="absolute inset-0 h-full w-full object-cover" />
             <div class="absolute inset-0 bg-black/38"></div>
+            {#if availableLanguages.length > 1 && selectedLanguage}
+              {@const currentMeta = getLanguageMeta(selectedLanguage.languageCode)}
+              <div class="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+                <div class="relative -m-3 p-3" on:mouseleave={() => (languageMenuOpen = false)} role="group" aria-label="Page language selector">
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-black/28 px-4 py-2 text-sm font-semibold uppercase tracking-[0.12em] text-white shadow-lg backdrop-blur-md transition-all hover:bg-black/38"
+                    on:click={() => (languageMenuOpen = !languageMenuOpen)}
+                    aria-label="Choose page language"
+                  >
+                    <span class="text-base leading-none">{currentMeta.flag}</span>
+                    <span>{selectedLanguage.languageCode}</span>
+                  </button>
+                  {#if languageMenuOpen}
+                    <div class="absolute right-3 z-20 mt-2 min-w-44 overflow-hidden rounded-3xl border border-black/8 bg-white/94 p-1 text-left shadow-[0_20px_55px_rgba(45,53,46,0.2)] backdrop-blur-xl">
+                      {#each availableLanguages as language}
+                        {@const meta = getLanguageMeta(language.languageCode)}
+                        <button
+                          type="button"
+                          class="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100"
+                          on:click={() => {
+                            selectedLanguageCode = language.languageCode;
+                            languageMenuOpen = false;
+                          }}
+                        >
+                          <span class="text-base leading-none">{meta.flag}</span>
+                          <span class="font-semibold uppercase">{language.languageCode}</span>
+                          <span class="text-stone-500">{language.displayName}</span>
+                        </button>
+                      {/each}
+                    </div>
+                  {/if}
+                </div>
+              </div>
+            {/if}
             <h1 class="relative max-w-3xl text-3xl font-semibold tracking-tight text-white drop-shadow-lg sm:text-5xl">{project.name}</h1>
           </header>
         {:else}
