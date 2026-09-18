@@ -36,6 +36,8 @@
 - Added a compact localized Pricing link directly below the subtitle so mobile visitors can reach `/pricing` without relying on the desktop navigation.
 - Removed the circular flow arrows from Free redesign/setup and added only the requested inline design and gear icons before their highlighted titles.
 - Reduced the Google Maps preview dimensions, padding, and typography below 420px to prevent awkward wrapping while leaving larger breakpoints unchanged.
+- Replaced the final WhatsApp/email callout with localized Reach out copy and internal `/contact` and `/pricing` actions.
+- Replaced the two product-example arrow symbols with eye icons while preserving their links and accessible labels.
 - Updated README task status.
 
 ## Files Touched

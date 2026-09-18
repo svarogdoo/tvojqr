@@ -23,7 +23,7 @@ No blocking findings. The implementation matches the approved section order, lin
 - The translation panel exposes all four supported language examples at once without animation.
 - Product-card internals switch to side-by-side only from 768px, avoiding overly narrow copy and phone columns on small screens.
 - Decorative background shapes, arrows, and connector paths are excluded from assistive technology where applicable.
-- WhatsApp opens in a new tab with `noreferrer`; email uses a direct `mailto:` link.
+- The final callout uses internal `/contact` and `/pricing` links with localized labels.
 - Contact actions have visible keyboard focus states and stack on narrow screens.
 - Compaction preserves the existing mobile two-column path and touch-target dimensions while reducing desktop phone and connector height.
 - Free-word emphasis is derived from localized metadata rather than assuming the highlighted word appears first.
@@ -31,3 +31,4 @@ No blocking findings. The implementation matches the approved section order, lin
 - FAQ summary rows retain comfortable touch heights and visible keyboard focus on mobile and desktop.
 - The added Pricing link is keyboard focusable, localized, and visible at mobile widths.
 - Setup-card arrows are removed at every breakpoint; only the explicitly requested design and gear title icons remain.
+- The Maps preview uses a dedicated sub-420px size and typography treatment to avoid cramped business details and Menu-pill wrapping.

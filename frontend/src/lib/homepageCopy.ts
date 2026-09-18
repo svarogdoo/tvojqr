@@ -41,10 +41,10 @@ export const homepageCopy = {
         description: "Update and reupload your Image Menu files, or edit Web Page Menu items and prices in a few clicks.",
       },
       contact: {
-        title: "Ready to make your menu digital?",
-        description: "Send us your menu or ask us anything. Reach us on WhatsApp or by email.",
-        whatsapp: "Message on WhatsApp",
-        email: "Email us",
+        title: "Reach out!",
+        description: "Contact us or check our pricing.",
+        contactAction: "Contact us",
+        pricingAction: "Check pricing",
       },
     },
     whyUseUs: {
@@ -243,10 +243,10 @@ export const homepageCopy = {
         description: "Actualiza y vuelve a subir tu menú en imágenes, o edita los platos y precios del menú web en pocos clics.",
       },
       contact: {
-        title: "¿Listo para digitalizar tu menú?",
-        description: "Envíanos tu menú o pregúntanos lo que necesites por WhatsApp o correo electrónico.",
-        whatsapp: "Escribir por WhatsApp",
-        email: "Enviar un correo",
+        title: "¡Contáctanos!",
+        description: "Contáctanos o consulta nuestros precios.",
+        contactAction: "Contactar",
+        pricingAction: "Ver precios",
       },
     },
     whyUseUs: {
@@ -446,10 +446,10 @@ export const homepageCopy = {
         description: "Aggiorna e ricarica i file del Menu con immagini oppure modifica piatti e prezzi del Menu web in pochi clic.",
       },
       contact: {
-        title: "Vuoi rendere digitale il tuo menu?",
-        description: "Inviaci il menu o chiedici qualsiasi cosa tramite WhatsApp o email.",
-        whatsapp: "Scrivi su WhatsApp",
-        email: "Invia un'email",
+        title: "Contattaci!",
+        description: "Contattaci oppure consulta i nostri prezzi.",
+        contactAction: "Contattaci",
+        pricingAction: "Vedi i prezzi",
       },
     },
     whyUseUs: {
@@ -649,10 +649,10 @@ export const homepageCopy = {
         description: "Ažurirajte i ponovno učitajte slikovni jelovnik ili u nekoliko klikova uredite jela i cijene web-jelovnika.",
       },
       contact: {
-        title: "Spremni za digitalni jelovnik?",
-        description: "Pošaljite nam jelovnik ili nas pitajte što god trebate putem WhatsAppa ili e-pošte.",
-        whatsapp: "Pošalji WhatsApp poruku",
-        email: "Pošalji e-poštu",
+        title: "Javite nam se!",
+        description: "Kontaktirajte nas ili pogledajte naše cijene.",
+        contactAction: "Kontaktirajte nas",
+        pricingAction: "Pogledaj cijene",
       },
     },
     whyUseUs: {

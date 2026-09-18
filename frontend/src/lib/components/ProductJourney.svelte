@@ -89,7 +89,17 @@
               rel="noreferrer"
               aria-label={copy.imageMenu.example}
             >
-              <span aria-hidden="true">→</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                ></path>
+                <circle cx="12" cy="12" r="2.5"></circle>
+              </svg>
             </a>
           </div>
           <div class="phone-preview" aria-hidden="true">
@@ -111,7 +121,17 @@
               rel="noreferrer"
               aria-label={copy.webMenu.example}
             >
-              <span aria-hidden="true">→</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                ></path>
+                <circle cx="12" cy="12" r="2.5"></circle>
+              </svg>
             </a>
           </div>
           <div class="phone-preview" aria-hidden="true">
@@ -257,10 +277,8 @@
         <h2>{copy.contact.title}</h2>
         <p>{copy.contact.description}</p>
         <div class="contact-actions">
-          <a href="https://wa.me/35799180703" target="_blank" rel="noreferrer">
-            {copy.contact.whatsapp}
-          </a>
-          <a href="mailto:support@hostingqr.com">{copy.contact.email}</a>
+          <a href="/contact">{copy.contact.contactAction}</a>
+          <a href="/pricing">{copy.contact.pricingAction}</a>
         </div>
       </aside>
     </div>
@@ -512,6 +530,14 @@
     color: #354337;
     font-family: Arial, sans-serif;
     font-size: 1.25rem;
+  }
+
+  .card-arrow svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .card-arrow {
