@@ -1,5 +1,52 @@
 export const homepageCopy = {
   en: {
+    journey: {
+      question: "Want your menu digital?",
+      subtitle: "Two simple options. All the support you need.",
+      pricingCta: "View pricing",
+      imageMenu: {
+        title: "Image Menu",
+        description: "Keep your menu's original look in a simple, scan-ready format.",
+        example: "See example",
+      },
+      webMenu: {
+        title: "Web Page Menu",
+        description: "Give guests a fast, mobile-friendly menu built for the web.",
+        example: "See example",
+      },
+      redesign: {
+        title: "Free redesign",
+        highlight: "Free",
+        description: "Use your own menu or let us redesign it. We set everything up for you.",
+      },
+      setup: {
+        title: "Free setup",
+        highlight: "Free",
+        description: "Send us your menu and we turn it into a clean web page.",
+      },
+      translations: {
+        title: "Translations",
+        description: "We can help prepare your menu in the languages your guests need.",
+      },
+      qrCode: {
+        title: "QR Code",
+        description: "Get one shareable QR code that stays yours forever.",
+      },
+      googleMaps: {
+        title: "Google Maps",
+        description: "We help add your menu link to your Google pin so more guests can find it.",
+      },
+      changes: {
+        title: "Easy changes",
+        description: "Update and reupload your Image Menu files, or edit Web Page Menu items and prices in a few clicks.",
+      },
+      contact: {
+        title: "Ready to make your menu digital?",
+        description: "Send us your menu or ask us anything. Reach us on WhatsApp or by email.",
+        whatsapp: "Message on WhatsApp",
+        email: "Email us",
+      },
+    },
     whyUseUs: {
       title: "Why use us?",
       subtitle: "Faster updates, no reprints, and easy translations when you need them.",
@@ -31,15 +78,9 @@ export const homepageCopy = {
       faq: [
         {
           id: "how-does-it-work",
-          question: "How do I create a QR code menu or document page?",
-          answer: [
-            "You create your account",
-            "You click to start your new project",
-            "Upload your menu, images, or documents, then choose a public URL and background color",
-            "Add translated content in the language section, or do it later",
-            "QR is already there, pick your style and download it for printing",
-          ],
-          closing: "You are all ready to go!",
+          question: "How do I create my digital menu?",
+          answerText:
+            "Reach out to us and send your menu. We’ll set everything up for you, usually within a few days or less. Once it’s ready, you’ll receive an account where you can manage and update everything yourself. We handle the setup; you stay in control afterward.",
         },
         {
           id: "translate-page",
@@ -161,6 +202,53 @@ export const homepageCopy = {
     },
   },
   es: {
+    journey: {
+      question: "¿Quieres tu menú digital?",
+      subtitle: "Dos opciones sencillas. Todo el apoyo que necesitas.",
+      pricingCta: "Ver precios",
+      imageMenu: {
+        title: "Menú en imágenes",
+        description: "Mantén el diseño original de tu menú en un formato sencillo para escanear.",
+        example: "Ver ejemplo",
+      },
+      webMenu: {
+        title: "Menú en página web",
+        description: "Ofrece a tus clientes un menú rápido y adaptado al móvil.",
+        example: "Ver ejemplo",
+      },
+      redesign: {
+        title: "Rediseño gratis",
+        highlight: "gratis",
+        description: "Usa tu propio menú o deja que lo rediseñemos. Nosotros lo configuramos todo.",
+      },
+      setup: {
+        title: "Configuración gratis",
+        highlight: "gratis",
+        description: "Envíanos tu menú y lo convertimos en una página web clara.",
+      },
+      translations: {
+        title: "Traducciones",
+        description: "Podemos ayudarte a preparar el menú en los idiomas que necesiten tus clientes.",
+      },
+      qrCode: {
+        title: "Tu código QR",
+        description: "Recibe un código QR para compartir que será tuyo para siempre.",
+      },
+      googleMaps: {
+        title: "Google Maps",
+        description: "Te ayudamos a añadir el menú a tu ficha de Google para llegar a más clientes.",
+      },
+      changes: {
+        title: "Cambios fáciles",
+        description: "Actualiza y vuelve a subir tu menú en imágenes, o edita los platos y precios del menú web en pocos clics.",
+      },
+      contact: {
+        title: "¿Listo para digitalizar tu menú?",
+        description: "Envíanos tu menú o pregúntanos lo que necesites por WhatsApp o correo electrónico.",
+        whatsapp: "Escribir por WhatsApp",
+        email: "Enviar un correo",
+      },
+    },
     whyUseUs: {
       title: "¿Por qué nosotros?",
       subtitle:
@@ -193,15 +281,9 @@ export const homepageCopy = {
       faq: [
         {
           id: "how-does-it-work",
-          question: "¿Cómo funciona esto?",
-          answer: [
-            "Creas tu cuenta",
-            "Haces clic para empezar tu nuevo proyecto",
-            "Subes tu oferta, eliges URL y color de fondo",
-            "Añades la oferta traducida en la sección de idiomas, o lo haces más tarde",
-            "El QR ya está listo: elige tu estilo y descárgalo para imprimir",
-          ],
-          closing: "¡Ya estás listo para empezar!",
+          question: "¿Cómo creo mi menú digital?",
+          answerText:
+            "Contáctanos y envíanos tu menú. Lo configuraremos todo por ti, normalmente en unos pocos días o menos. Cuando esté listo, recibirás una cuenta desde la que podrás gestionar y actualizar todo. Nosotros hacemos la configuración inicial; después tú mantienes el control.",
         },
         {
           id: "translate-page",
@@ -323,6 +405,53 @@ export const homepageCopy = {
     },
   },
   it: {
+    journey: {
+      question: "Vuoi il tuo menu digitale?",
+      subtitle: "Due opzioni semplici. Tutto il supporto che ti serve.",
+      pricingCta: "Vedi i prezzi",
+      imageMenu: {
+        title: "Menu con immagini",
+        description: "Mantieni l'aspetto originale del menu in un formato semplice da scansionare.",
+        example: "Vedi esempio",
+      },
+      webMenu: {
+        title: "Menu su pagina web",
+        description: "Offri agli ospiti un menu veloce e ottimizzato per lo smartphone.",
+        example: "Vedi esempio",
+      },
+      redesign: {
+        title: "Restyling gratuito",
+        highlight: "gratuito",
+        description: "Usa il tuo menu o lascia che lo ridisegniamo. Pensiamo noi a configurare tutto.",
+      },
+      setup: {
+        title: "Configurazione gratuita",
+        highlight: "gratuita",
+        description: "Inviaci il menu e lo trasformiamo in una pagina web chiara.",
+      },
+      translations: {
+        title: "Traduzioni",
+        description: "Possiamo preparare il menu nelle lingue di cui hanno bisogno i tuoi ospiti.",
+      },
+      qrCode: {
+        title: "Il tuo codice QR",
+        description: "Ricevi un codice QR da condividere che resterà tuo per sempre.",
+      },
+      googleMaps: {
+        title: "Google Maps",
+        description: "Ti aiutiamo ad aggiungere il menu alla scheda Google per raggiungere più clienti.",
+      },
+      changes: {
+        title: "Modifiche semplici",
+        description: "Aggiorna e ricarica i file del Menu con immagini oppure modifica piatti e prezzi del Menu web in pochi clic.",
+      },
+      contact: {
+        title: "Vuoi rendere digitale il tuo menu?",
+        description: "Inviaci il menu o chiedici qualsiasi cosa tramite WhatsApp o email.",
+        whatsapp: "Scrivi su WhatsApp",
+        email: "Invia un'email",
+      },
+    },
     whyUseUs: {
       title: "Perché scegliere noi?",
       subtitle:
@@ -355,15 +484,9 @@ export const homepageCopy = {
       faq: [
         {
           id: "how-does-it-work",
-          question: "Come funziona?",
-          answer: [
-            "Crei il tuo account",
-            "Clicchi per iniziare un nuovo progetto",
-            "Carichi la tua offerta, scegli URL e colore di sfondo",
-            "Aggiungi l'offerta tradotta nella sezione lingue, oppure lo fai più tardi",
-            "Il QR è già pronto: scegli lo stile e scaricalo per la stampa",
-          ],
-          closing: "Sei pronto per partire!",
+          question: "Come creo il mio menu digitale?",
+          answerText:
+            "Contattaci e inviaci il tuo menu. Configureremo tutto per te, solitamente entro pochi giorni o meno. Quando sarà pronto, riceverai un account da cui potrai gestire e aggiornare tutto in autonomia. Noi ci occupiamo della configurazione iniziale; poi il controllo resta a te.",
         },
         {
           id: "translate-page",
@@ -485,6 +608,53 @@ export const homepageCopy = {
     },
   },
   hr: {
+    journey: {
+      question: "Želite digitalni jelovnik?",
+      subtitle: "Dvije jednostavne opcije. Sva podrška koja vam treba.",
+      pricingCta: "Pogledaj cijene",
+      imageMenu: {
+        title: "Slikovni jelovnik",
+        description: "Zadržite izvorni izgled jelovnika u jednostavnom formatu za skeniranje.",
+        example: "Pogledaj primjer",
+      },
+      webMenu: {
+        title: "Jelovnik na web-stranici",
+        description: "Ponudite gostima brz jelovnik prilagođen mobilnim uređajima.",
+        example: "Pogledaj primjer",
+      },
+      redesign: {
+        title: "Besplatan redizajn",
+        highlight: "Besplatan",
+        description: "Koristite svoj jelovnik ili ga prepustite nama. Mi ćemo sve postaviti.",
+      },
+      setup: {
+        title: "Besplatno postavljanje",
+        highlight: "Besplatno",
+        description: "Pošaljite nam jelovnik, a mi ćemo ga pretvoriti u urednu web-stranicu.",
+      },
+      translations: {
+        title: "Prijevodi",
+        description: "Možemo pripremiti jelovnik na jezicima koji su potrebni vašim gostima.",
+      },
+      qrCode: {
+        title: "Vaš QR kod",
+        description: "Dobivate QR kod za dijeljenje koji zauvijek ostaje vaš.",
+      },
+      googleMaps: {
+        title: "Google Maps",
+        description: "Pomažemo dodati jelovnik na vašu Google lokaciju kako bi vas našlo više gostiju.",
+      },
+      changes: {
+        title: "Jednostavne izmjene",
+        description: "Ažurirajte i ponovno učitajte slikovni jelovnik ili u nekoliko klikova uredite jela i cijene web-jelovnika.",
+      },
+      contact: {
+        title: "Spremni za digitalni jelovnik?",
+        description: "Pošaljite nam jelovnik ili nas pitajte što god trebate putem WhatsAppa ili e-pošte.",
+        whatsapp: "Pošalji WhatsApp poruku",
+        email: "Pošalji e-poštu",
+      },
+    },
     whyUseUs: {
       title: "Zašto odabrati nas?",
       subtitle:
@@ -517,15 +687,9 @@ export const homepageCopy = {
       faq: [
         {
           id: "how-does-it-work",
-          question: "Kako funkcionira?",
-          answer: [
-            "Napravite svoj račun",
-            "Kliknete za početak novog projekta",
-            "Učitate svoju ponudu, odaberete URL i boju pozadine",
-            "Dodate prevedenu ponudu u odjeljku jezika ili to učinite kasnije",
-            "QR je već spreman: odaberite stil i preuzmite ga za tisak",
-          ],
-          closing: "Spremni ste za početak!",
+          question: "Kako izraditi digitalni jelovnik?",
+          answerText:
+            "Kontaktirajte nas i pošaljite nam svoj jelovnik. Sve ćemo postaviti za vas, obično u roku od nekoliko dana ili manje. Kada bude spremno, dobit ćete račun s kojeg možete samostalno upravljati svime i unositi izmjene. Mi odrađujemo početno postavljanje, a nakon toga vi imate potpunu kontrolu.",
         },
         {
           id: "translate-page",

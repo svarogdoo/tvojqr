@@ -191,7 +191,7 @@
 </svelte:head>
 
 <div
-  class="min-h-screen px-4 py-4 sm:px-6 lg:px-8"
+  class="min-h-screen overflow-x-clip px-4 py-4 sm:px-6 lg:px-8"
   style={`--page-bg: ${project?.backgroundColor ?? "#f8f7f3"}; background-color: var(--page-bg);`}
 >
   {#if state === "loading"}

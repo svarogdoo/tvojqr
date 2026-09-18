@@ -1,9 +1,8 @@
 <script lang="ts">
   import Footer from "$lib/components/Footer.svelte";
-  import Hero from "$lib/components/Hero.svelte";
   import Navigation from "$lib/components/Navigation.svelte";
+  import ProductJourney from "$lib/components/ProductJourney.svelte";
   import Seo from "$lib/components/Seo.svelte";
-  import Services from "$lib/components/Services.svelte";
   import WhoAreWe from "$lib/components/WhoAreWe.svelte";
   import { siteUrl } from "$lib/config";
   import { language, languages, type LanguageCode } from "$lib/stores/language";
@@ -64,8 +63,7 @@
 <div class="flex min-h-screen flex-col">
   <Navigation />
   <main class="flex-1">
-    <Hero />
-    <Services />
+    <ProductJourney />
     <WhoAreWe />
   </main>
   <Footer />
