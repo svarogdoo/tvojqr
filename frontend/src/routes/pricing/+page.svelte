@@ -28,8 +28,8 @@
     {
       id: "plus",
       price: {
-        monthly: { amount: "€10", period: "month" },
-        annual: { amount: "€100", period: "year" },
+        monthly: { amount: "€12", period: "month" },
+        annual: { amount: "€120", period: "year" },
       },
     },
   ];

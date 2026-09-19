@@ -77,7 +77,7 @@ To be fully autonomous, HostingQr should include built-in billing:
 The current product pricing is:
 
 - Image Menu: EUR 7 monthly or EUR 70 annually.
-- Digital Menu: EUR 10 monthly or EUR 100 annually.
+- Digital Menu: EUR 12 monthly or EUR 120 annually.
 - Annual billing includes two months free.
 - A two-week free trial is available through the current contact-based onboarding flow.
 
@@ -351,6 +351,7 @@ Status markers for tasks:
 [DONE] 9.1.a Tier names
 [PARTIAL] 9.1.b Feature limits (projects and languages enforced; storage, traffic, file types remain)
 [PARTIAL] 9.1.c Free tier and/or free trial policy
+[DONE] 9.1.d Increase Digital Menu pricing to EUR 12 monthly or EUR 120 annually.
 9.2 [PARTIAL] Integrate recurring payments provider.
 9.2.a [PARTIAL] Subscription checkout temporarily routes paid-plan interest to contact form while Polar redirect is disabled.
 [DONE] 9.2.b Customer billing portal
