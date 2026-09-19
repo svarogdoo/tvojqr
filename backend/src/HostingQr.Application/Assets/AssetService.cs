@@ -19,17 +19,20 @@ public sealed class AssetService : IAssetService
     private readonly IProjectRepository _projectRepository;
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetStorageService _assetStorageService;
+    private readonly IProjectAccessService _projectAccessService;
 
     public AssetService(
         ICurrentUserContext currentUserContext,
         IProjectRepository projectRepository,
         IAssetRepository assetRepository,
-        IAssetStorageService assetStorageService)
+        IAssetStorageService assetStorageService,
+        IProjectAccessService projectAccessService)
     {
         _currentUserContext = currentUserContext;
         _projectRepository = projectRepository;
         _assetRepository = assetRepository;
         _assetStorageService = assetStorageService;
+        _projectAccessService = projectAccessService;
     }
 
     public async Task<IReadOnlyList<AssetResponse>> UploadImagesAsync(Guid projectId, string languageCode, IFormFileCollection files, CancellationToken cancellationToken = default)
@@ -39,8 +42,7 @@ public sealed class AssetService : IAssetService
             throw new ArgumentException("At least one image is required.");
         }
 
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        var project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             throw new InvalidOperationException("Project was not found.");
@@ -70,8 +72,7 @@ public sealed class AssetService : IAssetService
 
     public async Task<AssetResponse> UploadDigitalMenuCoverAsync(Guid projectId, IFormFile file, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        var project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             throw new InvalidOperationException("Project was not found.");
@@ -112,8 +113,7 @@ public sealed class AssetService : IAssetService
 
     public async Task<bool> DeleteImageAsync(Guid projectId, Guid assetId, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        var project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             return false;
@@ -131,8 +131,7 @@ public sealed class AssetService : IAssetService
 
     public async Task<bool> DeleteDigitalMenuCoverAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        var project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null || project.MenuType != ProjectMenuType.Digital)
         {
             return false;
@@ -152,8 +151,7 @@ public sealed class AssetService : IAssetService
 
     public async Task<IReadOnlyList<AssetResponse>?> ReorderImagesAsync(Guid projectId, IReadOnlyList<Guid> assetIds, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        var project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        var project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             return null;

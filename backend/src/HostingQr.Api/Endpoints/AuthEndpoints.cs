@@ -15,7 +15,7 @@ public static class AuthEndpoints
     {
         RouteGroupBuilder group = endpoints.MapGroup("/api/auth").WithTags("Auth");
 
-        group.MapGet("/google", (HttpContext httpContext, IOptions<AuthOptions> authOptions) =>
+        group.MapGet("/google", (HttpContext httpContext, IOptions<AuthOptions> authOptions, string? returnPath) =>
         {
             GoogleAuthOptions googleAuthOptions = httpContext.RequestServices.GetRequiredService<IOptions<GoogleAuthOptions>>().Value;
             if (!googleAuthOptions.IsConfigured())
@@ -25,9 +25,10 @@ public static class AuthEndpoints
                     statusCode: StatusCodes.Status503ServiceUnavailable);
             }
 
+            string validatedReturnPath = ValidateReturnPath(returnPath);
             var properties = new AuthenticationProperties
             {
-                RedirectUri = $"{authOptions.Value.FrontendBaseUrl.TrimEnd('/')}/dashboard"
+                RedirectUri = $"{authOptions.Value.FrontendBaseUrl.TrimEnd('/')}{validatedReturnPath}"
             };
 
             return Results.Challenge(properties, [AuthConstants.GoogleScheme]);
@@ -58,5 +59,19 @@ public static class AuthEndpoints
             .WithSummary("Signs out the current user.");
 
         return endpoints;
+    }
+
+    internal static string ValidateReturnPath(string? returnPath)
+    {
+        if (string.IsNullOrWhiteSpace(returnPath))
+        {
+            return "/dashboard";
+        }
+
+        string value = returnPath.Trim();
+        return value.StartsWith("/", StringComparison.Ordinal) && !value.StartsWith("//", StringComparison.Ordinal) &&
+            Uri.TryCreate(value, UriKind.Relative, out _) && !value.Contains('\\')
+            ? value
+            : "/dashboard";
     }
 }

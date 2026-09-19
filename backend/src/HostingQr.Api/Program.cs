@@ -58,6 +58,8 @@ app.UseAuthorization();
 app.MapAdminEndpoints();
 app.MapAuthEndpoints();
 app.MapBillingEndpoints();
+app.MapInvoiceEndpoints();
+app.MapInvitationEndpoints();
 app.MapSystemEndpoints();
 app.MapProjectEndpoints();
 app.MapSlugEndpoints();

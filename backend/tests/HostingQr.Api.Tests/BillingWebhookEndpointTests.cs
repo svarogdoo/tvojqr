@@ -94,6 +94,33 @@ public sealed class BillingWebhookEndpointTests
         Assert.Null(billingEvent.EntitlementActive);
     }
 
+    [Fact]
+    public async Task PolarWebhook_RecordsPreservedManualEntitlement()
+    {
+        await using TestApplicationFactory factory = new();
+        factory.EntitlementRepository.ApplyUpsert = false;
+        factory.EntitlementRepository.Current = new EntitlementResponse(BillingTier.Plus, true, true, null);
+        HttpClient client = factory.CreateClient();
+        string payload = """
+            {
+              "type": "subscription.revoked",
+              "data": {
+                "metadata": {
+                  "userId": "11111111-1111-1111-1111-111111111111",
+                  "tier": "standard"
+                }
+              }
+            }
+            """;
+
+        HttpResponseMessage response = await client.PostAsync("/api/billing/polar/webhook", CreateSignedContent(payload));
+
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+        BillingEventRecord billingEvent = Assert.Single(factory.BillingEventRepository.Events);
+        Assert.Equal("manual_entitlement_preserved", billingEvent.ProcessedAction);
+        Assert.True(billingEvent.EntitlementActive);
+    }
+
     private static StringContent CreateSignedContent(string payload)
     {
         string id = "evt_test";
@@ -138,16 +165,18 @@ public sealed class BillingWebhookEndpointTests
     public sealed class FakeEntitlementRepository : IEntitlementRepository
     {
         public EntitlementUpsert? LastUpsert { get; private set; }
+        public bool ApplyUpsert { get; set; } = true;
+        public EntitlementResponse Current { get; set; } = new(BillingTier.None, false, false, null);
 
         public Task<EntitlementResponse> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new EntitlementResponse(BillingTier.None, false, false, null));
+            return Task.FromResult(Current);
         }
 
-        public Task UpsertAsync(Guid userId, string tier, bool isActive, DateTimeOffset? endsAt, bool grantedManually = false, CancellationToken cancellationToken = default)
+        public Task<bool> UpsertAsync(Guid userId, string tier, bool isActive, DateTimeOffset? endsAt, bool grantedManually = false, CancellationToken cancellationToken = default)
         {
             LastUpsert = new EntitlementUpsert(userId, tier, isActive, endsAt, grantedManually);
-            return Task.CompletedTask;
+            return Task.FromResult(ApplyUpsert);
         }
     }
 

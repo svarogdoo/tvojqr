@@ -45,11 +45,9 @@ public sealed class AssetServiceTests
     public async Task UploadDigitalMenuCoverAsync_RejectsProjectsOutsideCurrentOwner()
     {
         var storage = new FakeAssetStorageService("cover.webp");
-        var service = new AssetService(
-            new FakeCurrentUserContext(_userId),
-            new FakeProjectRepository(new ProjectWithSlug { Id = _projectId, OwnerUserId = Guid.NewGuid(), MenuType = ProjectMenuType.Digital }),
-            new FakeAssetRepository([]),
-            storage);
+        FakeCurrentUserContext userContext = new(_userId);
+        FakeProjectRepository projectRepository = new(new ProjectWithSlug { Id = _projectId, OwnerUserId = Guid.NewGuid(), MenuType = ProjectMenuType.Digital });
+        var service = new AssetService(userContext, projectRepository, new FakeAssetRepository([]), storage, new FakeProjectAccessService(userContext, projectRepository));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.UploadDigitalMenuCoverAsync(_projectId, CreateFormFile("cover.jpg", "image/jpeg")));
@@ -74,11 +72,12 @@ public sealed class AssetServiceTests
         Assert.Contains("cover.webp", storage.DeletedFiles);
     }
 
-    private AssetService CreateService(string menuType, FakeAssetRepository repository, FakeAssetStorageService storage) => new(
-        new FakeCurrentUserContext(_userId),
-        new FakeProjectRepository(new ProjectWithSlug { Id = _projectId, OwnerUserId = _userId, MenuType = menuType }),
-        repository,
-        storage);
+    private AssetService CreateService(string menuType, FakeAssetRepository repository, FakeAssetStorageService storage)
+    {
+        FakeCurrentUserContext userContext = new(_userId);
+        FakeProjectRepository projectRepository = new(new ProjectWithSlug { Id = _projectId, OwnerUserId = _userId, MenuType = menuType });
+        return new AssetService(userContext, projectRepository, repository, storage, new FakeProjectAccessService(userContext, projectRepository));
+    }
 
     private Asset CreateAsset(string purpose, string storedFileName, string languageCode) => new()
     {
@@ -112,12 +111,22 @@ public sealed class AssetServiceTests
         public Task<ProjectWithSlug?> GetByIdAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default) =>
             Task.FromResult<ProjectWithSlug?>(project.OwnerUserId == ownerUserId && project.Id == projectId ? project : null);
 
+        public Task<ProjectWithSlug?> GetByIdAsync(Guid projectId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<ProjectWithSlug?>(project.Id == projectId ? project : null);
+
         public Task<IReadOnlyList<ProjectWithSlug>> ListByOwnerAsync(Guid ownerUserId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<PublicProject?> GetPublicBySlugAsync(string slug, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, string menuType, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ProjectWithSlug?> UpdateAsync(Guid ownerUserId, Guid projectId, string name, string slug, string backgroundColor, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<ProjectWithSlug?> UpdateStatusAsync(Guid ownerUserId, Guid projectId, string status, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<bool> DeleteAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    }
+
+    private sealed class FakeProjectAccessService(ICurrentUserContext userContext, IProjectRepository repository) : IProjectAccessService
+    {
+        public Task<bool> IsCurrentUserAdminAsync(CancellationToken cancellationToken = default) => Task.FromResult(false);
+        public Task<ProjectWithSlug?> GetAccessibleProjectAsync(Guid projectId, CancellationToken cancellationToken = default) =>
+            repository.GetByIdAsync(userContext.GetCurrentUserId(), projectId, cancellationToken);
     }
 
     private sealed class FakeAssetRepository(IEnumerable<Asset> initialAssets) : IAssetRepository

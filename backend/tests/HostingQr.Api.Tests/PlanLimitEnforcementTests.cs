@@ -153,16 +153,14 @@ public sealed class PlanLimitEnforcementTests
         Assert.Equal(0, viewRepository.IncrementCount);
     }
 
-    private static ProjectService CreateService(FakeProjectRepository projectRepository, FakeLanguageRepository languageRepository, string tier, FakeProjectViewRepository? viewRepository = null) => new(
-        new FakeCurrentUserContext(),
-        new FakeUserRepository(),
-        projectRepository,
-        viewRepository ?? new FakeProjectViewRepository(),
-        new FakeSlugService(),
-        new FakeEntitlementService(tier),
-        new FakeAssetRepository(),
-        new FakeAssetService(),
-        languageRepository);
+    private static ProjectService CreateService(FakeProjectRepository projectRepository, FakeLanguageRepository languageRepository, string tier, FakeProjectViewRepository? viewRepository = null)
+    {
+        FakeCurrentUserContext userContext = new();
+        FakeEntitlementService entitlementService = new(tier);
+        return new ProjectService(userContext, new FakeUserRepository(), projectRepository, viewRepository ?? new FakeProjectViewRepository(),
+            new FakeSlugService(), entitlementService, new FakeAssetRepository(), new FakeAssetService(), languageRepository,
+            new ProjectAccessService(userContext, entitlementService, projectRepository));
+    }
 
     private static ProjectLanguageVariant CreateLanguage(Guid projectId, string languageCode, bool isDefault, int sortOrder) => new()
     {
@@ -202,6 +200,9 @@ public sealed class PlanLimitEnforcementTests
 
         public Task<ProjectWithSlug?> GetByIdAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default) =>
             Task.FromResult(Projects.SingleOrDefault(project => project.OwnerUserId == ownerUserId && project.Id == projectId));
+
+        public Task<ProjectWithSlug?> GetByIdAsync(Guid projectId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Projects.SingleOrDefault(project => project.Id == projectId));
 
         public Task<PublicProject?> GetPublicBySlugAsync(string slug, CancellationToken cancellationToken = default) =>
             Task.FromResult(PublicProject?.Slug == slug ? PublicProject : null);

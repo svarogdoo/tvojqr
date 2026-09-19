@@ -12,6 +12,7 @@ public sealed class DigitalMenuService : IDigitalMenuService
     private readonly IDigitalMenuRepository _menuRepository;
     private readonly IEntitlementService _entitlementService;
     private readonly TimeProvider _timeProvider;
+    private readonly IProjectAccessService _projectAccessService;
 
     public DigitalMenuService(
         ICurrentUserContext currentUserContext,
@@ -19,7 +20,8 @@ public sealed class DigitalMenuService : IDigitalMenuService
         IProjectLanguageVariantRepository languageRepository,
         IDigitalMenuRepository menuRepository,
         IEntitlementService entitlementService,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IProjectAccessService projectAccessService)
     {
         _currentUserContext = currentUserContext;
         _projectRepository = projectRepository;
@@ -27,6 +29,7 @@ public sealed class DigitalMenuService : IDigitalMenuService
         _menuRepository = menuRepository;
         _entitlementService = entitlementService;
         _timeProvider = timeProvider;
+        _projectAccessService = projectAccessService;
     }
 
     public async Task<DigitalMenuResponse?> GetForOwnerAsync(Guid projectId, CancellationToken cancellationToken = default)
@@ -82,8 +85,7 @@ public sealed class DigitalMenuService : IDigitalMenuService
             throw new InvalidOperationException("Digital Menu requires the Digital Menu plan.");
         }
 
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        ProjectWithSlug? project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is not null && project.MenuType != ProjectMenuType.Digital)
         {
             throw new InvalidOperationException("This project is not a Digital Menu.");

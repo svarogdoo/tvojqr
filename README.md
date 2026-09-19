@@ -475,6 +475,12 @@ Status markers for tasks:
 
 [DONE] 15.1 Add an admin-only overview page.
 [DONE] 15.1.a Show total accounts, total views, and account counts by tier.
+[DONE] 15.2 Add owner-only client and menu management.
+[DONE] 15.2.a Show all clients with menu types, joined date, billing cycle, and invoice dates.
+[DONE] 15.2.b Let the owner view and edit every menu while clients remain limited to their own menus.
+[DONE] 15.2.c Let the owner invite a client by email and securely transfer a completed menu.
+[DONE] 15.2.d Add owner-managed monthly/annual billing profiles and private invoice uploads.
+[DONE] 15.2.e Show read-only billing details and invoice links in client account settings.
 
 ### 16. Search Visibility
 

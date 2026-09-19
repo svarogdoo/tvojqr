@@ -12,6 +12,8 @@ using HostingQr.Infrastructure.Projects;
 using HostingQr.Infrastructure.Services;
 using HostingQr.Infrastructure.Slugs;
 using HostingQr.Infrastructure.Users;
+using HostingQr.Infrastructure.Invoices;
+using HostingQr.Infrastructure.Invitations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Http;
@@ -53,6 +55,9 @@ public static class DependencyInjection
         services
             .AddOptions<PolarOptions>()
             .Bind(configuration.GetSection(PolarOptions.SectionName));
+
+        services.AddOptions<PrivateInvoiceStorageOptions>().Bind(configuration.GetSection(PrivateInvoiceStorageOptions.SectionName));
+        services.AddOptions<SmtpOptions>().Bind(configuration.GetSection(SmtpOptions.SectionName));
 
         services.AddHttpClient();
         services.AddHttpContextAccessor();
@@ -117,6 +122,7 @@ public static class DependencyInjection
         services.AddSingleton<IConfigureOptions<GoogleOptions>, GoogleAuthenticationConfigurator>();
 
         StorageOptions storageOptions = configuration.GetSection(StorageOptions.SectionName).Get<StorageOptions>() ?? new StorageOptions();
+        PrivateInvoiceStorageOptions privateInvoiceOptions = configuration.GetSection(PrivateInvoiceStorageOptions.SectionName).Get<PrivateInvoiceStorageOptions>() ?? new PrivateInvoiceStorageOptions();
 
         services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
         services.AddSingleton<IBackendInfoService, BackendInfoService>();
@@ -128,6 +134,15 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserContext, AuthenticatedUserContext>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAdminOverviewRepository, AdminOverviewRepository>();
+        services.AddScoped<IAdminClientRepository, AdminClientRepository>();
+        services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
+        services.AddSingleton<IInvitationEmailSender, SmtpInvitationEmailSender>();
+        services.AddSingleton<LocalPrivateInvoiceStorage>();
+        services.AddSingleton<R2PrivateInvoiceStorage>();
+        services.AddSingleton<IPrivateInvoiceStorage>(provider => privateInvoiceOptions.UsesR2()
+            ? provider.GetRequiredService<R2PrivateInvoiceStorage>()
+            : provider.GetRequiredService<LocalPrivateInvoiceStorage>());
         services.AddScoped<IBillingEventRepository, BillingEventRepository>();
         services.AddScoped<IEntitlementRepository, EntitlementRepository>();
         services.AddScoped<IEntitlementService, EntitlementService>();

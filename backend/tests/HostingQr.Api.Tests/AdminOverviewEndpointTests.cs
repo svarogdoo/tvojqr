@@ -57,6 +57,17 @@ public sealed class AdminOverviewEndpointTests
     }
 
     [Fact]
+    public async Task GetAdminClients_ReturnsForbiddenForNonAdmin()
+    {
+        await using TestApplicationFactory factory = new(BillingTier.Standard);
+        HttpClient client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        HttpResponseMessage response = await client.GetAsync("/api/admin/clients");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetAdminOverview_ReturnsMetricsForAdmin()
     {
         await using TestApplicationFactory factory = new(BillingTier.Admin);

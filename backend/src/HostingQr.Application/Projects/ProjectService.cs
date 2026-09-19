@@ -15,6 +15,7 @@ public sealed class ProjectService : IProjectService
     private readonly IAssetRepository _assetRepository;
     private readonly IAssetService _assetService;
     private readonly IProjectLanguageVariantRepository _languageVariantRepository;
+    private readonly IProjectAccessService _projectAccessService;
 
     public ProjectService(
         ICurrentUserContext currentUserContext,
@@ -25,7 +26,8 @@ public sealed class ProjectService : IProjectService
         IEntitlementService entitlementService,
         IAssetRepository assetRepository,
         IAssetService assetService,
-        IProjectLanguageVariantRepository languageVariantRepository)
+        IProjectLanguageVariantRepository languageVariantRepository,
+        IProjectAccessService projectAccessService)
     {
         _currentUserContext = currentUserContext;
         _userRepository = userRepository;
@@ -36,6 +38,7 @@ public sealed class ProjectService : IProjectService
         _assetRepository = assetRepository;
         _assetService = assetService;
         _languageVariantRepository = languageVariantRepository;
+        _projectAccessService = projectAccessService;
     }
 
     public async Task<IReadOnlyList<ProjectListItem>> ListProjectsAsync(CancellationToken cancellationToken = default)
@@ -55,8 +58,7 @@ public sealed class ProjectService : IProjectService
 
     public async Task<ProjectDetailResponse?> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        Domain.Projects.ProjectWithSlug? project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
 
         return project is null
             ? null
@@ -104,10 +106,9 @@ public sealed class ProjectService : IProjectService
             throw new ArgumentException("Project name is required.", nameof(request));
         }
 
-        Guid userId = _currentUserContext.GetCurrentUserId();
         string normalizedSlug = _slugService.NormalizeOrThrow(request.Slug);
 
-        if (await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken) is not { } existingProject)
+        if (await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken) is not { } existingProject)
         {
             return null;
         }
@@ -119,7 +120,7 @@ public sealed class ProjectService : IProjectService
         }
 
         string backgroundColor = NormalizeBackgroundColor(request.BackgroundColor);
-        Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(userId, projectId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
+        Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateAsync(existingProject.OwnerUserId, projectId, request.Name.Trim(), normalizedSlug, backgroundColor, cancellationToken);
         if (updatedProject is null)
         {
             return null;
@@ -131,8 +132,8 @@ public sealed class ProjectService : IProjectService
     public async Task<ProjectDetailResponse?> UpdateProjectStatusAsync(Guid projectId, UpdateProjectStatusRequest request, CancellationToken cancellationToken = default)
     {
         string normalizedStatus = NormalizeStatus(request.Status);
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        Domain.Projects.ProjectWithSlug? updatedProject = await _projectRepository.UpdateStatusAsync(userId, projectId, normalizedStatus, cancellationToken);
+        Domain.Projects.ProjectWithSlug? existingProject = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
+        Domain.Projects.ProjectWithSlug? updatedProject = existingProject is null ? null : await _projectRepository.UpdateStatusAsync(existingProject.OwnerUserId, projectId, normalizedStatus, cancellationToken);
 
         return updatedProject is null
             ? null
@@ -141,8 +142,7 @@ public sealed class ProjectService : IProjectService
 
     public async Task<ProjectDetailResponse?> AddLanguageAsync(Guid projectId, CreateProjectLanguageRequest request, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        Domain.Projects.ProjectWithSlug? project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             return null;
@@ -168,8 +168,7 @@ public sealed class ProjectService : IProjectService
 
     public async Task<ProjectDetailResponse?> UpdateLanguageAsync(Guid projectId, string languageCode, UpdateProjectLanguageRequest request, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        Domain.Projects.ProjectWithSlug? project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             return null;
@@ -199,8 +198,7 @@ public sealed class ProjectService : IProjectService
 
     public async Task<ProjectDetailResponse?> DeleteLanguageAsync(Guid projectId, string languageCode, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        Domain.Projects.ProjectWithSlug? project = await _projectRepository.GetByIdAsync(userId, projectId, cancellationToken);
+        Domain.Projects.ProjectWithSlug? project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
         if (project is null)
         {
             return null;
@@ -230,8 +228,8 @@ public sealed class ProjectService : IProjectService
 
     public async Task<bool> DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
-        Guid userId = _currentUserContext.GetCurrentUserId();
-        return await _projectRepository.DeleteAsync(userId, projectId, cancellationToken);
+        Domain.Projects.ProjectWithSlug? project = await _projectAccessService.GetAccessibleProjectAsync(projectId, cancellationToken);
+        return project is not null && await _projectRepository.DeleteAsync(project.OwnerUserId, projectId, cancellationToken);
     }
 
     public async Task<PublicProjectResponse?> GetPublicProjectAsync(string slug, CancellationToken cancellationToken = default)

@@ -32,8 +32,20 @@ Current endpoint:
 - `POST /api/slugs/generate`
 - `GET /api/public/{slug}`
 - `GET /api/billing/entitlement`
+- `GET /api/billing/manual-profile`
 - `POST /api/billing/checkout`
 - `POST /api/billing/polar/webhook`
+- `GET /api/admin/clients`
+- `GET /api/admin/menus`
+- `PUT /api/admin/clients/{userId}/billing`
+- `POST|GET /api/admin/clients/{userId}/invoices`
+- `DELETE /api/admin/invoices/{invoiceId}`
+- `GET /api/invoices`
+- `GET /api/invoices/{invoiceId}/download`
+- `POST /api/admin/projects/{projectId}/invitations`
+- `DELETE /api/admin/invitations/{invitationId}`
+- `GET /api/invitations/{token}`
+- `POST /api/invitations/{token}/accept`
 
 Current notes:
 
@@ -181,6 +193,38 @@ Admin overview:
 - only active `admin` entitlement users can access the metrics endpoint
 - metrics include total accounts, total views, and account counts by current tier (`none`, `admin`, `free`, `standard`, `plus`)
 
+Owner client management:
+
+- active `admin` entitlement is the only owner/admin gate
+- manual billing profiles grant the existing `plus` entitlement so assigned Image and Digital Menus remain editable; accepting additional transfers does not overwrite an existing entitlement
+- manually granted entitlements take precedence over dormant Polar webhook updates
+- invoice PDFs are limited to 10 MB, stored privately, and streamed only through authenticated endpoints
+- local private invoices default to `data/private-invoices` under the API content root; set `PrivateInvoices__RootPath` to a persistent mounted directory in production
+- private R2 storage uses a separate non-public bucket and credentials; it never uses `Storage__R2__PublicBaseUrl`
+
+```bash
+PrivateInvoices__Provider=R2
+PrivateInvoices__R2__AccountId=your-cloudflare-account-id
+PrivateInvoices__R2__AccessKeyId=your-private-r2-access-key-id
+PrivateInvoices__R2__SecretAccessKey=your-private-r2-secret-access-key
+PrivateInvoices__R2__BucketName=your-private-invoice-bucket
+```
+
+Project invitation email:
+
+- SMTP must be configured before an invitation can be created; an unconfigured sender returns `503` and no raw token is returned by the API
+- `Auth__FrontendBaseUrl` is used to build `/invitations/{token}` links
+
+```bash
+Smtp__Host=smtp.example.com
+Smtp__Port=587
+Smtp__Username=your-smtp-user
+Smtp__Password=your-smtp-password
+Smtp__FromAddress=no-reply@hostingqr.com
+Smtp__FromName=HostingQr
+Smtp__EnableSsl=true
+```
+
 Recommended local setup:
 
 ```bash
@@ -217,6 +261,7 @@ Railway deployment recommendation:
 - if `Database__ConnectionString` is not set, the app can also build a connection string from Railway `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and `PGPASSWORD` variables
 - Railway internal DB hosts such as `*.railway.internal` now default to `SSL Mode=Disable`; external/public hosts still default to `SSL Mode=Require`
 - for persistent uploaded files on Railway, mount a volume and set `Storage__UploadsRootPath` to that mounted directory (for example `/data/uploads`)
+- when using local private invoice storage, mount a private persistent volume and set `PrivateInvoices__RootPath` to it (for example `/data/private-invoices`)
 
 Config note:
 

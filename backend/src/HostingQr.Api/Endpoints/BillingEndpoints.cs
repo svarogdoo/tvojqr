@@ -22,6 +22,22 @@ public static class BillingEndpoints
             .WithName("GetCurrentEntitlement")
             .WithSummary("Returns the current user's active pricing tier entitlement.");
 
+        group.MapGet("/manual-profile", [Authorize] async (ICurrentUserContext currentUserContext, IAdminClientRepository repository, CancellationToken cancellationToken) =>
+        {
+            var profile = await repository.GetBillingAsync(currentUserContext.GetCurrentUserId(), cancellationToken);
+            return profile is null ? Results.NotFound() : Results.Ok(profile);
+        })
+            .WithName("GetCurrentManualBillingProfile")
+            .WithSummary("Returns the current user's owner-managed billing profile.");
+
+        group.MapGet("/account-summary", [Authorize] async (ICurrentUserContext currentUserContext, IAdminClientRepository repository, CancellationToken cancellationToken) =>
+        {
+            var summary = await repository.GetAccountSummaryAsync(currentUserContext.GetCurrentUserId(), cancellationToken);
+            return summary is null ? Results.NotFound() : Results.Ok(summary);
+        })
+            .WithName("GetCurrentAccountSummary")
+            .WithSummary("Returns the current user's joined, menu, and owner-managed billing summary.");
+
         group.MapPost("/checkout", [Authorize] async (
             CheckoutRequest request,
             ICurrentUserContext currentUserContext,
@@ -217,15 +233,18 @@ public static class BillingEndpoints
             bool isActive = webhookEvent.Action is PolarWebhookAction.Activate
                 || (webhookEvent.EndsAt is not null && webhookEvent.EndsAt > DateTimeOffset.UtcNow);
 
-            await entitlementRepository.UpsertAsync(userId, webhookEvent.Tier, isActive, webhookEvent.EndsAt, cancellationToken: cancellationToken);
+            bool entitlementUpdated = await entitlementRepository.UpsertAsync(userId, webhookEvent.Tier, isActive, webhookEvent.EndsAt, cancellationToken: cancellationToken);
+            EntitlementResponse? effectiveEntitlement = entitlementUpdated
+                ? null
+                : await entitlementRepository.GetByUserIdAsync(userId, cancellationToken);
             await RecordBillingEventAsync(
                 billingEventRepository,
                 providerEventId,
                 webhookEvent.Type,
                 webhookEvent,
-                GetProcessedAction(webhookEvent.Action),
-                isActive,
-                webhookEvent.EndsAt,
+                entitlementUpdated ? GetProcessedAction(webhookEvent.Action) : "manual_entitlement_preserved",
+                effectiveEntitlement?.IsActive ?? isActive,
+                effectiveEntitlement?.EndsAt ?? webhookEvent.EndsAt,
                 payload,
                 cancellationToken);
             return Results.Accepted();

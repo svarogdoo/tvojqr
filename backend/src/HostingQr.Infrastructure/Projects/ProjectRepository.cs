@@ -64,6 +64,20 @@ public sealed class ProjectRepository : IProjectRepository
         return await connection.QuerySingleOrDefaultAsync<ProjectWithSlug>(command);
     }
 
+    public async Task<ProjectWithSlug?> GetByIdAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            select p.id, p.owner_user_id as OwnerUserId, p.name, p.status, p.menu_type as MenuType,
+                   p.time_zone as TimeZone, p.background_color as BackgroundColor, s.slug as Slug,
+                   p.created_at as CreatedAt, p.updated_at as UpdatedAt
+            from projects p
+            inner join slugs s on s.project_id = p.id and s.is_primary = true
+            where p.id = @ProjectId;
+            """;
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<ProjectWithSlug>(new CommandDefinition(sql, new { ProjectId = projectId }, cancellationToken: cancellationToken));
+    }
+
     public async Task<PublicProject?> GetPublicBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
         const string sql = """
@@ -180,17 +194,21 @@ public sealed class ProjectRepository : IProjectRepository
 
     public async Task<bool> DeleteAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default)
     {
-        const string deleteAssetsSql = "delete from assets where project_id = @ProjectId;";
-        const string deleteSlugsSql = "delete from slugs where project_id = @ProjectId;";
-        const string deleteProjectSql = "delete from projects where id = @ProjectId and owner_user_id = @OwnerUserId;";
+        const string ownershipSql = "select 1 from projects where id = @ProjectId and owner_user_id = @OwnerUserId for update;";
+        const string deleteProjectSql = "delete from projects where id = @ProjectId;";
 
         using var connection = _connectionFactory.CreateConnection();
         connection.Open();
         using var transaction = connection.BeginTransaction();
 
-        await connection.ExecuteAsync(new CommandDefinition(deleteAssetsSql, new { ProjectId = projectId }, transaction, cancellationToken: cancellationToken));
-        await connection.ExecuteAsync(new CommandDefinition(deleteSlugsSql, new { ProjectId = projectId }, transaction, cancellationToken: cancellationToken));
-        int affected = await connection.ExecuteAsync(new CommandDefinition(deleteProjectSql, new { ProjectId = projectId, OwnerUserId = ownerUserId }, transaction, cancellationToken: cancellationToken));
+        int owned = await connection.ExecuteScalarAsync<int>(new CommandDefinition(ownershipSql, new { ProjectId = projectId, OwnerUserId = ownerUserId }, transaction, cancellationToken: cancellationToken));
+        if (owned == 0)
+        {
+            transaction.Rollback();
+            return false;
+        }
+
+        int affected = await connection.ExecuteAsync(new CommandDefinition(deleteProjectSql, new { ProjectId = projectId }, transaction, cancellationToken: cancellationToken));
 
         transaction.Commit();
         return affected > 0;

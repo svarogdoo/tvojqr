@@ -9,6 +9,7 @@
   import { toApiUrl } from "$lib/config";
   import { auth, authNavigationStartedEvent, refreshSession, startGoogleSignIn } from "$lib/stores/auth";
   import { showSnackbar } from "$lib/stores/snackbar";
+  import type { AdminMenu } from "$lib/types/admin";
   import type {
     Asset,
     CreateProjectRequest,
@@ -94,6 +95,10 @@
   let changingDefaultLanguageCode = "";
   let uploadingCover = false;
   let removingCover = false;
+  let canAssignProject = false;
+  let inviteEmail = "";
+  let sendingInvitation = false;
+  let invitationMessage = "";
 
   $: hasFormChanges = form.name !== savedForm.name
     || form.slug !== savedForm.slug
@@ -193,6 +198,44 @@
       error = "Unable to load this project right now.";
     } finally {
       loading = false;
+    }
+  }
+
+  async function loadAssignmentAccess() {
+    if (currentTier !== "admin" || !project) {
+      canAssignProject = false;
+      return;
+    }
+
+    try {
+      const response = await apiFetch("/api/admin/menus");
+      if (!response.ok) return;
+      const menus = (await response.json()) as AdminMenu[];
+      canAssignProject = menus.some((menu) => menu.projectId === project?.id && menu.clientUserId === $auth.user?.id);
+    } catch {
+      canAssignProject = false;
+    }
+  }
+
+  async function sendClientInvitation() {
+    if (!project || !inviteEmail.trim()) return;
+    sendingInvitation = true;
+    invitationMessage = "";
+    try {
+      const response = await apiFetch(`/api/admin/projects/${project.id}/invitations`, {
+        method: "POST",
+        body: JSON.stringify({ email: inviteEmail.trim(), expiresInDays: 7 }),
+      });
+      if (!response.ok) {
+        const problem = await response.json().catch(() => null) as { detail?: string; message?: string } | null;
+        throw new Error(problem?.detail ?? problem?.message ?? "Invitation could not be sent.");
+      }
+      invitationMessage = `Invitation sent to ${inviteEmail.trim()}.`;
+      inviteEmail = "";
+    } catch (caught) {
+      invitationMessage = caught instanceof Error ? caught.message : "Invitation could not be sent.";
+    } finally {
+      sendingInvitation = false;
     }
   }
 
@@ -1005,15 +1048,15 @@
     projectId = window.location.pathname.split("/").at(-1) ?? "";
     isDraft = projectId === "new";
     await refreshSession();
-    if (isDraft) {
-      try {
-        const entitlementResponse = await apiFetch("/api/billing/entitlement");
-        if (entitlementResponse.ok) {
-          currentTier = ((await entitlementResponse.json()) as Entitlement).tier;
-        }
-      } catch {
-        currentTier = null;
+    try {
+      const entitlementResponse = await apiFetch("/api/billing/entitlement");
+      if (entitlementResponse.ok) {
+        currentTier = ((await entitlementResponse.json()) as Entitlement).tier;
       }
+    } catch {
+      currentTier = null;
+    }
+    if (isDraft) {
       loading = false;
       error = "";
       project = null;
@@ -1031,6 +1074,7 @@
     }
 
     await loadProject();
+    await loadAssignmentAccess();
   });
 
   onDestroy(() => {
@@ -1387,6 +1431,19 @@
                 </button>
               </div>
             </div>
+
+            {#if canAssignProject}
+              <div class="rounded-[1.5rem] border border-stone-300 bg-[rgba(220,228,216,0.58)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>
+                <p class="text-xs uppercase tracking-[0.18em] text-stone-600">Client assignment</p>
+                <h2 class="mt-2 text-xl font-semibold text-stone-900">Transfer this finished menu</h2>
+                <p class="mt-2 text-sm leading-7 text-stone-600">Send a secure seven-day invitation. The client becomes the menu owner, while your admin account keeps full support access.</p>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <input type="email" bind:value={inviteEmail} placeholder="client@example.com" class="min-w-0 flex-1 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-stone-900" />
+                  <button type="button" class="btn-primary text-sm" disabled={sendingInvitation || !inviteEmail.trim()} on:click={sendClientInvitation}>{sendingInvitation ? "Sending..." : "Send invitation"}</button>
+                </div>
+                {#if invitationMessage}<p class="mt-3 text-sm text-stone-700">{invitationMessage}</p>{/if}
+              </div>
+            {/if}
 
             {#if !isDraft}
             <div class="mt-3 rounded-[1.5rem] border border-[rgba(165,93,79,0.16)] bg-[rgba(249,238,234,0.72)] px-6 py-5 shadow-sm" class:hidden={activeEditorTab === "menu"}>

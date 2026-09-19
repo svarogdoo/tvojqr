@@ -76,13 +76,15 @@ public sealed class DigitalMenuServiceTests
     private static DigitalMenuItemResponse Item(string name, bool isOutOfStock) =>
         new(Guid.NewGuid(), "8.50", isOutOfStock, 0, [new DigitalMenuItemTranslation("en", name, "")]);
 
-    private static DigitalMenuService CreateService(FakeMenuRepository repository, DateTimeOffset now) => new(
-        new FakeCurrentUserContext(),
-        new FakeProjectRepository(),
-        new FakeLanguageRepository(),
-        repository,
-        new FakeEntitlementService(),
-        new FixedTimeProvider(now));
+    private static DigitalMenuService CreateService(FakeMenuRepository repository, DateTimeOffset now)
+    {
+        FakeCurrentUserContext userContext = new();
+        FakeProjectRepository projectRepository = new();
+        FakeEntitlementService entitlementService = new();
+        return new DigitalMenuService(userContext, projectRepository, new FakeLanguageRepository(), repository,
+            entitlementService, new FixedTimeProvider(now),
+            new HostingQr.Application.Projects.ProjectAccessService(userContext, entitlementService, projectRepository));
+    }
 
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
@@ -110,6 +112,7 @@ public sealed class DigitalMenuServiceTests
         };
 
         public Task<ProjectWithSlug?> GetByIdAsync(Guid ownerUserId, Guid projectId, CancellationToken cancellationToken = default) => Task.FromResult<ProjectWithSlug?>(ownerUserId == UserId && projectId == ProjectId ? Project : null);
+        public Task<ProjectWithSlug?> GetByIdAsync(Guid projectId, CancellationToken cancellationToken = default) => Task.FromResult<ProjectWithSlug?>(projectId == ProjectId ? Project : null);
         public Task<IReadOnlyList<ProjectWithSlug>> ListByOwnerAsync(Guid ownerUserId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<ProjectWithSlug>>([Project]);
         public Task<PublicProject?> GetPublicBySlugAsync(string slug, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<ProjectWithSlug> CreateAsync(Guid ownerUserId, string name, string slug, string backgroundColor, string menuType, CancellationToken cancellationToken = default) => throw new NotImplementedException();

@@ -42,6 +42,11 @@ export function startGoogleSignIn() {
   window.location.href = toApiUrl("/api/auth/google");
 }
 
+export function startGoogleSignInWithReturnPath(returnPath: string) {
+  window.dispatchEvent(new CustomEvent(authNavigationStartedEvent));
+  window.location.href = toApiUrl(`/api/auth/google?returnPath=${encodeURIComponent(returnPath)}`);
+}
+
 export async function signOut() {
   await apiFetch("/api/auth/sign-out", { method: "POST" });
   auth.set({ status: "anonymous", user: null });
